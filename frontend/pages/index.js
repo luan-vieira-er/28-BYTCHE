@@ -16,11 +16,8 @@ import {
   Play,
   Heart,
   Users,
-  Building2,
-  Gamepad2,
   Shield,
   Award,
-  Clock,
   BookOpen
 } from 'lucide-react'
 
@@ -34,8 +31,8 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>DoctorPixel - Hospital Virtual</title>
-        <meta name="description" content="DoctorPixel - Um hospital virtual para triagem médica interativa" />
+        <title>DoctorPixel - Cuidado Infantil Personalizado</title>
+        <meta name="description" content="DoctorPixel - Plataforma digital segura para cuidado e apoio infantil personalizado" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
@@ -67,9 +64,9 @@ export default function Home() {
             minHeight: '100vh',
             display: 'flex',
             alignItems: 'center',
-            py: 8
+            py: { xs: 4, lg: 8 }
           }}>
-            <Grid container spacing={6} alignItems="center">
+            <Grid container spacing={6} alignItems="stretch">
               {/* Left Content */}
               <Grid item xs={12} lg={6}>
                 <Box sx={{ textAlign: { xs: 'center', lg: 'left' } }}>
@@ -125,14 +122,15 @@ export default function Home() {
                       color: 'text.secondary',
                       mb: 6,
                       lineHeight: 1.5,
-                      maxWidth: '500px',
+                      maxWidth: '550px',
                       mx: { xs: 'auto', lg: 0 }
                     }}
                   >
-                    Revolucione o aprendizado médico com nossa plataforma de
+                    Uma plataforma digital
                     <Box component="span" sx={{ color: 'primary.main', fontWeight: 600 }}>
-                      {' '}triagem virtual interativa
+                      {' '}acolhedora e segura
                     </Box>
+                    {' '}que ajuda cada criança a se expressar de forma única e receber o cuidado personalizado que merece através de um ambiente lúdico e respeitoso.
                   </Typography>
 
                   {/* CTA Buttons */}
@@ -192,26 +190,26 @@ export default function Home() {
                   <Stack direction="row" spacing={4} justifyContent={{ xs: 'center', lg: 'flex-start' }}>
                     <Box sx={{ textAlign: 'center' }}>
                       <Typography variant="h4" sx={{ color: 'primary.main', fontWeight: 700 }}>
-                        10K+
+                        +30
                       </Typography>
                       <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                        Estudantes
+                        Especialistas em <br/>desenvolvimento infantil
                       </Typography>
                     </Box>
                     <Box sx={{ textAlign: 'center' }}>
                       <Typography variant="h4" sx={{ color: 'primary.main', fontWeight: 700 }}>
-                        95%
+                        +92%
                       </Typography>
                       <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                        Satisfação
+                        Das crianças se sentem <br/>acolhidas e compreendidas
                       </Typography>
                     </Box>
                     <Box sx={{ textAlign: 'center' }}>
                       <Typography variant="h4" sx={{ color: 'primary.main', fontWeight: 700 }}>
-                        24/7
+                        100%
                       </Typography>
                       <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                        Disponível
+                        Livre de julgamentos. <br/>Totalmente acolhedor.
                       </Typography>
                     </Box>
                   </Stack>
@@ -225,27 +223,41 @@ export default function Home() {
                   display: 'flex',
                   justifyContent: 'center',
                   alignItems: 'center',
-                  minHeight: 500
+                  minHeight: { xs: 400, md: 500 },
+                  width: '100%'
                 }}>
                   {/* Main Visual Circle */}
                   <Box sx={{
-                    width: { xs: 300, md: 400, lg: 500 },
-                    height: { xs: 300, md: 400, lg: 500 },
+                    width: { xs: 300, md: 400, lg: 450 },
+                    height: { xs: 300, md: 400, lg: 450 },
                     borderRadius: '50%',
-                    background: 'linear-gradient(135deg, rgba(86, 255, 158, 0.1) 0%, rgba(78, 205, 196, 0.1) 100%)',
-                    border: '2px solid rgba(86, 255, 158, 0.3)',
+                    background: 'linear-gradient(135deg, rgba(86, 255, 158, 0.15) 0%, rgba(78, 205, 196, 0.15) 50%, rgba(255, 217, 61, 0.1) 100%)',
+                    border: '3px solid rgba(86, 255, 158, 0.4)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     position: 'relative',
+                    boxShadow: '0 0 60px rgba(86, 255, 158, 0.2)',
+                    mx: 'auto',
                     '&::before': {
                       content: '""',
                       position: 'absolute',
                       width: '120%',
                       height: '120%',
                       borderRadius: '50%',
-                      border: '1px solid rgba(86, 255, 158, 0.1)',
-                      animation: 'pulse 3s ease-in-out infinite'
+                      border: '2px solid rgba(86, 255, 158, 0.2)',
+                      animation: 'pulse 4s ease-in-out infinite',
+                      zIndex: -1
+                    },
+                    '&::after': {
+                      content: '""',
+                      position: 'absolute',
+                      width: '140%',
+                      height: '140%',
+                      borderRadius: '50%',
+                      border: '1px solid rgba(78, 205, 196, 0.1)',
+                      animation: 'pulse 6s ease-in-out infinite reverse',
+                      zIndex: -2
                     },
                     '@keyframes pulse': {
                       '0%, 100%': {
@@ -253,52 +265,180 @@ export default function Home() {
                         opacity: 1
                       },
                       '50%': {
-                        transform: 'scale(1.05)',
-                        opacity: 0.7
+                        transform: 'scale(1.08)',
+                        opacity: 0.6
                       }
                     }
                   }}>
-                    <Heart size={120} color="#56FF9E" />
+                    <Box sx={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      gap: 2
+                    }}>
+                      <Heart size={80} color="#56FF9E" />
+                      <Typography sx={{
+                        fontSize: '1.2rem',
+                        fontWeight: 600,
+                        color: '#56FF9E',
+                        textAlign: 'center',
+                        lineHeight: 1.2
+                      }}>
+                        Cuidado<br />Especializado
+                      </Typography>
+                    </Box>
                   </Box>
 
                   {/* Floating Elements */}
                   <Box sx={{
                     position: 'absolute',
-                    top: '20%',
-                    right: '10%',
-                    p: 2,
-                    borderRadius: 3,
-                    backgroundColor: 'rgba(26, 43, 51, 0.8)',
-                    border: '1px solid rgba(86, 255, 158, 0.3)',
-                    backdropFilter: 'blur(10px)'
+                    top: '15%',
+                    right: '8%',
+                    p: 2.5,
+                    borderRadius: 4,
+                    backgroundColor: 'rgba(26, 43, 51, 0.95)',
+                    border: '2px solid rgba(86, 255, 158, 0.5)',
+                    backdropFilter: 'blur(20px)',
+                    boxShadow: '0 12px 40px rgba(86, 255, 158, 0.25)',
+                    animation: 'float 3s ease-in-out infinite',
+                    zIndex: 10,
+                    '@keyframes float': {
+                      '0%, 100%': { transform: 'translateY(0px)' },
+                      '50%': { transform: 'translateY(-8px)' }
+                    }
                   }}>
-                    <Users size={24} color="#56FF9E" />
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                      <Users size={24} color="#56FF9E" />
+                      <Typography sx={{
+                        fontSize: '0.75rem',
+                        color: '#56FF9E',
+                        fontWeight: 600,
+                        whiteSpace: 'nowrap'
+                      }}>
+                        Equipe
+                      </Typography>
+                    </Box>
                   </Box>
 
                   <Box sx={{
                     position: 'absolute',
-                    bottom: '20%',
-                    left: '10%',
-                    p: 2,
-                    borderRadius: 3,
-                    backgroundColor: 'rgba(26, 43, 51, 0.8)',
-                    border: '1px solid rgba(78, 205, 196, 0.3)',
-                    backdropFilter: 'blur(10px)'
+                    bottom: '18%',
+                    left: '8%',
+                    p: 2.5,
+                    borderRadius: 4,
+                    backgroundColor: 'rgba(26, 43, 51, 0.95)',
+                    border: '2px solid rgba(78, 205, 196, 0.5)',
+                    backdropFilter: 'blur(20px)',
+                    boxShadow: '0 12px 40px rgba(78, 205, 196, 0.25)',
+                    animation: 'float 4s ease-in-out infinite',
+                    zIndex: 10,
+                    '@keyframes float': {
+                      '0%, 100%': { transform: 'translateY(0px)' },
+                      '50%': { transform: 'translateY(-6px)' }
+                    }
                   }}>
-                    <Shield size={24} color="#4ECDC4" />
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                      <Shield size={24} color="#4ECDC4" />
+                      <Typography sx={{
+                        fontSize: '0.75rem',
+                        color: '#4ECDC4',
+                        fontWeight: 600,
+                        whiteSpace: 'nowrap'
+                      }}>
+                        Seguro
+                      </Typography>
+                    </Box>
                   </Box>
 
                   <Box sx={{
                     position: 'absolute',
-                    top: '50%',
-                    left: '5%',
-                    p: 2,
-                    borderRadius: 3,
-                    backgroundColor: 'rgba(26, 43, 51, 0.8)',
-                    border: '1px solid rgba(255, 217, 61, 0.3)',
-                    backdropFilter: 'blur(10px)'
+                    top: '45%',
+                    left: '2%',
+                    p: 2.5,
+                    borderRadius: 4,
+                    backgroundColor: 'rgba(26, 43, 51, 0.95)',
+                    border: '2px solid rgba(255, 217, 61, 0.5)',
+                    backdropFilter: 'blur(20px)',
+                    boxShadow: '0 12px 40px rgba(255, 217, 61, 0.25)',
+                    animation: 'float 5s ease-in-out infinite',
+                    zIndex: 10,
+                    '@keyframes float': {
+                      '0%, 100%': { transform: 'translateY(0px)' },
+                      '50%': { transform: 'translateY(-10px)' }
+                    }
                   }}>
-                    <Award size={24} color="#FFD93D" />
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                      <Award size={24} color="#FFD93D" />
+                      <Typography sx={{
+                        fontSize: '0.75rem',
+                        color: '#FFD93D',
+                        fontWeight: 600,
+                        whiteSpace: 'nowrap'
+                      }}>
+                        Qualidade
+                      </Typography>
+                    </Box>
+                  </Box>
+
+                  <Box sx={{
+                    position: 'absolute',
+                    top: '25%',
+                    left: '15%',
+                    p: 2,
+                    borderRadius: 4,
+                    backgroundColor: 'rgba(26, 43, 51, 0.95)',
+                    border: '2px solid rgba(156, 39, 176, 0.5)',
+                    backdropFilter: 'blur(20px)',
+                    boxShadow: '0 12px 40px rgba(156, 39, 176, 0.25)',
+                    animation: 'float 3.5s ease-in-out infinite',
+                    zIndex: 10,
+                    '@keyframes float': {
+                      '0%, 100%': { transform: 'translateY(0px)' },
+                      '50%': { transform: 'translateY(-4px)' }
+                    }
+                  }}>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                      <BookOpen size={20} color="#9C27B0" />
+                      <Typography sx={{
+                        fontSize: '0.7rem',
+                        color: '#9C27B0',
+                        fontWeight: 600,
+                        whiteSpace: 'nowrap'
+                      }}>
+                        Lúdico
+                      </Typography>
+                    </Box>
+                  </Box>
+
+                  {/* Additional floating element for better balance */}
+                  <Box sx={{
+                    position: 'absolute',
+                    bottom: '10%',
+                    right: '15%',
+                    p: 1.5,
+                    borderRadius: 4,
+                    backgroundColor: 'rgba(26, 43, 51, 0.95)',
+                    border: '2px solid rgba(255, 152, 0, 0.5)',
+                    backdropFilter: 'blur(20px)',
+                    boxShadow: '0 12px 40px rgba(255, 152, 0, 0.25)',
+                    animation: 'float 4.5s ease-in-out infinite',
+                    zIndex: 10,
+                    '@keyframes float': {
+                      '0%, 100%': { transform: 'translateY(0px)' },
+                      '50%': { transform: 'translateY(-7px)' }
+                    }
+                  }}>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5 }}>
+                      <Heart size={18} color="#FF9800" />
+                      <Typography sx={{
+                        fontSize: '0.65rem',
+                        color: '#FF9800',
+                        fontWeight: 600,
+                        whiteSpace: 'nowrap'
+                      }}>
+                        Amor
+                      </Typography>
+                    </Box>
                   </Box>
                 </Box>
               </Grid>
@@ -330,24 +470,27 @@ export default function Home() {
               sx={{
                 color: 'text.secondary',
                 mb: 8,
-                maxWidth: '700px',
+                maxWidth: '800px',
                 mx: 'auto',
                 lineHeight: 1.6
               }}
             >
-              Uma plataforma revolucionária que combina tecnologia de ponta com metodologias
-              educacionais comprovadas para transformar o ensino médico
+              Uma plataforma especializada que oferece um ambiente digital seguro e acolhedor,
+              desenvolvida para apoiar cada criança de forma única em seu processo de cuidado e desenvolvimento
             </Typography>
           </Box>
 
-          <Grid container spacing={4}>
-            <Grid item xs={12} md={4}>
+          <Grid container spacing={4} sx={{ display: 'flex', flexWrap: 'nowrap', overflowX: { xs: 'auto', md: 'visible' } }}>
+            <Grid item xs={12} md={4} sx={{ minWidth: { xs: '280px', md: 'auto' }, flex: { md: '1' } }}>
               <Card sx={{
                 height: '100%',
                 textAlign: 'center',
                 p: 4,
                 position: 'relative',
-                overflow: 'hidden'
+                overflow: 'hidden',
+                background: 'linear-gradient(135deg, rgba(26, 43, 51, 0.8) 0%, rgba(19, 31, 36, 0.9) 100%)',
+                border: '1px solid rgba(86, 255, 158, 0.2)',
+                backdropFilter: 'blur(20px)'
               }}>
                 <CardContent>
                   <Box sx={{
@@ -361,26 +504,29 @@ export default function Home() {
                     justifyContent: 'center',
                     boxShadow: '0 8px 32px rgba(86, 255, 158, 0.3)'
                   }}>
-                    <Users size={40} />
+                    <Heart size={40} />
                   </Box>
                   <Typography variant="h5" component="h3" sx={{ mb: 3, fontWeight: 600, color: 'white' }}>
-                    Colaboração em Tempo Real
+                    Ambiente Lúdico e Interativo
                   </Typography>
                   <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.7 }}>
-                    Conecte-se com colegas e profissionais de saúde ao redor do mundo.
-                    Aprenda através de casos clínicos colaborativos e discussões em grupo.
+                    Jogos e atividades especialmente desenvolvidos para respeitar o ritmo único de cada criança,
+                    facilitando a comunicação e expressão em um ambiente divertido e acolhedor.
                   </Typography>
                 </CardContent>
               </Card>
             </Grid>
 
-            <Grid item xs={12} md={4}>
+            <Grid item xs={12} md={4} sx={{ minWidth: { xs: '280px', md: 'auto' }, flex: { md: '1' } }}>
               <Card sx={{
                 height: '100%',
                 textAlign: 'center',
                 p: 4,
                 position: 'relative',
-                overflow: 'hidden'
+                overflow: 'hidden',
+                background: 'linear-gradient(135deg, rgba(26, 43, 51, 0.8) 0%, rgba(19, 31, 36, 0.9) 100%)',
+                border: '1px solid rgba(78, 205, 196, 0.2)',
+                backdropFilter: 'blur(20px)'
               }}>
                 <CardContent>
                   <Box sx={{
@@ -397,23 +543,26 @@ export default function Home() {
                     <Shield size={40} />
                   </Box>
                   <Typography variant="h5" component="h3" sx={{ mb: 3, fontWeight: 600, color: 'white' }}>
-                    Protocolos Validados
+                    Cuidado Personalizado
                   </Typography>
                   <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.7 }}>
-                    Baseado em protocolos médicos internacionais e validado por especialistas.
-                    Garanta que está aprendendo as melhores práticas da medicina moderna.
+                    Processo de avaliação adaptado às necessidades específicas de cada criança,
+                    com protocolos desenvolvidos por especialistas em desenvolvimento infantil.
                   </Typography>
                 </CardContent>
               </Card>
             </Grid>
 
-            <Grid item xs={12} md={4}>
+            <Grid item xs={12} md={4} sx={{ minWidth: { xs: '280px', md: 'auto' }, flex: { md: '1' } }}>
               <Card sx={{
                 height: '100%',
                 textAlign: 'center',
                 p: 4,
                 position: 'relative',
-                overflow: 'hidden'
+                overflow: 'hidden',
+                background: 'linear-gradient(135deg, rgba(26, 43, 51, 0.8) 0%, rgba(19, 31, 36, 0.9) 100%)',
+                border: '1px solid rgba(255, 217, 61, 0.2)',
+                backdropFilter: 'blur(20px)'
               }}>
                 <CardContent>
                   <Box sx={{
@@ -427,14 +576,14 @@ export default function Home() {
                     justifyContent: 'center',
                     boxShadow: '0 8px 32px rgba(255, 217, 61, 0.3)'
                   }}>
-                    <Award size={40} />
+                    <Users size={40} />
                   </Box>
                   <Typography variant="h5" component="h3" sx={{ mb: 3, fontWeight: 600, color: 'white' }}>
-                    Certificação Reconhecida
+                    Suporte Familiar
                   </Typography>
                   <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.7 }}>
-                    Obtenha certificados reconhecidos por instituições de ensino e
-                    organizações de saúde. Comprove suas competências de forma oficial.
+                    Orientação e apoio para famílias, com recursos educativos e ferramentas
+                    que auxiliam no entendimento e acompanhamento do desenvolvimento da criança.
                   </Typography>
                 </CardContent>
               </Card>
@@ -478,7 +627,7 @@ export default function Home() {
                 color: 'white'
               }}
             >
-              Pronto para revolucionar seu aprendizado?
+              Inicie uma jornada de cuidado e compreensão
             </Typography>
 
             <Typography
@@ -486,13 +635,13 @@ export default function Home() {
               sx={{
                 color: 'text.secondary',
                 mb: 6,
-                maxWidth: '600px',
+                maxWidth: '650px',
                 mx: 'auto',
                 lineHeight: 1.6
               }}
             >
-              Junte-se a milhares de profissionais de saúde que já estão transformando
-              sua carreira com DoctorPixel
+              Proporcione à sua criança um ambiente digital seguro e acolhedor para se expressar livremente.
+              Conecte-se com especialistas e inicie um processo de cuidado respeitoso e individualizado.
             </Typography>
 
             <Stack
@@ -519,7 +668,7 @@ export default function Home() {
               </Button>
 
               <Typography variant="body2" color="text.secondary">
-                ✨ Sem compromisso • Acesso imediato • Suporte 24/7
+                ✨ Ambiente seguro • Especialistas qualificados • Suporte contínuo
               </Typography>
             </Stack>
           </Box>
@@ -543,13 +692,13 @@ export default function Home() {
                 }}>
                   DoctorPixel
                 </Typography>
-                <Typography variant="body1" color="text.secondary" sx={{ mb: 3, maxWidth: 400 }}>
-                  Transformando o ensino médico através de tecnologia inovadora e
-                  experiências imersivas de aprendizado.
+                <Typography variant="body1" color="text.secondary" sx={{ mb: 3, maxWidth: 450 }}>
+                  Plataforma digital especializada em cuidado e apoio infantil personalizado,
+                  oferecendo um ambiente seguro e acolhedor para facilitar a comunicação e o desenvolvimento.
                 </Typography>
-                <Stack direction="row" spacing={2}>
+                <Stack direction="row" spacing={2} flexWrap="wrap">
                   <Chip
-                    label="Inovação"
+                    label="Cuidado Individualizado"
                     size="small"
                     sx={{
                       backgroundColor: 'rgba(86, 255, 158, 0.1)',
@@ -558,7 +707,7 @@ export default function Home() {
                     }}
                   />
                   <Chip
-                    label="Educação"
+                    label="Desenvolvimento Infantil"
                     size="small"
                     sx={{
                       backgroundColor: 'rgba(78, 205, 196, 0.1)',
@@ -567,7 +716,7 @@ export default function Home() {
                     }}
                   />
                   <Chip
-                    label="Saúde"
+                    label="Ambiente Seguro"
                     size="small"
                     sx={{
                       backgroundColor: 'rgba(255, 217, 61, 0.1)',
@@ -580,27 +729,63 @@ export default function Home() {
 
               <Grid item xs={12} md={6}>
                 <Grid container spacing={4}>
-                  <Grid item xs={6}>
+                  <Grid item xs={6} sm={4}>
                     <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: 'white' }}>
-                      Produto
+                      Plataforma
                     </Typography>
                     <Stack spacing={1}>
-                      <Typography variant="body2" color="text.secondary">Funcionalidades</Typography>
-                      <Typography variant="body2" color="text.secondary">Preços</Typography>
-                      <Typography variant="body2" color="text.secondary">Suporte</Typography>
-                      <Typography variant="body2" color="text.secondary">Documentação</Typography>
+                      <Typography variant="body2" color="text.secondary" sx={{ cursor: 'pointer', '&:hover': { color: 'primary.main' } }}>
+                        Casos Clínicos
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary" sx={{ cursor: 'pointer', '&:hover': { color: 'primary.main' } }}>
+                        Simulações
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary" sx={{ cursor: 'pointer', '&:hover': { color: 'primary.main' } }}>
+                        Protocolos
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary" sx={{ cursor: 'pointer', '&:hover': { color: 'primary.main' } }}>
+                        Avaliações
+                      </Typography>
                     </Stack>
                   </Grid>
 
-                  <Grid item xs={6}>
+                  <Grid item xs={6} sm={4}>
                     <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: 'white' }}>
-                      Empresa
+                      Suporte
                     </Typography>
                     <Stack spacing={1}>
-                      <Typography variant="body2" color="text.secondary">Sobre nós</Typography>
-                      <Typography variant="body2" color="text.secondary">Carreiras</Typography>
-                      <Typography variant="body2" color="text.secondary">Blog</Typography>
-                      <Typography variant="body2" color="text.secondary">Contato</Typography>
+                      <Typography variant="body2" color="text.secondary" sx={{ cursor: 'pointer', '&:hover': { color: 'primary.main' } }}>
+                        Central de Ajuda
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary" sx={{ cursor: 'pointer', '&:hover': { color: 'primary.main' } }}>
+                        Tutoriais
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary" sx={{ cursor: 'pointer', '&:hover': { color: 'primary.main' } }}>
+                        FAQ
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary" sx={{ cursor: 'pointer', '&:hover': { color: 'primary.main' } }}>
+                        Contato
+                      </Typography>
+                    </Stack>
+                  </Grid>
+
+                  <Grid item xs={12} sm={4}>
+                    <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: 'white' }}>
+                      Recursos
+                    </Typography>
+                    <Stack spacing={1}>
+                      <Typography variant="body2" color="text.secondary" sx={{ cursor: 'pointer', '&:hover': { color: 'primary.main' } }}>
+                        Biblioteca Médica
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary" sx={{ cursor: 'pointer', '&:hover': { color: 'primary.main' } }}>
+                        Artigos
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary" sx={{ cursor: 'pointer', '&:hover': { color: 'primary.main' } }}>
+                        Webinars
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary" sx={{ cursor: 'pointer', '&:hover': { color: 'primary.main' } }}>
+                        Comunidade
+                      </Typography>
                     </Stack>
                   </Grid>
                 </Grid>
@@ -613,9 +798,11 @@ export default function Home() {
               borderTop: '1px solid rgba(86, 255, 158, 0.1)',
               textAlign: 'center'
             }}>
-              <Typography variant="body2" color="text.secondary">
-                © 2024 DoctorPixel. Todos os direitos reservados.
-                Desenvolvido com ❤️ para revolucionar o ensino médico.
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                © 2025 DoctorPixel. Todos os direitos reservados.
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
+                Plataforma desenvolvida para cuidado infantil personalizado • Ambiente digital acolhedor e respeitoso
               </Typography>
             </Box>
           </Box>
