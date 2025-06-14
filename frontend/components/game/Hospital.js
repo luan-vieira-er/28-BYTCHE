@@ -5,7 +5,10 @@ import TileMap from './TileMap'
 import { HOSPITAL_MAP } from '@/data/hospitalMap'
 import { useAssets } from '@/hooks/useAssets'
 
-const Hospital = () => {
+const Hospital = ({
+  tilesetName = 'tiny-town',
+  mapData = HOSPITAL_MAP
+}) => {
   const [animationFrame, setAnimationFrame] = useState(0)
   const { isAssetLoaded } = useAssets()
 
@@ -220,7 +223,7 @@ const Hospital = () => {
   })
 
   // Verifica se deve usar tilemap ou fallback
-  const useTilemap = isAssetLoaded('tiny-town')
+  const useTilemap = isAssetLoaded(tilesetName)
 
   if (useTilemap) {
     // Renderiza usando tilemap
@@ -228,72 +231,16 @@ const Hospital = () => {
       <Container>
         {/* Tilemap do hospital */}
         <TileMap
-          mapData={HOSPITAL_MAP}
-          tilesetName="tiny-town"
-          tileWidth={16}
-          tileHeight={16}
-          scale={3}
+          mapData={mapData}
+          tilesetName={tilesetName}
+          tileWidth={mapData.tileWidth}
+          tileHeight={mapData.tileHeight}
+          scale={mapData.tileWidth === 64 ? 1 : 3} // Escala menor para tiles grandes
           offsetX={0}
           offsetY={0}
         />
 
-        {/* Efeitos de iluminação */}
-        <Graphics draw={drawLighting} />
-
-        {/* Textos e labels */}
-        <Text
-          text="RECEPÇÃO"
-          style={labelStyle}
-          anchor={0.5}
-          x={200}
-          y={75}
-        />
-
-        <Text
-          text="ÁREA DE ESPERA"
-          style={signStyle}
-          anchor={0.5}
-          x={520}
-          y={120}
-        />
-
-        <Text
-          text="TRIAGEM ➜"
-          style={signStyle}
-          anchor={0.5}
-          x={570}
-          y={300}
-        />
-
-        <Text
-          text="EQUIPAMENTOS"
-          style={signStyle}
-          anchor={0.5}
-          x={830}
-          y={170}
-        />
-
-        <Text
-          text="FARMÁCIA"
-          style={signStyle}
-          anchor={0.5}
-          x={940}
-          y={470}
-        />
-
-        {/* Instruções de movimento */}
-        <Text
-          text="Use as setas ↑↓←→ ou WASD para se mover"
-          style={new TextStyle({
-            fontFamily: 'Arial',
-            fontSize: 12,
-            fill: 0x6B7280,
-            fontStyle: 'italic'
-          })}
-          anchor={0.5}
-          x={600}
-          y={750}
-        />
+        {/* Textos e labels do ambiente */}
       </Container>
     )
   }
@@ -347,20 +294,6 @@ const Hospital = () => {
         anchor={0.5}
         x={940}
         y={470}
-      />
-
-      {/* Instruções de movimento */}
-      <Text
-        text="Use as setas ↑↓←→ ou WASD para se mover"
-        style={new TextStyle({
-          fontFamily: 'Arial',
-          fontSize: 12,
-          fill: 0x6B7280,
-          fontStyle: 'italic'
-        })}
-        anchor={0.5}
-        x={600}
-        y={750}
       />
     </Container>
   )
