@@ -239,8 +239,8 @@ export default function CreateRoomPage() {
                 />
 
                 {/* Grid com Nome do Paciente e Idade */}
-                <Grid container spacing={1.5} sx={{ mb: 1 }}>
-                    <Grid item xs={12} sm={6}>
+                <Grid container spacing={1.5} sx={{ mb: 1, width: '100%', flexWrap: 'nowrap' }}>
+                    <Grid item xs={12} sm={6} sx={{ width: '50%' }}>
                         <TextField
                             label="Nome do Paciente"
                             placeholder="Digite o nome do paciente"
@@ -278,7 +278,7 @@ export default function CreateRoomPage() {
                             }}
                         />
                     </Grid>
-                    <Grid item xs={12} sm={6}>
+                    <Grid item xs={12} sm={6} sx={{ width: '50%' }}>
                         <TextField
                             label="Idade"
                             placeholder="Idade do paciente"
@@ -386,11 +386,11 @@ export default function CreateRoomPage() {
                 </FormControl>
 
                 {/* Grid com Foco e Restrições */}
-                <Grid container spacing={1.5} sx={{ mb: 1 }}>
-                    <Grid item xs={12} sm={6}>
+                <Grid container spacing={1.5} sx={{ mb: 1, width: '100%', flexWrap: 'nowrap'  }}>
+                    <Grid item xs={12} sm={6} sx={{ width: '50%' }}>
                         <TextField
                             label="Foco da Consulta"
-                            placeholder="Qual o foco principal..."
+                
                             multiline
                             rows={1}
                             variant="outlined"
@@ -427,10 +427,10 @@ export default function CreateRoomPage() {
                             }}
                         />
                     </Grid>
-                    <Grid item xs={12} sm={6}>
+                    <Grid item xs={12} sm={6} sx={{ width: '50%' }}>
                         <TextField
                             label="Restrições"
-                            placeholder="Restrições ao falar com o paciente..."
+             
                             multiline
                             rows={1}
                             variant="outlined"
