@@ -3,15 +3,22 @@ import { useCallback, useEffect, useState } from 'react'
 import { TextStyle } from 'pixi.js'
 import { useGameStore } from '@/store/gameStore'
 import { getCollisionSystem } from '@/utils/collisionSystem'
+import CharacterSprite from './CharacterSprite'
+import { getCharacterConfig, getCharacterSpriteId } from '@/utils/characterMapping'
 
-const Player = ({ x, y, onMove }) => {
+const Player = ({ x, y, onMove, characterConfig }) => {
   const [isMoving, setIsMoving] = useState(false)
   const [direction, setDirection] = useState('down')
   const [animationFrame, setAnimationFrame] = useState(0)
 
   const { playerName, playerAvatar } = useGameStore()
 
-  // Animação de caminhada
+  // Obtém configuração do personagem selecionado usando o mapeamento
+  const mappedCharacter = getCharacterConfig(characterConfig)
+  const characterId = getCharacterSpriteId(characterConfig?.character)
+  const characterName = mappedCharacter.name || playerName || 'Jogador'
+
+  // Animação de caminhada (mantida para compatibilidade)
   useEffect(() => {
     if (!isMoving) return
 
@@ -22,7 +29,7 @@ const Player = ({ x, y, onMove }) => {
     return () => clearInterval(interval)
   }, [isMoving])
 
-  // Controles de movimento
+  // Controles de movimento (sistema original restaurado)
   useEffect(() => {
     const handleKeyPress = (event) => {
       const speed = 5
@@ -87,127 +94,41 @@ const Player = ({ x, y, onMove }) => {
     return () => window.removeEventListener('keydown', handleKeyPress)
   }, [x, y, direction, onMove])
 
-  // Desenhar o player
-  const drawPlayer = useCallback((g) => {
-    g.clear()
-
-    // Sombra
-    g.beginFill(0x000000, 0.2)
-    g.drawEllipse(0, 35, 25, 8)
-    g.endFill()
-
-    // Corpo principal
-    const bodyColor = getAvatarColor(playerAvatar)
-    g.beginFill(bodyColor)
-    g.drawRoundedRect(-15, -30, 30, 50, 8)
-    g.endFill()
-
-    // Cabeça
-    g.beginFill(0xFFDBB3) // Cor da pele
-    g.drawCircle(0, -40, 18)
-    g.endFill()
-
-    // Cabelo
-    const hairColor = getHairColor(playerAvatar)
-    g.beginFill(hairColor)
-    g.drawEllipse(0, -50, 20, 15)
-    g.endFill()
-
-    // Olhos
-    g.beginFill(0x000000)
-    g.drawCircle(-6, -42, 2)
-    g.drawCircle(6, -42, 2)
-    g.endFill()
-
-    // Sorriso
-    g.lineStyle(2, 0x000000)
-    g.arc(0, -35, 8, 0, Math.PI)
-
-    // Braços (animação simples)
-    g.lineStyle(6, 0xFFDBB3)
-    const armOffset = isMoving ? Math.sin(animationFrame) * 5 : 0
-    g.moveTo(-15, -15 + armOffset)
-    g.lineTo(-25, 0 - armOffset)
-    g.moveTo(15, -15 - armOffset)
-    g.lineTo(25, 0 + armOffset)
-
-    // Pernas (animação de caminhada)
-    g.lineStyle(8, 0x4A5568) // Cor da calça
-    const legOffset = isMoving ? Math.sin(animationFrame * 2) * 8 : 0
-    g.moveTo(-8, 20)
-    g.lineTo(-8 + legOffset, 40)
-    g.moveTo(8, 20)
-    g.lineTo(8 - legOffset, 40)
-
-    // Sapatos
-    g.beginFill(0x2D3748)
-    g.drawEllipse(-8 + legOffset, 42, 8, 4)
-    g.drawEllipse(8 - legOffset, 42, 8, 4)
-    g.endFill()
-
-  }, [playerAvatar, isMoving, animationFrame])
-
+  // Funções de cor mantidas para fallback
   const getAvatarColor = (avatar) => {
     const colors = {
-      child1: 0x3182CE, // Azul
-      child2: 0xE53E3E, // Vermelho
-      child3: 0x38A169, // Verde
-      child4: 0x9F7AEA, // Roxo
+      Jorge: 0x3182CE, // Azul
+      Ana: 0xE53E3E, // Vermelho
+      Zombie: 0x38A169, // Verde
+      erik: 0x9F7AEA, // Roxo
+      child1: 0x3182CE,
+      child2: 0xE53E3E,
+      child3: 0x38A169,
+      child4: 0x9F7AEA,
       child5: 0xF56500  // Laranja
     }
-    return colors[avatar] || colors.child1
+    return colors[avatar] || colors[characterId] || colors.child1
   }
 
-  const getHairColor = (avatar) => {
-    const colors = {
-      child1: 0x8B4513, // Marrom
-      child2: 0x000000, // Preto
-      child3: 0xFFD700, // Loiro
-      child4: 0x8B0000, // Ruivo
-      child5: 0x654321  // Castanho
-    }
-    return colors[avatar] || colors.child1
-  }
 
-  const nameStyle = new TextStyle({
-    fontFamily: 'Arial',
-    fontSize: 14,
-    fill: 0x000000,
-    fontWeight: 'bold',
-    dropShadow: true,
-    dropShadowColor: 0xFFFFFF,
-    dropShadowBlur: 2,
-    dropShadowDistance: 1
-  })
 
   return (
-    <Container x={x} y={y}>
-      {/* Player sprite */}
-      <Graphics draw={drawPlayer} />
-
-      {/* Nome do player */}
-      {playerName && (
-        <Text
-          text={playerName}
-          style={nameStyle}
-          anchor={0.5}
-          x={0}
-          y={-70}
-        />
-      )}
-
-      {/* Indicador de movimento */}
-      {isMoving && (
-        <Graphics
-          draw={(g) => {
-            g.clear()
-            g.beginFill(0xFFFFFF, 0.8)
-            g.drawCircle(0, -80, 3)
-            g.endFill()
-          }}
-        />
-      )}
-    </Container>
+    <CharacterSprite
+      characterId={characterId}
+      x={x}
+      y={y}
+      scale={0.5} // Reduzido para sprites HD (192x256 -> ~96x128)
+      isMoving={isMoving}
+      direction={direction}
+      showName={true}
+      name={characterName}
+      showShadow={true}
+      fallbackColor={mappedCharacter.fallbackColor || getAvatarColor(playerAvatar)}
+      onSpriteLoad={(spriteData) => {
+        console.log(`✅ Sprite do jogador carregado: ${characterId}`, spriteData)
+        console.log(`🎭 Personagem mapeado:`, mappedCharacter)
+      }}
+    />
   )
 }
 

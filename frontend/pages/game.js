@@ -174,7 +174,7 @@ export default function Game() {
           alignItems: 'center',
           justifyContent: 'center',
           minHeight: '100vh',
-          background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)'
+          background: 'linear-gradient(135deg, #131F24 0%, #0A1015 100%)'
         }}>
           <Box sx={{ textAlign: 'center' }}>
             <Box sx={{ mb: 4 }}>
