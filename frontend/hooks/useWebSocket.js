@@ -209,7 +209,6 @@ export const useWebSocket = () => {
 
   // Backend-specific actions
   const joinRoom = useCallback((roomId) => {
-    console.log("🚀 ~ joinRoom ~ roomId:", roomId)
     websocketService.joinGameWithCode(roomId);
   }, []);
 

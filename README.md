@@ -1,5 +1,5 @@
 # 🧠 Projeto [Doctor Pixel]
-
+![Screenshot do Projeto](./assets/screenshot1.png)
 ## 👥 Equipe: 28 - BYTCHÊ
 
 ### 👨‍💻 Integrantes

@@ -128,7 +128,6 @@ export const startChat = async (roomId) => {
     );
 
     const reply = responseMessage.data.choices[0].message.content;
-    console.log("🚀 ~ startChat ~ reply:", reply);
 
     await updateRoomHistory(roomId, "assistant", reply);
     const responses = await generateOptions(reply);

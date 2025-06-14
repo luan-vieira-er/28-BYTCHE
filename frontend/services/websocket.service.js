@@ -42,7 +42,6 @@ class WebSocketService {
 
       // Se temos um código de acesso pendente, entrar na sala automaticamente
       if (this.pendingAccessCode) {
-        console.log('🚀 Entrando na sala automaticamente com código:', this.pendingAccessCode);
         this.joinGameWithCode(this.pendingAccessCode);
         this.pendingAccessCode = null; // Limpar após usar
       } else {
