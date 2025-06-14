@@ -6,7 +6,6 @@ const DialogSystem = ({ dialog, onChoice, onClose, isReadOnly = false }) => {
   const [isTyping, setIsTyping] = useState(true)
   const [showOptions, setShowOptions] = useState(false)
 
-  // Efeito de digitação
   useEffect(() => {
     if (!dialog?.message) return
 
