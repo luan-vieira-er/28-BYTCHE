@@ -1,12 +1,13 @@
 import { getRoom, updateRoomHistory } from "./room.service";
 
-const axios = require('axios');
-require('dotenv').config();
+const axios = require("axios");
+require("dotenv").config();
 
 const functions = [
   {
     name: "suggest_patient_responses",
-    description: "Gera opções de resposta para uma criança responder ao psicólogo virtual",
+    description:
+      "Gera opções de resposta para uma criança responder ao psicólogo virtual",
     parameters: {
       type: "object",
       properties: {
@@ -17,33 +18,42 @@ const functions = [
             properties: {
               option: {
                 type: "string",
-                description: "Letra identificadora da opção (A, B, C, D)"
+                description: "Letra identificadora da opção (A, B, C, D)",
               },
               text: {
                 type: "string",
-                description: "Texto da resposta da criança, em linguagem simples"
+                description:
+                  "Texto da resposta da criança, em linguagem simples",
               },
               emoji: {
                 type: "string",
-                description: "Emoji descrevendo a resposta."
-              }
+                description: "Emoji descrevendo a resposta.",
+              },
             },
-            required: ["option", "text", "emoji"]
+            required: ["option", "text", "emoji"],
           },
           minItems: 4,
-          maxItems: 4
-        }
+          maxItems: 4,
+        },
       },
-      required: ["responses"]
-    }
-  }
+      required: ["responses"],
+    },
+  },
 ];
 
 export const startChat = async (roomId) => {
   let room = await getRoom(roomId);
-  if(!room) return null
+  if (!room) return null;
 
-  const { finalidade,  perfil_paciente,  restricoes,  foco,  historico_previo,  nome_paciente,  idade } = room;
+  const {
+    finalidade,
+    perfil_paciente,
+    restricoes,
+    foco,
+    historico_previo,
+    nome_paciente,
+    idade,
+  } = room;
 
   const systemPrompt = `
     Você é um psicólogo infantil virtual muito gentil, carinhoso e acolhedor. Vai conversar com uma criança usando linguagem simples, respeitosa e afetuosa. Seu objetivo é criar um espaço seguro para a criança se expressar sobre si mesma, seus sentimentos, seu corpo e sua rotina — sem julgamentos e sem pressão.
@@ -93,98 +103,103 @@ export const startChat = async (roomId) => {
     - Ao final, gere um resumo compreensível e estruturado para o profissional de saúde, com base no que a criança relatou.
     `;
 
-    await updateRoomHistory(roomId, 'system', systemPrompt);
+  await updateRoomHistory(roomId, "system", systemPrompt);
 
-    try {
-        const responseMessage = await axios.post(
-            'https://api.openai.com/v1/chat/completions',
-            {
-            model: 'gpt-4o',
-            messages: [
-                { role: 'system', content: systemPrompt },
-                { role: 'user', content: 'Envie a primeira mensagem, o paciente acabou de chegar, cumprimente-o e de as boas vindas e pergunte como ele está.' },
-            ]
-            },
-            {
-            headers: {
-                'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-                'Content-Type': 'application/json',
-            },
-            }
-        );
+  try {
+    const responseMessage = await axios.post(
+      "https://api.openai.com/v1/chat/completions",
+      {
+        model: "gpt-4o",
+        messages: [
+          { role: "system", content: systemPrompt },
+          {
+            role: "user",
+            content:
+              "Envie a primeira mensagem, o paciente acabou de chegar, cumprimente-o e de as boas vindas e pergunte como ele está.",
+          },
+        ],
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
-        const reply = responseMessage.data.choices[0].message.content;
-        console.log("🚀 ~ startChat ~ reply:", reply)
+    const reply = responseMessage.data.choices[0].message.content;
+    console.log("🚀 ~ startChat ~ reply:", reply);
 
-        await updateRoomHistory(roomId, 'assistant', reply);
-        const responses = await generateOptions(reply);
+    await updateRoomHistory(roomId, "assistant", reply);
+    const responses = await generateOptions(reply);
 
-
-            return { reply, choices: responses };
-    } catch (error) {
-        console.log("🚀 ~ startChat ~ error:", error)
-    }
+    return { reply, choices: responses };
+  } catch (error) {
+    console.log("🚀 ~ startChat ~ error:", error);
+  }
 };
 
 export const sendMessage = async (roomId, message) => {
-    try {
-        let room = await getRoom(roomId);
-        if(!room) return null
+  try {
+    let room = await getRoom(roomId);
+    if (!room) return null;
 
-        await updateRoomHistory(roomId, 'user', message);
+    await updateRoomHistory(roomId, "user", message);
 
-        const { chat_history } = room;
-        const messages = [
-            ...chat_history,
-            { role: 'user', content: message.toString() }
-        ]
-        console.log("🚀 ~ sendMessage ~ messages:", messages)
-      const response = await axios.post(
-        'https://api.openai.com/v1/chat/completions',
-        {
-          model: 'gpt-4o',
-          messages
+    const { chat_history } = room;
+    const messages = [
+      ...chat_history,
+      { role: "user", content: message.toString() },
+    ];
+    const response = await axios.post(
+      "https://api.openai.com/v1/chat/completions",
+      {
+        model: "gpt-4o",
+        messages,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+          "Content-Type": "application/json",
         },
-        {
-          headers: {
-            'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      }
+    );
 
-      const reply = response.data.choices[0].message.content;
-      await updateRoomHistory(roomId, 'assistant', reply);
+    const reply = response.data.choices[0].message.content;
+    await updateRoomHistory(roomId, "assistant", reply);
     const responses = await generateOptions(reply);
 
-
-        return { reply, choices: responses };
-    } catch (err: any) {
-      console.error('Erro ao chamar OpenAI', err.response.data);
-    }
+    return { reply, choices: responses };
+  } catch (err: any) {
+    console.error("Erro ao chamar OpenAI", err.response.data);
+  }
 };
 
 export const finishRoom = async (roomId, message) => {
-    try {
-        let room = await getRoom(roomId);
-        if(!room) return null
+  try {
+    let room = await getRoom(roomId);
+    if (!room) return null;
 
-        await updateRoomHistory(roomId, 'system', 'A sessão foi finalizada pelo médico, agradeça ao paciente de forma educada na próxima interação.');
-        return;
-    } catch (err: any) {
-      console.error('Erro ao chamar OpenAI', err);
-    }
+    await updateRoomHistory(
+      roomId,
+      "system",
+      "A sessão foi finalizada pelo médico, agradeça ao paciente de forma educada na próxima interação."
+    );
+    return;
+  } catch (err: any) {
+    console.error("Erro ao chamar OpenAI", err);
+  }
 };
 
 const generateReportFromHistory = async (roomData) => {
   try {
     const response = await axios.post(
-      'https://api.openai.com/v1/chat/completions',
+      "https://api.openai.com/v1/chat/completions",
       {
-        model: 'gpt-4o',
+        model: "gpt-4o",
         messages: [
           {
-            role: 'system',
+            role: "system",
             content: `
 Você é um psicólogo experiente auxiliando na geração de relatórios clínicos para crianças.
 Com base na transcrição abaixo, gere um relatório estruturado em JSON, no seguinte formato TypeScript:
@@ -207,64 +222,71 @@ type RelatorioConsulta = {
 A chave "avaliacao_ia" deve conter uma síntese dos principais pontos observados na sessão, com linguagem técnica e objetiva.
 
 Considere que os dados do paciente e do psicólogo estão parcialmente implícitos e você pode preenchê-los com nomes fictícios coerentes.
-`
+`,
           },
           {
-            role: 'user',
-            content: `Segue a transcrição da conversa:\n\n${JSON.stringify(roomData, null, 2)}`
-          }
+            role: "user",
+            content: `Segue a transcrição da conversa:\n\n${JSON.stringify(
+              roomData,
+              null,
+              2
+            )}`,
+          },
         ],
-        temperature: 0.5
+        temperature: 0.5,
       },
       {
         headers: {
-          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-          'Content-Type': 'application/json'
-        }
+          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+          "Content-Type": "application/json",
+        },
       }
     );
 
     const content = response.data.choices[0].message.content;
-    const parsed = JSON.parse(content || '{}');
+    const parsed = JSON.parse(content || "{}");
     return parsed;
-
   } catch (error: any) {
-    console.error('Erro ao gerar relatório com a IA:', error?.response?.data || error.message);
+    console.error(
+      "Erro ao gerar relatório com a IA:",
+      error?.response?.data || error.message
+    );
     return null;
   }
 };
 
-
 const generateOptions = async (originalMessage) => {
-    try {
-        const responseChoices = await axios.post(
-        'https://api.openai.com/v1/chat/completions',
-        {
-            model: 'gpt-4o',
-            messages: [
-            {
-                role: 'user',
-                content: `Considere a seguinte resposta do psicólogo: "${originalMessage}".
+  try {
+    const responseChoices = await axios.post(
+      "https://api.openai.com/v1/chat/completions",
+      {
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "user",
+            content: `Considere a seguinte resposta do psicólogo: "${originalMessage}".
                     Gere 4 opções de resposta possíveis para a criança, em linguagem simples e amigável.
                     Elas podem ser positivas ou negativas, dependendo do contexto.
                     Não adicione emoji na mensagem text.
-                `
-            }
-            ],
-            functions: functions,
-            function_call: { name: "suggest_patient_responses" }
+                `,
+          },
+        ],
+        functions: functions,
+        function_call: { name: "suggest_patient_responses" },
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+          "Content-Type": "application/json",
         },
-        {
-            headers: {
-            'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-            'Content-Type': 'application/json',
-            },
-        }
-        );
+      }
+    );
 
-        const parsedFunctionCall = JSON.parse(responseChoices.data.choices[0].message.function_call.arguments);
-        return parsedFunctionCall.responses
-    } catch (error) {
-        console.log("🚀 ~ generateOptions ~ error:", error)
-    }
-}
+    const parsedFunctionCall = JSON.parse(
+      responseChoices.data.choices[0].message.function_call.arguments
+    );
+    return parsedFunctionCall.responses;
+  } catch (error) {
+    console.log("🚀 ~ generateOptions ~ error:", error);
+  }
+};
