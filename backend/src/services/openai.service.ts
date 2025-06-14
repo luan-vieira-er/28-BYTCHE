@@ -1,13 +1,16 @@
 const axios = require('axios');
 require('dotenv').config();
 
-export const startChat = async () => {
-  // Variáveis fornecidas pelo médico — você pode substituir dinamicamente
+export const startChat = async (roomId) => {
+  //Busca essas variáveis pelo roomId
+
   const finalidade = "primeira consulta";
   const perfil_paciente = "Criança de 7 anos, tímida, dificuldade em socializar na escola.";
   const restricoes = "Não falar sobre separação dos pais.";
   const foco = "emocional e social";
   const historico_previo = "Relato da escola indica episódios de choro frequente e isolamento durante o recreio.";
+  const nome_paciente = "juninho"
+  const idade = "10"
 
   const systemPrompt = `
     Você é um psicólogo infantil virtual muito gentil, carinhoso e acolhedor. Vai conversar com uma criança usando linguagem simples, respeitosa e afetuosa. Seu objetivo é criar um espaço seguro para a criança se expressar sobre si mesma, seus sentimentos, seu corpo e sua rotina — sem julgamentos e sem pressão.
@@ -18,6 +21,10 @@ export const startChat = async () => {
     - 🚫 Restrições temáticas: ${restricoes}
     - 🎯 Foco da escuta e da coleta: ${foco}
     - 📚 Histórico prévio: ${historico_previo}
+
+    📌 Informações do paciente:
+    - Idade: ${idade}.
+    - Nome: ${nome_paciente}
 
     💡 Instruções para você:
     - Acolha e se adapte às informações acima.
@@ -52,6 +59,30 @@ export const startChat = async () => {
     - Nunca diagnostique. Apenas ouça, acolha e registre.
     - Ao final, gere um resumo compreensível e estruturado para o profissional de saúde, com base no que a criança relatou.
     `;
+    
+    try {
+        const response = await axios.post(
+        'https://api.openai.com/v1/chat/completions',
+        {
+          model: 'gpt-4o',
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: 'Envie a primeira mensagem, o paciente acabou de chegar, cumprimente-o e de as boas vindas' },
+          ]
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      const reply = response.data.choices[0].message.content;
+      return reply
+    } catch (error) {
+        console.log("🚀 ~ startChat ~ error:", error)
+    }
 };
 
 export const sendMessage = async (history, message) => {
