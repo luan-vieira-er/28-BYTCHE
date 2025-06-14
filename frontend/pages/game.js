@@ -42,6 +42,9 @@ export default function Game() {
   const [showGame, setShowGame] = useState(false)
   const [playerConfig, setPlayerConfig] = useState(null)
 
+  // Verificar se há configuração salva para este código
+  const getStorageKey = (code) => `doctorPixel-playerConfig-${code}`
+
   useEffect(() => {
     if (!code) {
       setError('Código de acesso não fornecido')
@@ -49,37 +52,92 @@ export default function Game() {
       return
     }
 
+    // Verificar se há configuração salva para este código
+    const savedConfig = localStorage.getItem(getStorageKey(code))
+    if (savedConfig) {
+      try {
+        const parsedConfig = JSON.parse(savedConfig)
+        console.log('🔄 Configuração encontrada para reload:', parsedConfig)
+        setPlayerConfig(parsedConfig)
+      } catch (err) {
+        console.warn('⚠️ Erro ao carregar configuração salva:', err)
+        localStorage.removeItem(getStorageKey(code))
+      }
+    }
+
     // Conectar ao WebSocket com o código de acesso
     const connectToGame = async () => {
       try {
         setConnectionStatus('connecting')
 
-        // Conectar ao servidor WebSocket
-        websocketService.connect('http://localhost:3001')
-
-        // Aguardar conexão
-        websocketService.on('connection:success', () => {
-          // Enviar código de acesso para validação
-          websocketService.emit('game:join', { accessCode: code })
-          setConnectionStatus('connected')
-        })
+        // Conectar ao servidor WebSocket passando o código de acesso
+        // O websocket service agora chama automaticamente patientJoinRoom após conexão
+        websocketService.connect('http://localhost:3001', code)
 
         websocketService.on('connection:error', (error) => {
+          console.error('❌ Erro de conexão:', error)
           setError('Erro ao conectar com o servidor')
           setConnectionStatus('error')
         })
 
-        websocketService.on('game:access_denied', () => {
-          setError('Código de acesso inválido')
+        // Eventos do backend
+        websocketService.on('error', (errorMessage) => {
+          console.error('❌ Erro do backend:', errorMessage)
+          setError(errorMessage || 'Código de acesso inválido')
           setConnectionStatus('error')
         })
 
-        websocketService.on('game:access_granted', () => {
+        websocketService.on('patientJoined', (message) => {
+          console.log('✅ Paciente entrou na sala:', message)
           setConnectionStatus('ready')
-          setShowConfigStepper(true)
+
+          // Verificar se já há configuração salva
+          const savedConfig = localStorage.getItem(getStorageKey(code))
+          if (savedConfig) {
+            try {
+              const parsedConfig = JSON.parse(savedConfig)
+              console.log('🎮 Configuração encontrada, indo direto para o jogo:', parsedConfig)
+              setPlayerConfig(parsedConfig)
+              setShowGame(true)
+            } catch (err) {
+              console.warn('⚠️ Erro ao carregar configuração salva:', err)
+              localStorage.removeItem(getStorageKey(code))
+              setShowConfigStepper(true)
+            }
+          } else {
+            console.log('⚙️ Nenhuma configuração encontrada, mostrando ConfigStepper')
+            setShowConfigStepper(true)
+          }
         })
 
+        // Fallback - se não receber resposta em 5 segundos, assumir sucesso para desenvolvimento
+        setTimeout(() => {
+          if (connectionStatus === 'connecting') {
+            console.log('⚠️ Timeout - assumindo sucesso para desenvolvimento')
+            setConnectionStatus('ready')
+
+            // Verificar se já há configuração salva
+            const savedConfig = localStorage.getItem(getStorageKey(code))
+            if (savedConfig) {
+              try {
+                const parsedConfig = JSON.parse(savedConfig)
+                console.log('🎮 Configuração encontrada no timeout, indo direto para o jogo:', parsedConfig)
+                setPlayerConfig(parsedConfig)
+                setShowGame(true)
+              } catch (err) {
+                console.warn('⚠️ Erro ao carregar configuração salva no timeout:', err)
+                localStorage.removeItem(getStorageKey(code))
+                setShowConfigStepper(true)
+              }
+            } else {
+              console.log('⚙️ Nenhuma configuração encontrada no timeout, mostrando ConfigStepper')
+              setShowConfigStepper(true)
+            }
+          }
+        }, 5000)
+
       } catch (err) {
+        console.error('❌ Erro ao inicializar:', err)
         setError('Erro ao inicializar o jogo')
         setConnectionStatus('error')
       }
@@ -87,11 +145,7 @@ export default function Game() {
 
     connectToGame();
 
-    // Simulação para desenvolvimento - remover em produção
-    setTimeout(() => {
-      setConnectionStatus('ready')
-      setShowConfigStepper(true)
-    }, 3000)
+    // Simulação removida - agora usando integração real com backend
 
     // Cleanup ao desmontar o componente
     return () => {
@@ -100,10 +154,20 @@ export default function Game() {
   }, [code])
 
   const handleGoBack = () => {
+    // Limpar configuração salva ao sair do jogo
+    if (code) {
+      localStorage.removeItem(getStorageKey(code))
+      console.log('🗑️ Configuração removida ao sair do jogo')
+    }
     router.push('/')
   }
 
   const handleConfigStepperComplete = (config) => {
+    console.log('💾 Salvando configuração do jogador:', config)
+
+    // Salvar configuração no localStorage para este código específico
+    localStorage.setItem(getStorageKey(code), JSON.stringify(config))
+
     setPlayerConfig(config)
     setShowConfigStepper(false)
     setShowGame(true)
@@ -112,6 +176,18 @@ export default function Game() {
   const handleConfigStepperClose = () => {
     // Se o usuário fechar o stepper sem completar, volta para a landing page
     router.push('/')
+  }
+
+  const handleReconfigure = () => {
+    console.log('🔄 Reconfigurando personagem...')
+    // Limpar configuração salva
+    if (code) {
+      localStorage.removeItem(getStorageKey(code))
+    }
+    // Voltar para o ConfigStepper
+    setPlayerConfig(null)
+    setShowGame(false)
+    setShowConfigStepper(true)
   }
 
   if (connectionStatus === 'error') {
@@ -207,6 +283,7 @@ export default function Game() {
           accessCode={code}
           playerConfig={playerConfig}
           onExit={handleGoBack}
+          onReconfigure={handleReconfigure}
         />
       </>
     )

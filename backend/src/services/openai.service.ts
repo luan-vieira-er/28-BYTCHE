@@ -42,7 +42,7 @@ const functions = [
 export const startChat = async (roomId) => {
   let room = await getRoom(roomId);
   if(!room) return null
-  
+
   const { finalidade,  perfil_paciente,  restricoes,  foco,  historico_previo,  nome_paciente,  idade } = room;
 
   const systemPrompt = `
@@ -94,7 +94,7 @@ export const startChat = async (roomId) => {
     `;
 
     await updateRoomHistory(roomId, 'system', systemPrompt);
-    
+
     try {
         const responseMessage = await axios.post(
             'https://api.openai.com/v1/chat/completions',
@@ -118,7 +118,7 @@ export const startChat = async (roomId) => {
 
         await updateRoomHistory(roomId, 'assistant', reply);
         const responses = await generateOptions(reply);
-        
+
 
             return { reply, choices: responses };
     } catch (error) {
@@ -156,7 +156,7 @@ export const sendMessage = async (roomId, message) => {
       const reply = response.data.choices[0].message.content;
       await updateRoomHistory(roomId, 'assistant', reply);
     const responses = await generateOptions(reply);
-    
+
 
         return { reply, choices: responses };
     } catch (err: any) {

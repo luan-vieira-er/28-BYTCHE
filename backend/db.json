@@ -94,7 +94,7 @@
       "perfil_paciente": "Criança com dor de garganta",
       "restricoes": "Evitar antibióticos desnecessários",
       "foco": "Exame físico",
-      "status": "FINALIZADO",
+      "status": "DOUTOR_CONECTADO",
       "historico_previo": "Episódios recorrentes de dor de garganta",
       "nome_paciente": "Maria Oliveira",
       "idade": "8",

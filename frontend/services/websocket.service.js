@@ -1,4 +1,5 @@
 import { io } from 'socket.io-client';
+import { WEBSOCKET_CONFIG, wsLog, wsError } from '@/config/websocket.config';
 
 class WebSocketService {
   constructor() {
@@ -7,22 +8,24 @@ class WebSocketService {
     this.reconnectAttempts = 0;
     this.maxReconnectAttempts = 5;
     this.eventListeners = new Map();
+    this.pendingAccessCode = null; // Armazenar código de acesso para usar após conexão
   }
 
   // Connect to WebSocket server
-  connect(serverUrl = 'http://localhost:3001') {
+  connect(serverUrl = WEBSOCKET_CONFIG.SERVER_URL, accessCode = null) {
     if (this.socket && this.isConnected) {
-      console.log('WebSocket already connected');
+      wsLog('Already connected');
       return;
     }
 
-    console.log('Connecting to WebSocket server...');
+    // Armazenar código de acesso para usar após conexão
+    if (accessCode) {
+      this.pendingAccessCode = accessCode;
+    }
 
-    this.socket = io(serverUrl, {
-      transports: ['websocket', 'polling'],
-      timeout: 10000,
-      forceNew: true
-    });
+    wsLog('Connecting to server...', { url: serverUrl, hasAccessCode: !!accessCode });
+
+    this.socket = io(serverUrl, WEBSOCKET_CONFIG.CONNECTION_OPTIONS);
 
     this.setupEventListeners();
   }
@@ -32,27 +35,38 @@ class WebSocketService {
     if (!this.socket) return;
 
     this.socket.on('connect', () => {
-      console.log('Connected to WebSocket server');
+      console.log('🟢 WebSocket conectado! Socket ID:', this.socket.id);
+      wsLog('Connected to server');
       this.isConnected = true;
       this.reconnectAttempts = 0;
-      this.emit('connection:success');
+
+      // Se temos um código de acesso pendente, entrar na sala automaticamente
+      if (this.pendingAccessCode) {
+        console.log('🚀 Entrando na sala automaticamente com código:', this.pendingAccessCode);
+        this.joinGameWithCode(this.pendingAccessCode);
+        this.pendingAccessCode = null; // Limpar após usar
+      } else {
+        // Manter compatibilidade com sistema antigo
+        console.log('🔔 Emitindo connection:success...');
+        this.emit('connection:success');
+      }
     });
 
     this.socket.on('disconnect', (reason) => {
-      console.log('Disconnected from WebSocket server:', reason);
+      wsLog('Disconnected from server', { reason });
       this.isConnected = false;
       this.emit('connection:lost', reason);
     });
 
     this.socket.on('connect_error', (error) => {
-      console.error('WebSocket connection error:', error);
+      wsError('Connection error', error);
       this.isConnected = false;
       this.handleReconnect();
       this.emit('connection:error', error);
     });
 
     this.socket.on('error', (error) => {
-      console.error('WebSocket error:', error);
+      wsError('Socket error', error);
       this.emit('error', error);
     });
   }
@@ -87,11 +101,24 @@ class WebSocketService {
   }
 
   // Send event to server
-  emit(event, data) {
+  emit(event, data, message) {
+    console.log('🔌 Tentando emitir evento:', event, {
+      hasSocket: !!this.socket,
+      isConnected: this.isConnected,
+      socketConnected: this.socket?.connected,
+      data,
+      message
+    });
+
     if (this.socket && this.isConnected) {
-      this.socket.emit(event, data);
+      console.log('✅ Emitindo evento:', event, data);
+      this.socket.emit(event, data, message);
     } else {
-      console.warn('Cannot emit event: WebSocket not connected');
+      console.warn('❌ Cannot emit event: WebSocket not connected', {
+        hasSocket: !!this.socket,
+        isConnected: this.isConnected,
+        socketConnected: this.socket?.connected
+      });
     }
   }
 
@@ -124,29 +151,38 @@ class WebSocketService {
     }
   }
 
-  // Game access methods
+  // Game access methods - Integrado com backend
   joinGameWithCode(accessCode, playerData = {}) {
-    this.emit('game:join', {
-      accessCode,
-      playerData,
-      timestamp: new Date().toISOString()
-    });
+    console.log("🚀 ~ WebSocketService ~ joinGameWithCode ~ accessCode:", accessCode, playerData)
+    console.log("🔧 WEBSOCKET_CONFIG:", WEBSOCKET_CONFIG)
+    console.log("🎯 Evento a ser emitido:", WEBSOCKET_CONFIG.BACKEND_EVENTS.PATIENT_JOIN_ROOM)
+    wsLog('Joining room with access code', { accessCode, playerData });
+    // Usar evento do backend para validar acesso
+    this.emit(WEBSOCKET_CONFIG.BACKEND_EVENTS.PATIENT_JOIN_ROOM, accessCode);
   }
 
-  // Player-related methods
+  // Player-related methods - Integrado com backend
   joinGame(playerData) {
+    // Manter compatibilidade com sistema antigo
     this.emit('player:join', playerData);
   }
 
-  movePlayer(position) {
-    this.emit('player:move', { position });
+  movePlayer(position, roomId) {
+    // Usar evento do backend para sincronizar posição
+    if (roomId) {
+      wsLog('Sending position to backend', { roomId, position });
+      this.emit(WEBSOCKET_CONFIG.BACKEND_EVENTS.POSITION, { roomId, position });
+    } else {
+      // Fallback para sistema antigo
+      this.emit(WEBSOCKET_CONFIG.LEGACY_EVENTS.PLAYER_MOVE, { position });
+    }
   }
 
   updatePlayer(updates) {
     this.emit('player:update', updates);
   }
 
-  // NPC interaction methods
+  // NPC interaction methods - Integrado com backend
   interactWithNPC(npcId, interactionType = 'dialog') {
     this.emit('npc:interact', {
       npcId,
@@ -163,7 +199,18 @@ class WebSocketService {
     });
   }
 
-  // Triagem methods
+  // Métodos integrados com backend de IA
+  startFirstInteraction(roomId) {
+    wsLog('Starting first interaction with AI', { roomId });
+    this.emit(WEBSOCKET_CONFIG.BACKEND_EVENTS.FIRST_INTERACTION, roomId);
+  }
+
+  sendMessageToAI(roomId, message) {
+    wsLog('Sending message to AI', { roomId, message });
+    this.emit(WEBSOCKET_CONFIG.BACKEND_EVENTS.PATIENT_SEND_MESSAGE, roomId, message);
+  }
+
+  // Triagem methods - Mantido para compatibilidade
   startTriagem() {
     this.emit('triagem:start');
   }
@@ -177,16 +224,28 @@ class WebSocketService {
     });
   }
 
-  // Chat methods
-  sendChatMessage(message) {
-    this.emit('chat:message', {
-      message,
-      timestamp: new Date().toISOString()
-    });
+  // Chat methods - Integrado com backend
+  sendChatMessage(message, roomId = null) {
+    if (roomId) {
+      // Usar sistema do backend
+      this.sendMessageToAI(roomId, message);
+    } else {
+      // Fallback para sistema antigo
+      this.emit('chat:message', {
+        message,
+        timestamp: new Date().toISOString()
+      });
+    }
   }
 
   getChatHistory() {
     this.emit('chat:get_history');
+  }
+
+  // Métodos específicos do backend
+  finishRoom(roomId, message = '') {
+    wsLog('Finishing room', { roomId, message });
+    this.emit(WEBSOCKET_CONFIG.BACKEND_EVENTS.DOCTOR_FINISH_ROOM, roomId, message);
   }
 
   // Utility methods
