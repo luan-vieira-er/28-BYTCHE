@@ -18,6 +18,13 @@ export const useGameStore = create(
       currentScore: 0,
       achievements: [],
 
+      // Sistema de missões específicas
+      missionProgress: {
+        talkedToDoctor: false,
+        exploredAreas: 0,
+        completedTriage: false
+      },
+
       // Estado da triagem médica
       triageData: {
         symptoms: [],
@@ -56,6 +63,28 @@ export const useGameStore = create(
 
       addAchievement: (achievement) => set((state) => ({
         achievements: [...state.achievements, achievement]
+      })),
+
+      // Ações para missões específicas
+      completeMission: (missionKey) => set((state) => ({
+        missionProgress: {
+          ...state.missionProgress,
+          [missionKey]: true
+        }
+      })),
+
+      incrementExploredAreas: () => set((state) => ({
+        missionProgress: {
+          ...state.missionProgress,
+          exploredAreas: Math.min(state.missionProgress.exploredAreas + 1, 3)
+        }
+      })),
+
+      updateMissionProgress: (updates) => set((state) => ({
+        missionProgress: {
+          ...state.missionProgress,
+          ...updates
+        }
       })),
 
       updateTriageData: (data) => set((state) => ({
@@ -102,6 +131,11 @@ export const useGameStore = create(
         gameProgress: 'intro',
         completedActivities: [],
         currentScore: 0,
+        missionProgress: {
+          talkedToDoctor: false,
+          exploredAreas: 0,
+          completedTriage: false
+        },
         triageData: {
           symptoms: [],
           severity: 'unknown',
@@ -157,6 +191,7 @@ export const useGameStore = create(
         completedActivities: state.completedActivities,
         currentScore: state.currentScore,
         achievements: state.achievements,
+        missionProgress: state.missionProgress,
         soundEnabled: state.soundEnabled,
         musicEnabled: state.musicEnabled,
         difficulty: state.difficulty

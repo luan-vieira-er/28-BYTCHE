@@ -8,6 +8,7 @@ import NPCDoctor from './NPCDoctor'
 import Hospital from './Hospital'
 import DialogSystem from './DialogSystem'
 import TriageSystem from './TriageSystem'
+import MissionCompleteNotification from './MissionCompleteNotification'
 import { useGameStore } from '@/store/gameStore'
 import { useAssets } from '@/hooks/useAssets'
 import { HOSPITAL_MAP } from '@/data/hospitalMap'
@@ -26,15 +27,20 @@ const MedicalTriageGame = ({ onExit, onReconfigure, playerConfig, isDoctor = fal
   const [aiMessages, setAiMessages] = useState([])
   const [isWaitingForAI, setIsWaitingForAI] = useState(false)
   const [otherPlayers, setOtherPlayers] = useState([]) // Posições de outros players para médicos
+  const [completedMission, setCompletedMission] = useState(null)
 
 
   const {
     playerPosition,
     playerHealth,
     gameProgress,
+    missionProgress,
     selectedLocation,
     updatePlayerPosition,
     updateGameProgress,
+    completeMission,
+    incrementExploredAreas,
+    updateMissionProgress,
     setSelectedLocation
   } = useGameStore()
 
@@ -281,6 +287,20 @@ const MedicalTriageGame = ({ onExit, onReconfigure, playerConfig, isDoctor = fal
       if (dialogToShow) {
         setCurrentDialog(dialogToShow)
 
+        // Completar missão "Encontrar o Médico" quando iniciar diálogo
+        if (!missionProgress.talkedToDoctor) {
+          console.log('🎯 Missão completada: Encontrar o Médico')
+          completeMission('talkedToDoctor')
+
+          // Mostrar notificação de missão completada
+          setCompletedMission({
+            id: 1,
+            title: "Encontrar o Médico",
+            description: "Localize e converse com o Dr. Pixel",
+            icon: "👨‍⚕️"
+          })
+        }
+
         // Sincronizar diálogo para médicos (apenas se não for médico)
         if (!isDoctor && roomId) {
           websocketService.syncDialogStarted(roomId, dialogToShow)
@@ -375,6 +395,20 @@ const MedicalTriageGame = ({ onExit, onReconfigure, playerConfig, isDoctor = fal
     setShowTriage(false)
     updateGameProgress('triage_completed')
 
+    // Completar missão "Realizar Triagem"
+    if (!missionProgress.completedTriage) {
+      console.log('🎯 Missão completada: Realizar Triagem')
+      completeMission('completedTriage')
+
+      // Mostrar notificação de missão completada
+      setCompletedMission({
+        id: 3,
+        title: "Realizar Triagem",
+        description: "Complete uma avaliação médica",
+        icon: "📋"
+      })
+    }
+
     // Mostrar resultados baseados na triagem
     const severity = results.severity || 'low'
     let message = ''
@@ -399,7 +433,7 @@ const MedicalTriageGame = ({ onExit, onReconfigure, playerConfig, isDoctor = fal
         { text: '🚶‍♂️ Vou explorar o hospital', action: 'close' }
       ]
     })
-  }, [updateGameProgress])
+  }, [updateGameProgress, missionProgress.completedTriage, completeMission])
 
   if (gameState === 'loading' || isLoading) {
     return (
@@ -597,6 +631,7 @@ const MedicalTriageGame = ({ onExit, onReconfigure, playerConfig, isDoctor = fal
                   onMove={handlePlayerMove}
                   characterConfig={playerConfig}
                   roomId={roomId}
+                  onMissionComplete={setCompletedMission}
                 />
               )}
 
@@ -658,6 +693,14 @@ const MedicalTriageGame = ({ onExit, onReconfigure, playerConfig, isDoctor = fal
         <TriageSystem
           onComplete={handleTriageComplete}
           onClose={() => setShowTriage(false)}
+        />
+      )}
+
+      {/* Notificação de Missão Completada */}
+      {completedMission && (
+        <MissionCompleteNotification
+          mission={completedMission}
+          onComplete={() => setCompletedMission(null)}
         />
       )}
 

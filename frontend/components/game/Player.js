@@ -6,12 +6,20 @@ import { getCollisionSystem } from '@/utils/collisionSystem'
 import CharacterSprite from './CharacterSprite'
 import { getCharacterConfig, getCharacterSpriteId } from '@/utils/characterMapping'
 
-const Player = ({ x, y, onMove, characterConfig, roomId }) => {
+const Player = ({ x, y, onMove, characterConfig, roomId, onMissionComplete }) => {
   const [isMoving, setIsMoving] = useState(false)
   const [direction, setDirection] = useState('down')
   const [animationFrame, setAnimationFrame] = useState(0)
 
-  const { playerName, playerAvatar } = useGameStore()
+  const {
+    playerName,
+    playerAvatar,
+    missionProgress,
+    incrementExploredAreas
+  } = useGameStore()
+
+  // Estado para tracking de áreas exploradas
+  const [exploredAreas, setExploredAreas] = useState(new Set())
 
   // Obtém configuração do personagem selecionado usando o mapeamento
   const mappedCharacter = getCharacterConfig(characterConfig)
@@ -85,6 +93,33 @@ const Player = ({ x, y, onMove, characterConfig, roomId }) => {
         setIsMoving(true)
         onMove({ x: newX, y: newY })
 
+        // Sistema de exploração - detectar áreas visitadas
+        const currentArea = getAreaFromPosition(newX, newY)
+        if (currentArea && !exploredAreas.has(currentArea)) {
+          setExploredAreas(prev => {
+            const newSet = new Set(prev)
+            newSet.add(currentArea)
+
+            // Incrementar contador de áreas exploradas no store
+            if (newSet.size <= 3) {
+              console.log(`🗺️ Nova área explorada: ${currentArea} (${newSet.size}/3)`)
+              incrementExploredAreas()
+
+              // Completar missão quando explorar 3 áreas
+              if (newSet.size === 3 && onMissionComplete) {
+                onMissionComplete({
+                  id: 2,
+                  title: "Explorar o Hospital",
+                  description: "Visite todas as áreas do hospital",
+                  icon: "🏥"
+                })
+              }
+            }
+
+            return newSet
+          })
+        }
+
         // Parar animação após um tempo
         setTimeout(() => setIsMoving(false), 300)
       }
@@ -92,7 +127,27 @@ const Player = ({ x, y, onMove, characterConfig, roomId }) => {
 
     window.addEventListener('keydown', handleKeyPress)
     return () => window.removeEventListener('keydown', handleKeyPress)
-  }, [x, y, direction, onMove])
+  }, [x, y, direction, onMove, exploredAreas, incrementExploredAreas, onMissionComplete])
+
+  // Função para detectar área baseada na posição
+  const getAreaFromPosition = useCallback((posX, posY) => {
+    // Dividir o mapa em 3 áreas principais baseadas na posição
+    const mapWidth = 1200
+    const mapHeight = 800
+
+    // Área esquerda (0-400px)
+    if (posX < mapWidth / 3) {
+      return 'area_left'
+    }
+    // Área central (400-800px)
+    else if (posX < (mapWidth * 2) / 3) {
+      return 'area_center'
+    }
+    // Área direita (800-1200px)
+    else {
+      return 'area_right'
+    }
+  }, [])
 
   // Funções de cor mantidas para fallback
   const getAvatarColor = (avatar) => {

@@ -10,6 +10,7 @@ const GameUI = ({ playerHealth, gameProgress, onExit, onReconfigure, environment
   const {
     playerName,
     achievements,
+    missionProgress,
     soundEnabled,
     musicEnabled,
     toggleSound,
@@ -25,28 +26,28 @@ const GameUI = ({ playerHealth, gameProgress, onExit, onReconfigure, environment
       id: 1,
       title: "Encontrar o Médico",
       description: "Localize e converse com o Dr. Pixel",
-      completed: gameProgress?.talkedToDoctor || false,
+      completed: missionProgress?.talkedToDoctor || false,
       icon: "👨‍⚕️"
     },
     {
       id: 2,
       title: "Explorar o Hospital",
       description: "Visite todas as áreas do hospital",
-      completed: gameProgress?.exploredAreas >= 3 || false,
+      completed: missionProgress?.exploredAreas >= 3 || false,
       icon: "🏥"
     },
     {
       id: 3,
       title: "Realizar Triagem",
       description: "Complete uma avaliação médica",
-      completed: gameProgress?.completedTriage || false,
+      completed: missionProgress?.completedTriage || false,
       icon: "📋"
     }
   ]
 
   const completedMissions = missions.filter(m => m.completed).length
   const totalMissions = missions.length
-  const missionProgress = (completedMissions / totalMissions) * 100
+  const missionProgressPercentage = (completedMissions / totalMissions) * 100
 
   // Função para finalizar sessão (apenas para médicos)
   const handleFinishSession = () => {
@@ -147,13 +148,13 @@ const GameUI = ({ playerHealth, gameProgress, onExit, onReconfigure, environment
               <div className="w-full bg-gray-700/50 rounded-full h-2 overflow-hidden border border-gray-600/30">
                 <motion.div
                   initial={{ width: 0 }}
-                  animate={{ width: `${missionProgress}%` }}
+                  animate={{ width: `${missionProgressPercentage}%` }}
                   className="bg-gradient-to-r from-[#56FF9E] to-[#4ECDC4] h-2 rounded-full shadow-inner"
                   transition={{ duration: 1, ease: "easeOut" }}
                 />
               </div>
               <div className="text-xs text-gray-400 mt-1 text-center">
-                Progresso: {Math.round(missionProgress)}%
+                Progresso: {Math.round(missionProgressPercentage)}%
               </div>
             </div>
           </div>
@@ -196,7 +197,7 @@ const GameUI = ({ playerHealth, gameProgress, onExit, onReconfigure, environment
               <div className="w-16 bg-gray-700/50 rounded-full h-2 overflow-hidden border border-gray-600/30">
                 <motion.div
                   initial={{ width: 0 }}
-                  animate={{ width: `${missionProgress}%` }}
+                  animate={{ width: `${missionProgressPercentage}%` }}
                   className="bg-gradient-to-r from-[#56FF9E] to-[#4ECDC4] h-2 rounded-full"
                   transition={{ duration: 1, ease: "easeOut" }}
                 />
