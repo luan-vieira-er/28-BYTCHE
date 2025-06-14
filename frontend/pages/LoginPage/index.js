@@ -1,13 +1,55 @@
 import { Button, InputAdornment, TextField, Divider, Box, Typography } from "@mui/material";
 import { useRouter } from 'next/router';
+import { useState } from 'react';
 
 export default function LoginPage() {
     const router = useRouter();
 
-    const handleEndAdornmentClick = () => {
-        // Substitua '/sua-rota' pela rota que você deseja navegar
-        router.push('/sua-rota');
+    // Estado para armazenar os dados do formulário
+    const [formData, setFormData] = useState({
+        email: '',
+        password: ''
+    });
+
+    // Função para atualizar os campos do formulário
+    const handleInputChange = (field) => (event) => {
+        setFormData(prev => ({
+            ...prev,
+            [field]: event.target.value
+        }));
     };
+
+    // Função para lidar com o login
+    const handleLogin = () => {
+        console.log('Dados do login:', formData);
+
+        // Validação básica
+        if (!formData.email || !formData.password) {
+            alert('Por favor, preencha todos os campos');
+            return;
+        }
+
+        // Aqui você pode fazer a chamada para a API de login
+        // Exemplo:
+        // loginUser(formData.email, formData.password);
+
+        alert(`Login realizado com:\nEmail: ${formData.email}\nSenha: ${formData.password}`);
+    };
+
+    // Função para lidar com a criação de conta
+    const handleCreateAccount = () => {
+        console.log('Criar conta clicado');
+        // Aqui você pode redirecionar para a página de cadastro
+        // ou abrir um modal de cadastro
+        alert('Redirecionando para criação de conta...');
+    };
+
+    const handleEndAdornmentClick = () => {
+        console.log('Esqueceu a senha clicado');
+        // Aqui você pode redirecionar para recuperação de senha
+        alert('Redirecionando para recuperação de senha...');
+    };
+    
 
     return (
         <Box sx={{
@@ -74,6 +116,8 @@ export default function LoginPage() {
                     placeholder="Digite seu e-mail ou nome de usuário"
                     variant="outlined"
                     fullWidth
+                    value={formData.email}
+                    onChange={handleInputChange('email')}
                     sx={{
                         mb: 1.5,
                         '& .MuiInputLabel-root': {
@@ -112,6 +156,8 @@ export default function LoginPage() {
                     type="password"
                     variant="outlined"
                     fullWidth
+                    value={formData.password}
+                    onChange={handleInputChange('password')}
                     sx={{
                         mb: 2,
                         '& .MuiInputLabel-root': {
@@ -168,6 +214,7 @@ export default function LoginPage() {
                 <Button
                     variant="contained"
                     fullWidth
+                    onClick={handleLogin}
                     sx={{
                         py: 1.2,
                         px: 4,
@@ -234,6 +281,7 @@ export default function LoginPage() {
                 >
                     <Button
                         variant="outlined"
+                        onClick={handleCreateAccount}
                         sx={{
                             py: 1,
                             px: 3,
