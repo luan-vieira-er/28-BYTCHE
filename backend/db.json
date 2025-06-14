@@ -10,7 +10,7 @@
       "historico_previo": "Relato da escola indica episódios de choro frequente e isolamento durante o recreio.",
       "nome_paciente": "juninho",
       "idade": "7",
-      "status": "AGUARDANDO",
+      "status": "PACIENTE_CONECTADO",
       "chat_history": [
         {
           "role": "system",
