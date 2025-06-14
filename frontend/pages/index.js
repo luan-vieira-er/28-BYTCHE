@@ -1,5 +1,6 @@
 import Head from 'next/head'
 import { useState } from 'react'
+import { useRouter } from 'next/router'
 import AccessCodeDialog from '@/components/ui/AccessCodeDialog'
 import {
   Container,
@@ -18,14 +19,20 @@ import {
   Users,
   Shield,
   Award,
-  BookOpen
+  BookOpen,
+  Stethoscope
 } from 'lucide-react'
 
 export default function Home() {
+  const router = useRouter()
   const [dialogOpen, setDialogOpen] = useState(false)
 
   const handleStartGame = () => {
     setDialogOpen(true)
+  }
+
+  const handleDoctorAccess = () => {
+    router.push('/doctor-access')
   }
 
   return (
@@ -130,7 +137,7 @@ export default function Home() {
                     <Box component="span" sx={{ color: 'primary.main', fontWeight: 600 }}>
                       {' '}acolhedora e segura
                     </Box>
-                    {' '}que ajuda cada criança a se expressar de forma única e receber o cuidado personalizado que merece através de um ambiente lúdico e respeitoso.
+                    {' '}que ajuda cada criança a se expressar de forma única e receber o cuidado personalizado que merece.
                   </Typography>
 
                   {/* CTA Buttons */}
@@ -215,6 +222,40 @@ export default function Home() {
                   </Stack>
                 </Box>
               </Grid>
+
+              {/* Acesso Médico */}
+                  <Box sx={{
+                    mt: 4,
+                    p: 3,
+                    borderRadius: 2,
+                    backgroundColor: 'rgba(78, 205, 196, 0.1)',
+                    border: '1px solid rgba(78, 205, 196, 0.2)',
+                    textAlign: { xs: 'center', lg: 'left' }
+                  }}>
+                    <Typography variant="body2" sx={{ color: '#4ECDC4', fontWeight: 500, mb: 2 }}>
+                      👨‍⚕️ Você é um profissional de saúde?
+                    </Typography>
+                    <Button
+                      variant="outlined"
+                      size="medium"
+                      startIcon={<Stethoscope size={18} />}
+                      onClick={handleDoctorAccess}
+                      sx={{
+                        fontSize: '0.9rem',
+                        py: 1.5,
+                        px: 3,
+                        borderColor: '#4ECDC4',
+                        color: '#4ECDC4',
+                        '&:hover': {
+                          borderColor: '#56FF9E',
+                          backgroundColor: 'rgba(78, 205, 196, 0.1)',
+                          color: '#56FF9E'
+                        }
+                      }}
+                    >
+                      Acessar como Médico
+                    </Button>
+                  </Box>
 
               {/* Right Visual */}
               <Grid item xs={12} lg={6}>

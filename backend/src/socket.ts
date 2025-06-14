@@ -18,7 +18,7 @@ export const socketHandler = async (server: HttpServer) => {
     // Recebe o ID da sala e entra
     socket.on('doctorJoinRoom', async (roomId) => {
       // Buscar no Json Server se existe a Room Id
-      
+
       await updateRoom(roomId, { status: 'DOUTOR_CONECTADO' })
       // Cria a sala
       socket.join(roomId);
@@ -26,6 +26,20 @@ export const socketHandler = async (server: HttpServer) => {
     });
 
     // Recebe o ID da sala e entra
+    // Salvar configuração do paciente
+    socket.on('savePatientConfig', async (roomId, playerConfig) => {
+      let existRoom = await verifyRoom(roomId);
+      if (!existRoom) return socket.emit('error', 'Sala não encontrada')
+
+      // Salvar configuração do paciente na sala
+      await updateRoom(roomId, {
+        configuracao_paciente: JSON.stringify(playerConfig),
+        status: 'PACIENTE_CONFIGURADO'
+      });
+
+      console.log(`Configuração do paciente salva para sala ${roomId}:`, playerConfig);
+    });
+
     socket.on('patientJoinRoom', async (roomId) => {
       // Buscar no Json Server se existe a Room Id
       let existRoom = await verifyRoom(roomId);
@@ -38,6 +52,10 @@ export const socketHandler = async (server: HttpServer) => {
 
       // Notifica os outros da sala
       socket.to(roomId).emit('patientJoined', `Usuário ${socket.id} entrou na sala`);
+
+      // Buscar dados atualizados da sala para enviar para médicos
+      let updatedRoom = await verifyRoom(roomId);
+      socket.to(roomId).emit('playerConfigured', updatedRoom);
     });
 
     // Recebe mensagens e repassa para os membros da sala
@@ -97,6 +115,42 @@ export const socketHandler = async (server: HttpServer) => {
           }
         });
       }
+    });
+
+    // Sincronização de diálogos
+    socket.on('dialogStarted', async (roomId, dialogData) => {
+      let existRoom = await verifyRoom(roomId);
+      if (!existRoom) return socket.emit('error', 'Sala não encontrada')
+
+      // Enviar diálogo para todos na sala (incluindo médicos)
+      io.to(roomId).emit('dialogUpdate', {
+        type: 'started',
+        dialog: dialogData,
+        timestamp: new Date().toISOString()
+      });
+    });
+
+    socket.on('dialogChoice', async (roomId, choiceData) => {
+      let existRoom = await verifyRoom(roomId);
+      if (!existRoom) return socket.emit('error', 'Sala não encontrada')
+
+      // Enviar escolha para todos na sala
+      io.to(roomId).emit('dialogUpdate', {
+        type: 'choice',
+        choice: choiceData,
+        timestamp: new Date().toISOString()
+      });
+    });
+
+    socket.on('dialogEnded', async (roomId) => {
+      let existRoom = await verifyRoom(roomId);
+      if (!existRoom) return socket.emit('error', 'Sala não encontrada')
+
+      // Notificar fim do diálogo
+      io.to(roomId).emit('dialogUpdate', {
+        type: 'ended',
+        timestamp: new Date().toISOString()
+      });
     });
 
     socket.on('doctorCloseRoom', async (roomId) => {

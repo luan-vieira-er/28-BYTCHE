@@ -3,6 +3,7 @@ import { useState, useCallback, useEffect, useMemo } from 'react'
 import { TextStyle } from 'pixi.js'
 import GameUI from './GameUI'
 import Player from './Player'
+import OtherPlayer from './OtherPlayer'
 import NPCDoctor from './NPCDoctor'
 import Hospital from './Hospital'
 import DialogSystem from './DialogSystem'
@@ -17,13 +18,15 @@ import { initializeCollisionSystem } from '@/utils/collisionSystem'
 import websocketService from '@/services/websocket.service'
 import useWebSocket from '@/hooks/useWebSocket'
 
-const MedicalTriageGame = ({ onExit, onReconfigure, playerConfig }) => {
+const MedicalTriageGame = ({ onExit, onReconfigure, playerConfig, isDoctor = false, roomData = null }) => {
   const [gameState, setGameState] = useState('loading')
   const [currentDialog, setCurrentDialog] = useState(null)
   const [showTriage, setShowTriage] = useState(false)
   const [roomId, setRoomId] = useState(null)
   const [aiMessages, setAiMessages] = useState([])
   const [isWaitingForAI, setIsWaitingForAI] = useState(false)
+  const [otherPlayers, setOtherPlayers] = useState([]) // Posições de outros players para médicos
+
 
   const {
     playerPosition,
@@ -63,10 +66,21 @@ const MedicalTriageGame = ({ onExit, onReconfigure, playerConfig }) => {
       }
     }
 
-    // Se não há playerConfig ou location, usa fazendinha como padrão
-    const selectedLocation = playerConfig?.location || 'fazendinha'
+    // Para médicos, tentar usar configuração da sala ou padrão
+    // Para pacientes, usar configuração do player
+    let selectedLocation = 'fazendinha' // padrão
+
+    if (isDoctor && roomData) {
+      // Médico: usar configuração da sala se disponível
+      // Por enquanto usar padrão, mas pode ser expandido para ler da sala
+      selectedLocation = 'fazendinha'
+    } else if (playerConfig?.location) {
+      // Paciente: usar configuração do player
+      selectedLocation = playerConfig.location
+    }
+
     return locationMapping[selectedLocation] || locationMapping['fazendinha']
-  }, [playerConfig])
+  }, [playerConfig, isDoctor, roomData])
 
   // Configurações do jogo
   const GAME_WIDTH = 1200
@@ -78,6 +92,12 @@ const MedicalTriageGame = ({ onExit, onReconfigure, playerConfig }) => {
     const currentRoomId = new URLSearchParams(window.location.search).get('code') || playerConfig?.roomId
     if (currentRoomId) {
       setRoomId(currentRoomId)
+
+      // Salvar configuração do paciente no backend (apenas para pacientes)
+      if (!isDoctor && playerConfig && !playerConfig.roomData) {
+        console.log('💾 Salvando configuração do paciente:', playerConfig)
+        websocketService.savePatientConfig(currentRoomId, playerConfig)
+      }
     }
 
     // Configurar listeners para mensagens da IA
@@ -128,15 +148,43 @@ const MedicalTriageGame = ({ onExit, onReconfigure, playerConfig }) => {
       setIsWaitingForAI(false)
     }
 
+    // Handler para sincronização de diálogos (apenas para log)
+    const handleDialogUpdate = (data) => {
+      console.log('🔄 Atualização de diálogo recebida:', data)
+      // Médicos não veem diálogos, apenas logs para debug
+      if (isDoctor) {
+        console.log('👨‍⚕️ Médico recebeu atualização de diálogo:', data.type)
+      }
+    }
+
+    // Handler para posições de outros players (para médicos)
+    const handlePlayerPosition = (data) => {
+      if (isDoctor && data.sender !== websocketService.socket?.id) {
+        console.log('👤 Posição do player recebida:', data)
+        setOtherPlayers(prev => {
+          const updated = prev.filter(p => p.id !== data.sender)
+          return [...updated, {
+            id: data.sender,
+            position: data.position,
+            timestamp: Date.now()
+          }]
+        })
+      }
+    }
+
     // Registrar listeners
     websocketService.on('newMessage', handleNewMessage)
     websocketService.on('error', handleError)
+    websocketService.on('dialogUpdate', handleDialogUpdate)
+    websocketService.on('position', handlePlayerPosition)
 
     return () => {
       websocketService.off('newMessage', handleNewMessage)
       websocketService.off('error', handleError)
+      websocketService.off('dialogUpdate', handleDialogUpdate)
+      websocketService.off('position', handlePlayerPosition)
     }
-  }, [playerConfig])
+  }, [playerConfig, isDoctor])
 
   useEffect(() => {
     // Aguarda carregamento dos assets
@@ -172,6 +220,8 @@ const MedicalTriageGame = ({ onExit, onReconfigure, playerConfig }) => {
     )
 
     if (distance < 80 && !currentDialog && !isWaitingForAI) {
+      let dialogToShow = null
+
       if (roomId && aiMessages.length === 0) {
         // Primeira interação - usar IA do backend
         console.log('🤖 Iniciando primeira interação com IA')
@@ -179,14 +229,14 @@ const MedicalTriageGame = ({ onExit, onReconfigure, playerConfig }) => {
         websocketService.startFirstInteraction(roomId)
 
         // Mostrar diálogo de carregamento
-        setCurrentDialog({
+        dialogToShow = {
           npc: 'doctor',
           message: 'Olá! Eu sou o Dr. Pixel! 👨‍⚕️ Deixe-me pensar na melhor forma de te ajudar...',
           options: []
-        })
+        }
       } else {
         // Fallback para sistema local
-        setCurrentDialog({
+        dialogToShow = {
           npc: 'doctor',
           message: 'Olá! Eu sou o Dr. Pixel! 👨‍⚕️ Bem-vindo ao nosso hospital virtual! Como você está se sentindo hoje?',
           options: [
@@ -195,12 +245,26 @@ const MedicalTriageGame = ({ onExit, onReconfigure, playerConfig }) => {
             { text: 'Quero fazer um check-up! 🔍', action: 'checkup' },
             { text: '🚶‍♂️ Quero explorar o hospital', action: 'close' }
           ]
-        })
+        }
+      }
+
+      if (dialogToShow) {
+        setCurrentDialog(dialogToShow)
+
+        // Sincronizar diálogo para médicos (apenas se não for médico)
+        if (!isDoctor && roomId) {
+          websocketService.syncDialogStarted(roomId, dialogToShow)
+        }
       }
     }
   }, [currentDialog, updatePlayerPosition, gameEnvironment, roomId, aiMessages, isWaitingForAI])
 
   const handleDialogChoice = useCallback((choice) => {
+    // Sincronizar escolha para médicos (apenas se não for médico)
+    if (!isDoctor && roomId) {
+      websocketService.syncDialogChoice(roomId, choice)
+    }
+
     // Verificar se é uma escolha da IA
     if (choice.action.startsWith('ai_choice_') && roomId) {
       console.log('🤖 Enviando resposta para IA:', choice.text)
@@ -262,6 +326,11 @@ const MedicalTriageGame = ({ onExit, onReconfigure, playerConfig }) => {
         break
       case 'continue':
       case 'close':
+        // Sincronizar fim do diálogo para médicos (apenas se não for médico)
+        if (!isDoctor && roomId) {
+          websocketService.syncDialogEnded(roomId)
+        }
+
         // Se estamos em uma sessão com IA (roomId existe), usar finishRoom
         if (roomId && aiMessages.length > 0) {
           console.log('🏁 Finalizando sessão com IA usando finishRoom')
@@ -490,14 +559,42 @@ const MedicalTriageGame = ({ onExit, onReconfigure, playerConfig }) => {
                 doctorConfig={playerConfig?.doctor}
               />
 
-              {/* Player */}
-              <Player
-                x={playerPosition.x}
-                y={playerPosition.y}
-                onMove={handlePlayerMove}
-                characterConfig={playerConfig}
-                roomId={roomId}
-              />
+              {/* Player - apenas mostrar se não for médico */}
+              {!isDoctor && (
+                <Player
+                  x={playerPosition.x}
+                  y={playerPosition.y}
+                  onMove={handlePlayerMove}
+                  characterConfig={playerConfig}
+                  roomId={roomId}
+                />
+              )}
+
+              {/* Outros Players - para médicos visualizarem */}
+              {isDoctor && otherPlayers.map(player => {
+                // Validar dados antes de renderizar
+                if (!player || !player.position || typeof player.position.x !== 'number' || typeof player.position.y !== 'number') {
+                  console.warn('⚠️ Dados inválidos do player:', player)
+                  return null
+                }
+
+                const playerName = roomData?.nome_paciente
+                console.log('🎮 Renderizando OtherPlayer:', {
+                  playerId: player.id,
+                  playerName,
+                  position: player.position,
+                  characterConfig: playerConfig?.originalPatientConfig
+                })
+
+                return (
+                  <OtherPlayer
+                    key={player.id}
+                    x={player.position.x}
+                    y={player.position.y}
+                    playerName={typeof playerName === 'string' ? playerName : 'Paciente'}
+                  />
+                )
+              }).filter(Boolean)}
             </Container>
           </Stage>
         </div>
@@ -508,13 +605,17 @@ const MedicalTriageGame = ({ onExit, onReconfigure, playerConfig }) => {
         playerHealth={playerHealth}
         gameProgress={gameProgress}
         onExit={onExit}
-        onReconfigure={onReconfigure}
+        onReconfigure={isDoctor ? null : onReconfigure} // Médicos não podem reconfigurar
         environmentName={gameEnvironment.name}
-        showInstructions={true}
+        showInstructions={!isDoctor}
+        isDoctor={isDoctor}
+        roomId={roomId}
+        aiMessages={aiMessages}
+        roomData={roomData}
       />
 
-      {/* Sistema de Diálogos */}
-      {currentDialog && (
+      {/* Sistema de Diálogos - Apenas para pacientes */}
+      {!isDoctor && currentDialog && (
         <DialogSystem
           dialog={currentDialog}
           onChoice={handleDialogChoice}

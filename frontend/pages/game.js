@@ -35,15 +35,62 @@ const MedicalTriageGame = dynamic(() => import('@/components/game/MedicalTriageG
 
 export default function Game() {
   const router = useRouter()
-  const { code } = router.query
+  const { code, type } = router.query // Adicionar type para identificar se é médico
   const [connectionStatus, setConnectionStatus] = useState('connecting')
   const [error, setError] = useState('')
   const [showConfigStepper, setShowConfigStepper] = useState(false)
   const [showGame, setShowGame] = useState(false)
   const [playerConfig, setPlayerConfig] = useState(null)
+  const [isDoctor, setIsDoctor] = useState(false)
+  const [roomData, setRoomData] = useState(null)
+  const [waitingForPlayer, setWaitingForPlayer] = useState(false)
 
   // Verificar se há configuração salva para este código
   const getStorageKey = (code) => `doctorPixel-playerConfig-${code}`
+
+  // Função para buscar dados da sala do backend (para médicos)
+  const fetchRoomData = async (roomId) => {
+    try {
+      const response = await fetch(`http://localhost:3000/room/${roomId}`)
+      if (response.ok) {
+        const data = await response.json()
+        console.log('🏥 Dados da sala obtidos:', data)
+        return data
+      }
+    } catch (error) {
+      console.error('❌ Erro ao buscar dados da sala:', error)
+    }
+    return null
+  }
+
+  // Função para criar configuração do médico baseada na configuração do paciente
+  const createDoctorConfigFromRoom = (roomData) => {
+    if (!roomData || !roomData.configuracao_paciente) {
+      console.warn('⚠️ Dados da sala ou configuração do paciente não encontrados')
+      return null
+    }
+
+    try {
+      const patientConfig = JSON.parse(roomData.configuracao_paciente)
+      console.log('👨‍⚕️ Configuração do paciente encontrada:', patientConfig)
+
+      // Médico usa a mesma configuração de ambiente que o paciente
+      return {
+        character: 'erik', // Médico sempre usa erik (ou pode ser configurável)
+        doctor: 'erik',
+        location: patientConfig.location || 'fazendinha',
+        playerName: roomData.nome_paciente || 'Paciente',
+        roomData: roomData,
+        // Manter configuração original do paciente para referência
+        originalPatientConfig: patientConfig
+      }
+    } catch (error) {
+      console.error('❌ Erro ao parsear configuração do paciente:', error)
+      return null
+    }
+  }
+
+
 
   useEffect(() => {
     if (!code) {
@@ -52,16 +99,48 @@ export default function Game() {
       return
     }
 
-    // Verificar se há configuração salva para este código
-    const savedConfig = localStorage.getItem(getStorageKey(code))
-    if (savedConfig) {
-      try {
-        const parsedConfig = JSON.parse(savedConfig)
-        console.log('🔄 Configuração encontrada para reload:', parsedConfig)
-        setPlayerConfig(parsedConfig)
-      } catch (err) {
-        console.warn('⚠️ Erro ao carregar configuração salva:', err)
-        localStorage.removeItem(getStorageKey(code))
+    // Verificar se é médico baseado no parâmetro type
+    const isDoctorAccess = type === 'doctor'
+    setIsDoctor(isDoctorAccess)
+    console.log('👨‍⚕️ Tipo de acesso:', isDoctorAccess ? 'Médico' : 'Paciente')
+
+    // Se for médico, verificar se player já configurou a sala
+    if (isDoctorAccess) {
+      console.log('👨‍⚕️ Acesso de médico detectado - verificando status da sala')
+      setWaitingForPlayer(true)
+
+      fetchRoomData(code).then(data => {
+        if (data && data.status && data.status !== 'AGUARDANDO_PACIENTE') {
+          // Player já configurou e entrou
+          console.log('👨‍⚕️ Player já configurou a sala:', data)
+          setRoomData(data)
+
+          // Criar configuração do médico baseada na configuração do paciente
+          const doctorConfig = createDoctorConfigFromRoom(data)
+          if (doctorConfig) {
+            setPlayerConfig(doctorConfig)
+            console.log('👨‍⚕️ Configuração do médico criada:', doctorConfig)
+          }
+
+          setWaitingForPlayer(false)
+        } else {
+          // Player ainda não configurou
+          console.log('👨‍⚕️ Aguardando player configurar a sala...')
+          setWaitingForPlayer(true)
+        }
+      })
+    } else {
+      // Verificar se há configuração salva para este código (apenas para pacientes)
+      const savedConfig = localStorage.getItem(getStorageKey(code))
+      if (savedConfig) {
+        try {
+          const parsedConfig = JSON.parse(savedConfig)
+          console.log('🔄 Configuração encontrada para reload:', parsedConfig)
+          setPlayerConfig(parsedConfig)
+        } catch (err) {
+          console.warn('⚠️ Erro ao carregar configuração salva:', err)
+          localStorage.removeItem(getStorageKey(code))
+        }
       }
     }
 
@@ -71,8 +150,19 @@ export default function Game() {
         setConnectionStatus('connecting')
 
         // Conectar ao servidor WebSocket passando o código de acesso
-        // O websocket service agora chama automaticamente patientJoinRoom após conexão
-        websocketService.connect('http://localhost:3001', code)
+        if (isDoctorAccess) {
+          // Para médicos, só conectar se player já configurou
+          if (!waitingForPlayer) {
+            websocketService.connect('http://localhost:3001')
+            // Aguardar conexão e então entrar na sala como médico
+            setTimeout(() => {
+              websocketService.joinRoomAsDoctor(code)
+            }, 1000)
+          }
+        } else {
+          // Para pacientes, usar o fluxo normal
+          websocketService.connect('http://localhost:3001', code)
+        }
 
         websocketService.on('connection:error', (error) => {
           console.error('❌ Erro de conexão:', error)
@@ -91,22 +181,51 @@ export default function Game() {
           console.log('✅ Paciente entrou na sala:', message)
           setConnectionStatus('ready')
 
-          // Verificar se já há configuração salva
-          const savedConfig = localStorage.getItem(getStorageKey(code))
-          if (savedConfig) {
-            try {
-              const parsedConfig = JSON.parse(savedConfig)
-              console.log('🎮 Configuração encontrada, indo direto para o jogo:', parsedConfig)
-              setPlayerConfig(parsedConfig)
-              setShowGame(true)
-            } catch (err) {
-              console.warn('⚠️ Erro ao carregar configuração salva:', err)
-              localStorage.removeItem(getStorageKey(code))
+          if (isDoctorAccess) {
+            // Para médicos, ir direto para o jogo sem configuração
+            console.log('👨‍⚕️ Médico conectado, indo direto para visualização')
+            setWaitingForPlayer(false)
+            setShowGame(true)
+          } else {
+            // Para pacientes, verificar configuração salva
+            const savedConfig = localStorage.getItem(getStorageKey(code))
+            if (savedConfig) {
+              try {
+                const parsedConfig = JSON.parse(savedConfig)
+                console.log('🎮 Configuração encontrada, indo direto para o jogo:', parsedConfig)
+                setPlayerConfig(parsedConfig)
+                setShowGame(true)
+              } catch (err) {
+                console.warn('⚠️ Erro ao carregar configuração salva:', err)
+                localStorage.removeItem(getStorageKey(code))
+                setShowConfigStepper(true)
+              }
+            } else {
+              console.log('⚙️ Nenhuma configuração encontrada, mostrando ConfigStepper')
               setShowConfigStepper(true)
             }
-          } else {
-            console.log('⚙️ Nenhuma configuração encontrada, mostrando ConfigStepper')
-            setShowConfigStepper(true)
+          }
+        })
+
+        // Listener para médicos aguardando player configurar
+        websocketService.on('playerConfigured', (roomData) => {
+          console.log('👨‍⚕️ Player configurou a sala:', roomData)
+          if (isDoctorAccess && waitingForPlayer) {
+            setRoomData(roomData)
+
+            // Criar configuração do médico baseada na configuração do paciente
+            const doctorConfig = createDoctorConfigFromRoom(roomData)
+            if (doctorConfig) {
+              setPlayerConfig(doctorConfig)
+              console.log('👨‍⚕️ Configuração do médico criada:', doctorConfig)
+            }
+
+            setWaitingForPlayer(false)
+            // Conectar agora que player configurou
+            websocketService.connect('http://localhost:3001')
+            setTimeout(() => {
+              websocketService.joinRoomAsDoctor(code)
+            }, 1000)
           }
         })
 
@@ -116,22 +235,32 @@ export default function Game() {
             console.log('⚠️ Timeout - assumindo sucesso para desenvolvimento')
             setConnectionStatus('ready')
 
-            // Verificar se já há configuração salva
-            const savedConfig = localStorage.getItem(getStorageKey(code))
-            if (savedConfig) {
-              try {
-                const parsedConfig = JSON.parse(savedConfig)
-                console.log('🎮 Configuração encontrada no timeout, indo direto para o jogo:', parsedConfig)
-                setPlayerConfig(parsedConfig)
+            if (isDoctorAccess) {
+              // Para médicos, só ir para o jogo se não estiver aguardando player
+              if (!waitingForPlayer) {
+                console.log('👨‍⚕️ Médico conectado via timeout, indo direto para visualização')
                 setShowGame(true)
-              } catch (err) {
-                console.warn('⚠️ Erro ao carregar configuração salva no timeout:', err)
-                localStorage.removeItem(getStorageKey(code))
-                setShowConfigStepper(true)
+              } else {
+                console.log('👨‍⚕️ Médico ainda aguardando player configurar...')
               }
             } else {
-              console.log('⚙️ Nenhuma configuração encontrada no timeout, mostrando ConfigStepper')
-              setShowConfigStepper(true)
+              // Para pacientes, verificar configuração salva
+              const savedConfig = localStorage.getItem(getStorageKey(code))
+              if (savedConfig) {
+                try {
+                  const parsedConfig = JSON.parse(savedConfig)
+                  console.log('🎮 Configuração encontrada no timeout, indo direto para o jogo:', parsedConfig)
+                  setPlayerConfig(parsedConfig)
+                  setShowGame(true)
+                } catch (err) {
+                  console.warn('⚠️ Erro ao carregar configuração salva no timeout:', err)
+                  localStorage.removeItem(getStorageKey(code))
+                  setShowConfigStepper(true)
+                }
+              } else {
+                console.log('⚙️ Nenhuma configuração encontrada no timeout, mostrando ConfigStepper')
+                setShowConfigStepper(true)
+              }
             }
           }
         }, 5000)
@@ -151,7 +280,7 @@ export default function Game() {
     return () => {
       websocketService.disconnect()
     }
-  }, [code])
+  }, [code, type])
 
   const handleGoBack = () => {
     // Limpar configuração salva ao sair do jogo
@@ -268,6 +397,97 @@ export default function Game() {
     )
   }
 
+  // Tela de espera para médicos aguardando player
+  if (isDoctor && waitingForPlayer) {
+    return (
+      <>
+        <Head>
+          <title>Aguardando Paciente - DoctorPixel</title>
+          <meta name="description" content="Aguardando paciente configurar sessão" />
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
+          <link rel="icon" href="/favicon.ico" />
+        </Head>
+
+        <Box sx={{
+          minHeight: '100vh',
+          background: 'linear-gradient(135deg, #131F24 0%, #0A1015 100%)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          p: 3
+        }}>
+          <Card sx={{
+            maxWidth: 600,
+            width: '100%',
+            background: 'rgba(26, 43, 51, 0.9)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(86, 255, 158, 0.2)',
+            borderRadius: 4,
+            textAlign: 'center'
+          }}>
+            <CardContent sx={{ p: 6 }}>
+              <Box sx={{ mb: 4 }}>
+                <div className="animate-pulse text-6xl mb-4">👨‍⚕️</div>
+                <Typography variant="h4" sx={{
+                  fontWeight: 700,
+                  color: 'white',
+                  mb: 2,
+                  background: 'linear-gradient(135deg, #56FF9E 0%, #4ECDC4 100%)',
+                  backgroundClip: 'text',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent'
+                }}>
+                  Aguardando Paciente
+                </Typography>
+                <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
+                  O paciente ainda não configurou a sessão. Aguarde enquanto ele escolhe seu personagem e ambiente.
+                </Typography>
+              </Box>
+
+              <Box sx={{
+                p: 3,
+                borderRadius: 2,
+                backgroundColor: 'rgba(86, 255, 158, 0.1)',
+                border: '1px solid rgba(86, 255, 158, 0.2)',
+                mb: 4
+              }}>
+                <Typography variant="body2" sx={{ color: '#56FF9E', fontWeight: 500, mb: 2 }}>
+                  📋 Código da Sessão
+                </Typography>
+                <Typography variant="h6" sx={{ color: 'white', fontFamily: 'monospace' }}>
+                  {code}
+                </Typography>
+              </Box>
+
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 3 }}>
+                <CircularProgress size={24} sx={{ color: '#56FF9E', mr: 2 }} />
+                <Typography variant="body2" color="text.secondary">
+                  Conectando automaticamente quando o paciente estiver pronto...
+                </Typography>
+              </Box>
+
+              <Button
+                variant="outlined"
+                onClick={handleGoBack}
+                sx={{
+                  borderColor: '#4ECDC4',
+                  color: '#4ECDC4',
+                  '&:hover': {
+                    borderColor: '#56FF9E',
+                    backgroundColor: 'rgba(78, 205, 196, 0.1)',
+                    color: '#56FF9E'
+                  }
+                }}
+              >
+                Voltar
+              </Button>
+            </CardContent>
+          </Card>
+        </Box>
+      </>
+    )
+  }
+
   // Se deve mostrar o jogo
   if (showGame) {
     return (
@@ -284,6 +504,8 @@ export default function Game() {
           playerConfig={playerConfig}
           onExit={handleGoBack}
           onReconfigure={handleReconfigure}
+          isDoctor={isDoctor}
+          roomData={roomData}
         />
       </>
     )

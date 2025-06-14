@@ -10,8 +10,30 @@
       "historico_previo": "Relato da escola indica episódios de choro frequente e isolamento durante o recreio.",
       "nome_paciente": "juninho",
       "idade": "7",
-      "status": "AGUARDANDO",
-      "chat_history": []
+      "status": "CHAT_INICIADO",
+      "chat_history": [
+        {
+          "role": "assistant",
+          "content": "Oi, Juninho! Seja muito bem-vindo! Estou muito feliz de te conhecer. 😊 Como você está se sentindo hoje? Está tudo bem? Cê pode me contar no seu tempo, tá bom? Tô aqui pra te ouvir com calma."
+        },
+        {
+          "role": "user",
+          "content": "Tô animado! Vou brincar com meus amigos depois."
+        },
+        {
+          "role": "assistant",
+          "content": "Que legal, Juninho! Brincar com os amigos é sempre muito divertido. O que vocês estão planejando fazer? Tem alguma brincadeira ou jogo favorito? "
+        },
+        {
+          "role": "user",
+          "content": "Não sei, às vezes fico meio sem ideia do que brincar."
+        },
+        {
+          "role": "assistant",
+          "content": "Entendo, isso acontece com todo mundo de vez em quando. Que tal algumas sugestões? Vocês podem brincar de esconde-esconde, pega-pega, futebol ou até mesmo criar uma caça ao tesouro no quintal ou no parque. Se estiverem dentro de casa, vocês podem inventar histórias e fazer teatrinhos ou até construir coisas legais com blocos de montar. O importante é se divertir! O que acha dessas ideias?"
+        }
+      ],
+      "configuracao_paciente": "{\"doctor\":\"dr-bot\",\"character\":{\"id\":\"Zombie\",\"name\":\"Zombie\",\"image\":\"/assets/zombie.png\",\"attributes\":{\"humor\":2,\"curioso\":1,\"energia\":2,\"social\":1,\"soneca\":4,\"criativo\":2},\"description\":\"Misterioso e sonolento, mas surpreendentemente eficaz!\"},\"location\":\"fazendinha\"}"
     },
     {
       "id": "12345678-1234-1234-1234-1234567890ab",

@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useGameStore } from '@/store/gameStore'
+import websocketService from '@/services/websocket.service'
 
-const GameUI = ({ playerHealth, gameProgress, onExit, onReconfigure, environmentName, showInstructions = true }) => {
+const GameUI = ({ playerHealth, gameProgress, onExit, onReconfigure, environmentName, showInstructions = true, isDoctor = false, roomId, aiMessages = [], roomData = null }) => {
   const [showMenu, setShowMenu] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
 
@@ -46,6 +47,18 @@ const GameUI = ({ playerHealth, gameProgress, onExit, onReconfigure, environment
   const completedMissions = missions.filter(m => m.completed).length
   const totalMissions = missions.length
   const missionProgress = (completedMissions / totalMissions) * 100
+
+  // Função para finalizar sessão (apenas para médicos)
+  const handleFinishSession = () => {
+    if (isDoctor && roomId) {
+      console.log('👨‍⚕️ Médico finalizando sessão:', roomId)
+      websocketService.finishRoom(roomId, 'Sessão finalizada pelo médico')
+      // Opcional: mostrar confirmação ou redirecionar
+      if (onExit) {
+        setTimeout(() => onExit(), 1000) // Aguardar 1 segundo antes de sair
+      }
+    }
+  }
 
   return (
     <>
@@ -354,7 +367,7 @@ const GameUI = ({ playerHealth, gameProgress, onExit, onReconfigure, environment
                   📖 Como Jogar
                 </button>
 
-                {onReconfigure && (
+                {!isDoctor && onReconfigure && (
                   <button
                     onClick={onReconfigure}
                     className="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white py-3 rounded-xl font-medium hover:from-blue-600 hover:to-purple-600 transition-all"
@@ -477,6 +490,112 @@ const GameUI = ({ playerHealth, gameProgress, onExit, onReconfigure, environment
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Chat do Médico - Lado Direito */}
+      {isDoctor && (
+        <motion.div
+          initial={{ x: 400, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          className="fixed top-4 right-4 z-50 w-80"
+        >
+          <div className="bg-gradient-to-br from-[#131F24]/95 to-[#1A2B33]/95 backdrop-blur-md rounded-2xl shadow-xl border border-[#56FF9E]/20 h-[calc(100vh-2rem)] flex flex-col">
+            {/* Header do Chat */}
+            <div className="p-4 border-b border-[#56FF9E]/20">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center space-x-3">
+                  <div className="w-3 h-3 bg-[#56FF9E] rounded-full animate-pulse"></div>
+                  <h3 className="text-white font-bold text-lg">Chat da Sessão</h3>
+                </div>
+                <div className="text-xs text-gray-400">
+                  Sala: {roomId}
+                </div>
+              </div>
+
+              {/* Informações da Sala para Médicos */}
+              {isDoctor && (
+                <div className="text-xs text-gray-300 space-y-1">
+                  {roomData && (
+                    <>
+                      <div className="flex justify-between">
+                        <span>👤 Paciente:</span>
+                        <span className="text-[#56FF9E]">{roomData.nome_paciente || 'N/A'}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>🎂 Idade:</span>
+                        <span className="text-[#4ECDC4]">{roomData.idade || 'N/A'} anos</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>📋 Status:</span>
+                        <span className="text-yellow-400">{roomData.status || 'N/A'}</span>
+                      </div>
+                    </>
+                  )}
+                  <div className="flex justify-between">
+                    <span>💬 Mensagens:</span>
+                    <span className="text-[#4ECDC4]">{aiMessages.length}</span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Área de Mensagens */}
+            <div className="flex-1 p-4 overflow-y-auto space-y-3">
+              {aiMessages.length === 0 ? (
+                <div className="text-center text-gray-400 text-sm mt-8">
+                  <div className="text-4xl mb-2">💬</div>
+                  <p>Aguardando início da conversa...</p>
+                  <p className="text-xs mt-1">As mensagens aparecerão aqui quando o paciente começar a conversar com a IA.</p>
+                </div>
+              ) : (
+                aiMessages.map((message, index) => (
+                  <div
+                    key={index}
+                    className={`p-3 rounded-lg max-w-[90%] ${
+                      message.type === 'user'
+                        ? 'bg-[#56FF9E]/20 border border-[#56FF9E]/30 ml-auto text-right'
+                        : 'bg-gray-700/30 border border-gray-600/30'
+                    }`}
+                  >
+                    <div className="text-xs text-gray-400 mb-1">
+                      {message.type === 'user' ? '👤 Paciente' : '🤖 IA'}
+                    </div>
+                    <div className="text-white text-sm">
+                      {message.content}
+                    </div>
+                    {message.choices && message.choices.length > 0 && (
+                      <div className="mt-2 text-xs text-gray-400">
+                        <div className="font-medium mb-1">Opções oferecidas:</div>
+                        <ul className="list-disc list-inside space-y-1">
+                          {message.choices.map((choice, choiceIndex) => (
+                            <li key={choiceIndex} className="truncate">
+                              {typeof choice === 'string' ? choice : choice.text || choice.option || String(choice)}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Footer com Botão de Finalizar */}
+            <div className="p-4 border-t border-[#56FF9E]/20">
+              <button
+                onClick={handleFinishSession}
+                className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white py-3 rounded-xl font-bold transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
+              >
+                <span>🏁</span>
+                <span>Finalizar Sessão</span>
+              </button>
+              <div className="text-xs text-gray-400 text-center mt-2">
+                Clique para encerrar a sessão do paciente
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      )}
     </>
   )
 }

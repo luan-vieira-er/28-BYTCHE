@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
-const DialogSystem = ({ dialog, onChoice, onClose }) => {
+const DialogSystem = ({ dialog, onChoice, onClose, isReadOnly = false }) => {
   const [currentText, setCurrentText] = useState('')
   const [isTyping, setIsTyping] = useState(true)
   const [showOptions, setShowOptions] = useState(false)
@@ -64,7 +64,7 @@ const DialogSystem = ({ dialog, onChoice, onClose }) => {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         className="fixed inset-0 bg-black bg-opacity-50 flex items-end justify-center z-50"
-        onClick={onClose}
+        onClick={isReadOnly ? null : onClose}
       >
         <motion.div
           initial={{ y: 100, opacity: 0 }}
@@ -84,14 +84,23 @@ const DialogSystem = ({ dialog, onChoice, onClose }) => {
                 <h3 className="text-xl font-bold">{getNPCName(dialog.npc)}</h3>
                 <p className="text-blue-100 text-sm">Especialista em IA Médica</p>
               </div>
-              <div className="ml-auto">
-                <button
-                  onClick={onClose}
-                  className="text-white hover:text-gray-200 text-2xl font-bold w-8 h-8 flex items-center justify-center rounded-full hover:bg-white hover:bg-opacity-20 transition-all"
-                >
-                  ×
-                </button>
-              </div>
+              {!isReadOnly && (
+                <div className="ml-auto">
+                  <button
+                    onClick={onClose}
+                    className="text-white hover:text-gray-200 text-2xl font-bold w-8 h-8 flex items-center justify-center rounded-full hover:bg-white hover:bg-opacity-20 transition-all"
+                  >
+                    ×
+                  </button>
+                </div>
+              )}
+              {isReadOnly && (
+                <div className="ml-auto">
+                  <div className="bg-yellow-500 text-yellow-900 px-3 py-1 rounded-full text-sm font-medium">
+                    👨‍⚕️ Visualização Médica
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -130,28 +139,36 @@ const DialogSystem = ({ dialog, onChoice, onClose }) => {
                   className="space-y-3"
                 >
                   <h4 className="text-sm font-semibold text-gray-600 mb-3">
-                    Como você gostaria de responder?
+                    {isReadOnly ? 'Opções disponíveis para o paciente:' : 'Como você gostaria de responder?'}
                   </h4>
                   {dialog.options.map((option, index) => (
-                    <motion.button
+                    <motion.div
                       key={index}
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.4 + index * 0.1 }}
-                      onClick={() => onChoice(option)}
-                      className="w-full text-left p-4 bg-gradient-to-r from-blue-50 to-green-50 hover:from-blue-100 hover:to-green-100 rounded-xl border-2 border-transparent hover:border-blue-300 transition-all duration-200 transform hover:scale-[1.02] group"
+                      onClick={isReadOnly ? null : () => onChoice(option)}
+                      className={`w-full text-left p-4 rounded-xl border-2 transition-all duration-200 ${
+                        isReadOnly
+                          ? 'bg-gray-100 border-gray-300 cursor-default'
+                          : 'bg-gradient-to-r from-blue-50 to-green-50 hover:from-blue-100 hover:to-green-100 border-transparent hover:border-blue-300 transform hover:scale-[1.02] cursor-pointer group'
+                      }`}
                     >
                       <div className="flex items-center space-x-3">
-                        <div className="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold group-hover:bg-blue-600 transition-colors">
+                        <div className={`w-8 h-8 text-white rounded-full flex items-center justify-center text-sm font-bold transition-colors ${
+                          isReadOnly ? 'bg-gray-500' : 'bg-blue-500 group-hover:bg-blue-600'
+                        }`}>
                           {index + 1}
                         </div>
-                        <span className="text-gray-800 font-medium group-hover:text-gray-900">
+                        <span className={`font-medium ${
+                          isReadOnly ? 'text-gray-600' : 'text-gray-800 group-hover:text-gray-900'
+                        }`}>
                           {typeof option.text === 'string' ? option.text :
                            typeof option.text === 'object' ? JSON.stringify(option.text) :
                            String(option.text || 'Opção')}
                         </span>
                       </div>
-                    </motion.button>
+                    </motion.div>
                   ))}
                 </motion.div>
               )}

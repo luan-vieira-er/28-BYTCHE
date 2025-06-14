@@ -161,6 +161,20 @@ class WebSocketService {
     this.emit(WEBSOCKET_CONFIG.BACKEND_EVENTS.PATIENT_JOIN_ROOM, accessCode);
   }
 
+  // Método para médico entrar na sala
+  joinRoomAsDoctor(roomId) {
+    console.log("👨‍⚕️ ~ WebSocketService ~ joinRoomAsDoctor ~ roomId:", roomId)
+    wsLog('Doctor joining room', { roomId });
+    this.emit(WEBSOCKET_CONFIG.BACKEND_EVENTS.DOCTOR_JOIN_ROOM, roomId);
+  }
+
+  // Método para salvar configuração do paciente
+  savePatientConfig(roomId, playerConfig) {
+    console.log("💾 ~ WebSocketService ~ savePatientConfig ~ roomId:", roomId, playerConfig)
+    wsLog('Saving patient config', { roomId, playerConfig });
+    this.emit('savePatientConfig', roomId, playerConfig);
+  }
+
   // Player-related methods - Integrado com backend
   joinGame(playerData) {
     // Manter compatibilidade com sistema antigo
@@ -245,7 +259,24 @@ class WebSocketService {
   // Métodos específicos do backend
   finishRoom(roomId, message = '') {
     wsLog('Finishing room', { roomId, message });
-    this.emit(WEBSOCKET_CONFIG.BACKEND_EVENTS.DOCTOR_FINISH_ROOM, roomId, message);
+    // Usar o evento correto do backend
+    this.emit('doctorCloseRoom', roomId, message);
+  }
+
+  // Métodos para sincronização de diálogos
+  syncDialogStarted(roomId, dialogData) {
+    wsLog('Syncing dialog started', { roomId, dialogData });
+    this.emit('dialogStarted', roomId, dialogData);
+  }
+
+  syncDialogChoice(roomId, choiceData) {
+    wsLog('Syncing dialog choice', { roomId, choiceData });
+    this.emit('dialogChoice', roomId, choiceData);
+  }
+
+  syncDialogEnded(roomId) {
+    wsLog('Syncing dialog ended', { roomId });
+    this.emit('dialogEnded', roomId);
   }
 
   // Utility methods
