@@ -49,12 +49,111 @@ const GameUI = ({ playerHealth, gameProgress, onExit, environmentName, showInstr
 
   return (
     <>
-      {/* Nome do Ambiente - Topo Central */}
+      {/* Card do Jogador - Topo Esquerda */}
+      <motion.div
+        initial={{ x: -100, opacity: 0 }}
+        animate={{ x: 0, opacity: 1 }}
+        className="fixed top-4 left-4 z-50"
+      >
+        <div className="bg-gradient-to-br from-[#131F24]/95 to-[#1A2B33]/95 backdrop-blur-md rounded-2xl p-4 shadow-xl border border-[#56FF9E]/20">
+          <div className="flex items-center space-x-4">
+            <div className="relative">
+              <div className="w-12 h-12 bg-gradient-to-r from-[#56FF9E] to-[#4ECDC4] rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                {playerName ? playerName[0].toUpperCase() : 'P'}
+              </div>
+              <div className="absolute -top-1 -right-1 w-4 h-4 bg-[#56FF9E] rounded-full border-2 border-white animate-pulse flex items-center justify-center">
+                <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
+              </div>
+            </div>
+            <div>
+              <div className="font-bold text-white text-lg">
+                {playerName || 'Jogador'}
+              </div>
+              <div className="text-sm text-[#56FF9E] flex items-center space-x-2">
+                <span>⭐ Nível {playerLevel}</span>
+                <span>•</span>
+                <span className="flex items-center space-x-1">
+                  <span>❤️</span>
+                  <span>{playerHealth}%</span>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Painel de Missões - Topo Esquerda (abaixo do card do jogador) */}
+      <motion.div
+        initial={{ x: -100, opacity: 0 }}
+        animate={{ x: 0, opacity: 1 }}
+        transition={{ delay: 0.1 }}
+        className="fixed top-28 left-4 z-40"
+      >
+        <div className="bg-gradient-to-br from-[#131F24]/95 to-[#1A2B33]/95 backdrop-blur-md rounded-2xl p-4 shadow-xl border border-[#56FF9E]/20 max-w-xs">
+          {/* Sistema de Missões */}
+          <div>
+            <div className="flex items-center justify-between text-sm text-gray-300 mb-3">
+              <span className="flex items-center space-x-1">
+                <span>🎯</span>
+                <span>Missões</span>
+              </span>
+              <span className="font-semibold text-[#56FF9E]">{completedMissions}/{totalMissions}</span>
+            </div>
+
+            {/* Lista de Missões */}
+            <div className="space-y-2 max-h-32 overflow-y-auto">
+              {missions.map((mission) => (
+                <div
+                  key={mission.id}
+                  className={`flex items-center space-x-3 p-2 rounded-lg border transition-all ${
+                    mission.completed
+                      ? 'bg-[#56FF9E]/10 border-[#56FF9E]/30 text-[#56FF9E]'
+                      : 'bg-gray-700/30 border-gray-600/30 text-gray-300'
+                  }`}
+                >
+                  <span className="text-lg">{mission.icon}</span>
+                  <div className="flex-1 min-w-0">
+                    <div className={`text-xs font-medium truncate ${
+                      mission.completed ? 'text-[#56FF9E]' : 'text-white'
+                    }`}>
+                      {mission.title}
+                    </div>
+                    <div className="text-xs text-gray-400 truncate">
+                      {mission.description}
+                    </div>
+                  </div>
+                  {mission.completed && (
+                    <div className="text-[#56FF9E] text-sm">✓</div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Progresso Geral */}
+            <div className="mt-3 pt-3 border-t border-gray-600/30">
+              <div className="w-full bg-gray-700/50 rounded-full h-2 overflow-hidden border border-gray-600/30">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${missionProgress}%` }}
+                  className="bg-gradient-to-r from-[#56FF9E] to-[#4ECDC4] h-2 rounded-full shadow-inner"
+                  transition={{ duration: 1, ease: "easeOut" }}
+                />
+              </div>
+              <div className="text-xs text-gray-400 mt-1 text-center">
+                Progresso: {Math.round(missionProgress)}%
+              </div>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Nome do Ambiente - Topo Centro */}
       {environmentName && (
         <motion.div
           initial={{ y: -50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50"
+          transition={{ delay: 0.2 }}
+          className="fixed top-4 left-1/2 transform !-translate-x-1/2 z-50"
         >
           <div className="bg-gradient-to-r from-[#56FF9E]/20 to-[#4ECDC4]/20 backdrop-blur-md rounded-2xl px-6 py-3 border border-[#56FF9E]/30 shadow-lg">
             <div className="flex items-center space-x-3">
@@ -68,129 +167,65 @@ const GameUI = ({ playerHealth, gameProgress, onExit, environmentName, showInstr
         </motion.div>
       )}
 
-      {/* HUD Principal */}
-      <div className="fixed top-0 left-0 right-0 z-40 p-4 pt-20">
-        <div className="flex items-center justify-between">
-          {/* Info do Player com Missões */}
-          <motion.div
-            initial={{ x: -100, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            className="bg-gradient-to-br from-[#131F24]/95 to-[#1A2B33]/95 backdrop-blur-md rounded-2xl p-5 shadow-xl border border-[#56FF9E]/20"
-          >
-            <div className="flex items-center space-x-4 mb-4">
-              <div className="relative">
-                <div className="w-14 h-14 bg-gradient-to-r from-[#56FF9E] to-[#4ECDC4] rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg">
-                  {playerName ? playerName[0].toUpperCase() : 'P'}
-                </div>
-                <div className="absolute -top-1 -right-1 w-5 h-5 bg-[#56FF9E] rounded-full border-2 border-white animate-pulse flex items-center justify-center">
-                  <div className="w-2 h-2 bg-white rounded-full"></div>
-                </div>
-              </div>
-              <div>
-                <div className="font-bold text-white text-lg">
-                  {playerName || 'Jogador'}
-                </div>
-                <div className="text-sm text-[#56FF9E] flex items-center space-x-1">
-                  <span>⭐</span>
-                  <span>Nível {playerLevel}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Barra de Saúde Moderna */}
-            <div className="mb-4">
-              <div className="flex items-center justify-between text-sm text-gray-300 mb-2">
-                <span className="flex items-center space-x-1">
-                  <span>❤️</span>
-                  <span>Saúde</span>
-                </span>
-                <span className="font-semibold text-white">{playerHealth}%</span>
-              </div>
-              <div className="w-full bg-gray-700/50 rounded-full h-3 overflow-hidden border border-gray-600/30">
+      {/* Botão de Opções - Topo Direita */}
+      <motion.div
+        initial={{ x: 100, opacity: 0 }}
+        animate={{ x: 0, opacity: 1 }}
+        transition={{ delay: 0.3 }}
+        className="fixed top-4 right-4 z-50"
+      >
+        <div className="flex items-center space-x-3">
+          {/* Progresso de Missões */}
+          <div className="bg-gradient-to-br from-[#131F24]/95 to-[#1A2B33]/95 backdrop-blur-md rounded-2xl px-4 py-3 shadow-xl border border-[#56FF9E]/20">
+            <div className="flex items-center space-x-2 text-sm">
+              <span className="text-[#56FF9E]">🎯</span>
+              <span className="text-white font-medium">{completedMissions}/{totalMissions}</span>
+              <div className="w-16 bg-gray-700/50 rounded-full h-2 overflow-hidden border border-gray-600/30">
                 <motion.div
                   initial={{ width: 0 }}
-                  animate={{ width: `${playerHealth}%` }}
-                  className={`h-3 rounded-full ${
-                    playerHealth > 70 ? 'bg-gradient-to-r from-[#56FF9E] to-[#4ECDC4]' :
-                    playerHealth > 30 ? 'bg-gradient-to-r from-yellow-400 to-orange-500' :
-                    'bg-gradient-to-r from-red-400 to-red-500'
-                  } shadow-inner`}
-                  transition={{ duration: 0.8, ease: "easeOut" }}
+                  animate={{ width: `${missionProgress}%` }}
+                  className="bg-gradient-to-r from-[#56FF9E] to-[#4ECDC4] h-2 rounded-full"
+                  transition={{ duration: 1, ease: "easeOut" }}
                 />
               </div>
             </div>
+          </div>
 
-            {/* Sistema de Missões */}
-            <div>
-              <div className="flex items-center justify-between text-sm text-gray-300 mb-3">
-                <span className="flex items-center space-x-1">
-                  <span>🎯</span>
-                  <span>Missões</span>
-                </span>
-                <span className="font-semibold text-[#56FF9E]">{completedMissions}/{totalMissions}</span>
-              </div>
-
-              {/* Lista de Missões */}
-              <div className="space-y-2 max-h-32 overflow-y-auto">
-                {missions.map((mission) => (
-                  <div
-                    key={mission.id}
-                    className={`flex items-center space-x-3 p-2 rounded-lg border transition-all ${
-                      mission.completed
-                        ? 'bg-[#56FF9E]/10 border-[#56FF9E]/30 text-[#56FF9E]'
-                        : 'bg-gray-700/30 border-gray-600/30 text-gray-300'
-                    }`}
-                  >
-                    <span className="text-lg">{mission.icon}</span>
-                    <div className="flex-1 min-w-0">
-                      <div className={`text-xs font-medium truncate ${
-                        mission.completed ? 'text-[#56FF9E]' : 'text-white'
-                      }`}>
-                        {mission.title}
-                      </div>
-                      <div className="text-xs text-gray-400 truncate">
-                        {mission.description}
-                      </div>
-                    </div>
-                    {mission.completed && (
-                      <div className="text-[#56FF9E] text-sm">✓</div>
-                    )}
-                  </div>
-                ))}
-              </div>
-
-              {/* Progresso Geral */}
-              <div className="mt-3 pt-3 border-t border-gray-600/30">
-                <div className="w-full bg-gray-700/50 rounded-full h-2 overflow-hidden border border-gray-600/30">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${missionProgress}%` }}
-                    className="bg-gradient-to-r from-[#56FF9E] to-[#4ECDC4] h-2 rounded-full shadow-inner"
-                    transition={{ duration: 1, ease: "easeOut" }}
-                  />
-                </div>
-                <div className="text-xs text-gray-400 mt-1 text-center">
-                  Progresso: {Math.round(missionProgress)}%
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
-
-
-          {/* Menu Button Modernizado */}
-          <motion.button
-            initial={{ x: 100, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
+          {/* Botão Menu */}
+          <button
             onClick={() => setShowMenu(true)}
             className="bg-gradient-to-br from-[#131F24]/95 to-[#1A2B33]/95 backdrop-blur-md rounded-2xl p-4 shadow-xl border border-[#56FF9E]/20 hover:border-[#56FF9E]/40 transition-all duration-200 group"
           >
             <svg className="w-6 h-6 text-[#56FF9E] group-hover:text-[#4ECDC4] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
             </svg>
-          </motion.button>
+          </button>
         </div>
-      </div>
+      </motion.div>
+
+      {/* Conquistas Recentes - Ajustadas para não sobrepor */}
+      <AnimatePresence>
+        {achievements.length > 0 && (
+          <motion.div
+            initial={{ x: 300, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: 300, opacity: 0 }}
+            className="fixed top-24 right-4 z-40"
+          >
+            <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white rounded-2xl p-4 shadow-lg max-w-xs">
+              <div className="flex items-center space-x-3">
+                <div className="text-2xl">🏆</div>
+                <div>
+                  <div className="font-bold">Nova Conquista!</div>
+                  <div className="text-sm opacity-90">
+                    {achievements[achievements.length - 1]?.name}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Conquistas Recentes */}
       <AnimatePresence>
@@ -216,36 +251,32 @@ const GameUI = ({ playerHealth, gameProgress, onExit, environmentName, showInstr
         )}
       </AnimatePresence>
 
-      {/* Instruções de Movimento - Parte Inferior */}
+      {/* Card de Instruções Compacto - Centralizado na Parte Inferior */}
       {showInstructions && (
         <motion.div
           initial={{ y: 50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-40"
+          className="fixed bottom-4 left-1/2 transform !-translate-x-1/2 z-40"
         >
-          <div className="bg-gradient-to-r from-gray-900/90 to-gray-800/90 backdrop-blur-md rounded-2xl px-6 py-3 border border-gray-600/30 shadow-lg">
-            <div className="flex items-center space-x-4 text-sm text-gray-300">
+          <div className="bg-gradient-to-br from-[#131F24]/95 to-[#1A2B33]/95 backdrop-blur-md rounded-xl px-4 py-2 border border-[#56FF9E]/20 shadow-xl">
+            <div className="flex items-center justify-center space-x-4 text-xs text-gray-300">
+              {/* Movimento Compacto */}
               <div className="flex items-center space-x-2">
+                <span className="text-[#56FF9E] font-medium text-xs">🎮</span>
                 <div className="flex space-x-1">
-                  <kbd className="px-2 py-1 bg-gray-700 rounded text-xs font-mono text-white">↑</kbd>
-                  <kbd className="px-2 py-1 bg-gray-700 rounded text-xs font-mono text-white">↓</kbd>
-                  <kbd className="px-2 py-1 bg-gray-700 rounded text-xs font-mono text-white">←</kbd>
-                  <kbd className="px-2 py-1 bg-gray-700 rounded text-xs font-mono text-white">→</kbd>
-                </div>
-                <span>ou</span>
-                <div className="flex space-x-1">
-                  <kbd className="px-2 py-1 bg-gray-700 rounded text-xs font-mono text-white">W</kbd>
-                  <kbd className="px-2 py-1 bg-gray-700 rounded text-xs font-mono text-white">A</kbd>
-                  <kbd className="px-2 py-1 bg-gray-700 rounded text-xs font-mono text-white">S</kbd>
-                  <kbd className="px-2 py-1 bg-gray-700 rounded text-xs font-mono text-white">D</kbd>
+                  <kbd className="px-1.5 py-1 bg-gray-700/80 rounded text-xs font-mono text-white">↑↓←→</kbd>
+                  <span className="text-gray-400 text-xs">ou</span>
+                  <kbd className="px-1.5 py-1 bg-gray-700/80 rounded text-xs font-mono text-white">WASD</kbd>
                 </div>
               </div>
-              <div className="w-px h-4 bg-gray-600"></div>
-              <span>para se mover</span>
-              <div className="w-px h-4 bg-gray-600"></div>
+
+              {/* Separador */}
+              <div className="w-px h-6 bg-gray-600/50"></div>
+
+              {/* Interação Compacta */}
               <div className="flex items-center space-x-2">
-                <kbd className="px-2 py-1 bg-[#56FF9E] text-gray-900 rounded text-xs font-mono font-bold">ESPAÇO</kbd>
-                <span>para interagir</span>
+                <kbd className="px-2 py-1 bg-gradient-to-r from-[#56FF9E] to-[#4ECDC4] text-gray-900 rounded text-xs font-mono font-bold">ESPAÇO</kbd>
+                <span className="text-gray-300 text-xs">interagir</span>
               </div>
             </div>
           </div>

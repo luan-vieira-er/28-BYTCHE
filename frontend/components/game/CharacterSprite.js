@@ -222,7 +222,7 @@ const CharacterSprite = ({
         <Graphics draw={drawInteractionIndicator} />
       )}
 
-      {/* Nome do personagem - apenas acima */}
+      {/* Nome do personagem - acima da cabeça */}
       {showName && name && (
         <Container>
           {/* Fundo do nome com gradiente */}
@@ -244,7 +244,7 @@ const CharacterSprite = ({
               g.drawRoundedRect(-textWidth/2, -textHeight/2, textWidth, textHeight, 8)
             }}
             x={0}
-            y={-45 * scale}
+            y={-170 * scale}
           />
 
           {/* Texto do nome */}
@@ -253,7 +253,7 @@ const CharacterSprite = ({
             style={nameStyle}
             anchor={0.5}
             x={0}
-            y={-45 * scale}
+            y={-170 * scale}
           />
         </Container>
       )}
