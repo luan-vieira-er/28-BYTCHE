@@ -34,9 +34,14 @@ io.on('connection', (socket) => {
   });
 
   // Recebe mensagens e repassa para os membros da sala
-  socket.on('firstInteraction', ({ roomId }) => {
-    const firstMessage = startChat(roomId);
-    io.to(roomId).emit('newMessage', { sender: socket.id, firstMessage });
+  socket.on('firstInteraction', async ({ roomId }) => {
+    const response = await startChat(roomId);
+    if (response){
+      const { reply, choices } = response
+      io.to(roomId).emit('newMessage', { sender: socket.id, message: {
+        reply, choices
+      } });
+    }
   });
 
   socket.on('disconnect', () => {
@@ -44,7 +49,12 @@ io.on('connection', (socket) => {
   });
 });
 
+const test = async () => {
+  const response = await startChat('');
+  console.log("🚀 ~ test ~ response:", response)
+}
 
+test()
 
 // Mount all routes
 app.use('/api', router);

@@ -1,6 +1,38 @@
 const axios = require('axios');
 require('dotenv').config();
 
+const functions = [
+  {
+    name: "suggest_patient_responses",
+    description: "Gera opções de resposta para uma criança responder ao psicólogo virtual",
+    parameters: {
+      type: "object",
+      properties: {
+        responses: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              option: {
+                type: "string",
+                description: "Letra identificadora da opção (A, B, C, D)"
+              },
+              text: {
+                type: "string",
+                description: "Texto da resposta da criança, em linguagem simples"
+              }
+            },
+            required: ["option", "text"]
+          },
+          minItems: 4,
+          maxItems: 4
+        }
+      },
+      required: ["responses"]
+    }
+  }
+];
+
 export const startChat = async (roomId) => {
   //Busca essas variáveis pelo roomId
 
@@ -59,27 +91,34 @@ export const startChat = async (roomId) => {
     - Nunca diagnostique. Apenas ouça, acolha e registre.
     - Ao final, gere um resumo compreensível e estruturado para o profissional de saúde, com base no que a criança relatou.
     `;
+    console.log("🚀 ~ startChat ~ systemPrompt:", systemPrompt)
     
     try {
-        const response = await axios.post(
-        'https://api.openai.com/v1/chat/completions',
-        {
-          model: 'gpt-4o',
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: 'Envie a primeira mensagem, o paciente acabou de chegar, cumprimente-o e de as boas vindas' },
-          ]
-        },
-        {
-          headers: {
-            'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+        const responseMessage = await axios.post(
+            'https://api.openai.com/v1/chat/completions',
+            {
+            model: 'gpt-4o',
+            messages: [
+                { role: 'system', content: systemPrompt },
+                { role: 'user', content: 'Envie a primeira mensagem, o paciente acabou de chegar, cumprimente-o e de as boas vindas e pergunte como ele está.' },
+            ]
+            },
+            {
+            headers: {
+                'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+                'Content-Type': 'application/json',
+            },
+            }
+        );
 
-      const reply = response.data.choices[0].message.content;
-      return reply
+        const reply = responseMessage.data.choices[0].message.content;
+        console.log("🚀 ~ startChat ~ reply:", reply)
+
+        // Gravar reply no history da consutla
+        const responses = await generateOptions(reply);
+        
+
+            return { reply, choices: responses };
     } catch (error) {
         console.log("🚀 ~ startChat ~ error:", error)
     }
@@ -112,3 +151,37 @@ export const sendMessage = async (history, message) => {
       console.error('Erro ao chamar OpenAI', err);
     }
 };
+
+const generateOptions = async (originalMessage) => {
+    try {
+    const responseChoices = await axios.post(
+        'https://api.openai.com/v1/chat/completions',
+        {
+            model: 'gpt-4o',
+            messages: [
+            {
+                role: 'user',
+                content: `Considere a seguinte resposta do psicólogo: "${originalMessage}".
+                    Gere 4 opções de resposta possíveis para a criança, em linguagem simples e amigável.
+                    Elas podem ser positivas ou negativas, dependendo do contexto.
+                    Adicione emoji em todas elas
+                `
+            }
+            ],
+            functions: functions,
+            function_call: { name: "suggest_patient_responses" }
+        },
+        {
+            headers: {
+            'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+            'Content-Type': 'application/json',
+            },
+        }
+        );
+
+        const parsedFunctionCall = JSON.parse(responseChoices.data.choices[0].message.function_call.arguments);
+        return parsedFunctionCall.responses
+    } catch (error) {
+        console.log("🚀 ~ generateOptions ~ error:", error)
+    }
+}

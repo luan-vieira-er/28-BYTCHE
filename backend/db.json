@@ -8,7 +8,10 @@
       "foco": "",
       "historico_previo": "",
       "nome_paciente": "",
-      "idade": ""
+      "idade": "",
+      "chat_history": [
+        
+      ]
     }
   ],
   "medico": []
