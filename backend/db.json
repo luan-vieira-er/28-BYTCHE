@@ -1,0 +1,18 @@
+{
+  "consulta": [{
+      "roomId": "9fd458d0-61d7-4139-895e-d7fe1ca46517",
+      "doctorId": "12155335-0b04-4606-ac73-774be0a770aa",
+      "finalidade": "",
+      "perfil_paciente": "",
+      "restricoes": "",
+      "foco": "",
+      "historico_previo": "",
+      "nome_paciente": "",
+      "idade": "",
+      "chat_history": [
+        
+      ]
+    }
+  ],
+  "medico": []
+}
