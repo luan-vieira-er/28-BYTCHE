@@ -5,6 +5,7 @@ import { createMedic, createRoom, getMedicRooms, getRooms } from '../controllers
 const router = Router();
 
 router.post('/medic', createMedic)
+router.post('/room', createRoom)
 router.get('/rooms', getRooms);
 router.get('/medic/:id/rooms', getMedicRooms);
 

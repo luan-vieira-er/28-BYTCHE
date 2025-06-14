@@ -38,13 +38,13 @@ export function createRoom(req: Request, res: Response){
       room.medic_id = body.medic_id
 
       let response = axios.post('http://localhost:3000', room)
-
-      return { success: true, message: 'Sala criada com sucesso', id: room.id}
+      res.status(200).json({ success: true, message: 'Sala criada com sucesso', id: room.id}) 
+      return;
 
   }catch(error){
   console.log("🚀 ~ createRoom ~ error:", error)
-  return { success: false, message: 'Não foi possível criar uma sala'}
-
+    res.status(400).json({ success: false, message: 'Não foi possível criar uma sala'})
+    return;
   }
 }
 
