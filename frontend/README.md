@@ -1,81 +1,172 @@
-# CodeRace 2025 Frontend
+# Hospital Virtual - Triagem Médica Infantil Gamificada
 
-This is the frontend application for CodeRace 2025, built with Next.js and Tailwind CSS.
+Uma plataforma inovadora de triagem médica para crianças, desenvolvida com Next.js, Tailwind CSS e Pixi.js. O projeto combina gamificação com inteligência artificial para tornar o processo de triagem médica divertido e envolvente para crianças.
 
-## Getting Started
+## 🎯 Visão Geral
 
-First, install the dependencies:
+O Hospital Virtual é um ambiente 2D interativo estilo Gather onde crianças podem:
+
+- Explorar um hospital virtual amigável
+- Interagir com NPCs inteligentes (Dr. Pixel e equipe)
+- Realizar triagem médica através de jogos divertidos
+- Ganhar pontos e conquistas
+- Receber orientações médicas personalizadas
+
+## 🚀 Getting Started
+
+### Instalação
 
 ```bash
+# Clone o repositório
+cd frontend
+
+# Instale as dependências
 npm install
-# or
+# ou
 yarn install
-# or
+# ou
 pnpm install
 ```
 
-Then, run the development server:
+### Executar o projeto
 
 ```bash
+# Inicie o servidor de desenvolvimento
 npm run dev
-# or
+# ou
 yarn dev
-# or
+# ou
 pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abra [http://localhost:3000](http://localhost:3000) no seu navegador.
 
-## Tech Stack
+## 🛠️ Tech Stack
 
-- **Next.js 14** - React framework for production
-- **React 18** - JavaScript library for building user interfaces
-- **Tailwind CSS v3** - Utility-first CSS framework
-- **TypeScript** - Type-safe JavaScript
-- **ESLint** - Code linting and formatting
+### Core
 
-## Project Structure
+- **Next.js 14** - Framework React para produção
+- **React 18** - Biblioteca JavaScript para interfaces
+- **TypeScript** - JavaScript tipado
+- **Tailwind CSS v3** - Framework CSS utility-first
+
+### Game Engine
+
+- **Pixi.js 7.3** - Engine 2D para renderização de alta performance
+- **@pixi/react 7.1** - Bindings React para Pixi.js
+- **@pixi/sound** - Sistema de áudio para jogos
+
+### Estado e Animações
+
+- **Zustand** - Gerenciamento de estado leve
+- **Framer Motion** - Animações fluidas para React
+
+## 📁 Estrutura do Projeto
 
 ```
 frontend/
-├── components/          # Reusable React components
-│   ├── Layout.js       # Main layout wrapper
-│   ├── Navbar.js       # Navigation component
-│   └── Footer.js       # Footer component
-├── pages/              # Next.js pages (file-based routing)
-│   ├── _app.js         # Custom App component
-│   └── index.js        # Homepage
-├── public/             # Static assets
-├── styles/             # Global styles
-│   └── globals.css     # Global CSS with Tailwind
-├── next.config.js      # Next.js configuration
-├── tailwind.config.js  # Tailwind CSS configuration
-├── tsconfig.json       # TypeScript configuration
-└── package.json        # Dependencies and scripts
+├── components/
+│   ├── game/              # Componentes do jogo
+│   │   ├── MedicalTriageGame.js    # Componente principal do jogo
+│   │   ├── Player.js               # Avatar do jogador
+│   │   ├── NPCDoctor.js           # NPC Dr. Pixel
+│   │   ├── Hospital.js            # Cenário do hospital
+│   │   ├── DialogSystem.js        # Sistema de diálogos
+│   │   ├── TriageSystem.js        # Sistema de triagem gamificado
+│   │   └── GameUI.js              # Interface do jogo
+│   ├── Layout.js          # Layout principal
+│   ├── Navbar.js          # Navegação
+│   └── Footer.js          # Rodapé
+├── pages/
+│   ├── _app.js           # App customizado
+│   └── index.js          # Página inicial
+├── store/
+│   └── gameStore.js      # Store Zustand para estado do jogo
+├── styles/
+│   └── globals.css       # Estilos globais com Tailwind
+├── public/               # Assets estáticos
+└── [arquivos de config] # Configurações Next.js, Tailwind, etc.
 ```
 
-## Features
+## 🎮 Funcionalidades do Jogo
 
-- ✅ Next.js 14 with App Router support
-- ✅ Tailwind CSS v3 with custom design system
-- ✅ TypeScript support
-- ✅ Responsive design
-- ✅ ESLint configuration
-- ✅ Custom components and layout
-- ✅ Modern React patterns
+### Sistema de Personagens
 
-## Development
+- **Player customizável** com diferentes avatares
+- **Dr. Pixel** - NPC principal com IA para triagem
+- **Animações fluidas** e feedback visual
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run start` - Start production server
-- `npm run lint` - Run ESLint
+### Sistema de Triagem Gamificado
 
-## Customization
+- **5 etapas interativas** de avaliação médica
+- **Interface amigável** com emojis e animações
+- **Sistema de pontuação** e recompensas
+- **Recomendações personalizadas** baseadas nas respostas
 
-The project includes a custom Tailwind configuration with:
-- Custom color palette (primary colors)
-- Utility classes for buttons and cards
-- Responsive design patterns
+### Mecânicas de Jogo
 
-You can modify the design system in `tailwind.config.js` and add custom styles in `styles/globals.css`.
+- **Movimento livre** pelo hospital virtual (WASD ou setas)
+- **Sistema de conquistas** e progressão
+- **Interface responsiva** para desktop e mobile
+- **Persistência de dados** com localStorage
+
+### Recursos de Acessibilidade
+
+- **Design inclusivo** para crianças
+- **Controles simples** e intuitivos
+- **Feedback visual e sonoro**
+- **Suporte a dispositivos móveis**
+
+## 🏥 Fluxo da Triagem
+
+1. **Entrada no Hospital** - Criança explora o ambiente
+2. **Encontro com Dr. Pixel** - NPC inicia conversa amigável
+3. **Triagem Interativa** - 5 mini-jogos de avaliação:
+   - Como você está se sentindo? (seleção de emojis)
+   - Verificação de sintomas (interface visual)
+   - Escala de dor gamificada
+   - Atividades do dia
+   - Avaliação de humor
+4. **Resultados** - Análise automática e recomendações
+5. **Recompensas** - Pontos, conquistas e feedback positivo
+
+## 🎨 Design System
+
+### Cores Principais
+
+- **Verde/Azul** - Ambiente hospitalar amigável
+- **Roxo/Rosa** - Elementos de gamificação
+- **Amarelo/Laranja** - Recompensas e conquistas
+
+### Componentes Customizados
+
+- Botões com gradientes e animações
+- Cards com sombras e bordas arredondadas
+- Sistema de diálogos com animações de digitação
+- Interface de triagem com feedback visual
+
+## 🔧 Scripts Disponíveis
+
+```bash
+npm run dev      # Servidor de desenvolvimento
+npm run build    # Build para produção
+npm run start    # Servidor de produção
+npm run lint     # Verificação de código
+```
+
+## 🌟 Próximas Funcionalidades
+
+- [ ] Sistema de relatórios para pais/responsáveis
+- [ ] Integração com APIs médicas
+- [ ] Mais NPCs e especialidades médicas
+- [ ] Sistema de agendamento de consultas
+- [ ] Modo multiplayer para irmãos
+- [ ] Suporte a múltiplos idiomas
+
+## 🤝 Contribuindo
+
+Este projeto foi desenvolvido para o hackathon com foco em inovação na área da saúde infantil. Contribuições são bem-vindas!
+
+## 📄 Licença
+
+Projeto desenvolvido para fins educacionais e de demonstração.
