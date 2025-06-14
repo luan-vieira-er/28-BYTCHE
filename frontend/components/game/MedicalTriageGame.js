@@ -8,12 +8,15 @@ import Hospital from './Hospital'
 import DialogSystem from './DialogSystem'
 import TriageSystem from './TriageSystem'
 import { useGameStore } from '@/store/gameStore'
+import { useAssets } from '@/hooks/useAssets'
+import { HOSPITAL_MAP } from '@/data/hospitalMap'
+import { initializeCollisionSystem } from '@/utils/collisionSystem'
 
 const MedicalTriageGame = ({ onExit }) => {
   const [gameState, setGameState] = useState('loading')
   const [currentDialog, setCurrentDialog] = useState(null)
   const [showTriage, setShowTriage] = useState(false)
-  
+
   const {
     playerPosition,
     playerHealth,
@@ -22,28 +25,35 @@ const MedicalTriageGame = ({ onExit }) => {
     updateGameProgress
   } = useGameStore()
 
+  const { isLoading, loadingProgress, error } = useAssets()
+
   // Configurações do jogo
   const GAME_WIDTH = 1200
   const GAME_HEIGHT = 800
 
   useEffect(() => {
-    // Simular carregamento inicial
-    const timer = setTimeout(() => {
-      setGameState('intro')
-    }, 2000)
-    return () => clearTimeout(timer)
-  }, [])
+    // Aguarda carregamento dos assets
+    if (!isLoading && !error) {
+      // Inicializa sistema de colisão
+      initializeCollisionSystem(HOSPITAL_MAP.collision, 16, 16, 3)
+
+      const timer = setTimeout(() => {
+        setGameState('intro')
+      }, 1000)
+      return () => clearTimeout(timer)
+    }
+  }, [isLoading, error])
 
   const handlePlayerMove = useCallback((newPosition) => {
     updatePlayerPosition(newPosition)
-    
+
     // Verificar interações com NPCs
     const doctorPosition = { x: 600, y: 400 }
     const distance = Math.sqrt(
-      Math.pow(newPosition.x - doctorPosition.x, 2) + 
+      Math.pow(newPosition.x - doctorPosition.x, 2) +
       Math.pow(newPosition.y - doctorPosition.y, 2)
     )
-    
+
     if (distance < 80 && !currentDialog) {
       setCurrentDialog({
         npc: 'doctor',
@@ -101,11 +111,11 @@ const MedicalTriageGame = ({ onExit }) => {
   const handleTriageComplete = useCallback((results) => {
     setShowTriage(false)
     updateGameProgress('triage_completed')
-    
+
     // Mostrar resultados baseados na triagem
     const severity = results.severity || 'low'
     let message = ''
-    
+
     switch (severity) {
       case 'high':
         message = '🚨 Vamos cuidar de você rapidinho! Você precisa de atenção médica urgente. Não se preocupe, nossa equipe está aqui para ajudar!'
@@ -116,7 +126,7 @@ const MedicalTriageGame = ({ onExit }) => {
       default:
         message = '✅ Parabéns! Você está muito bem! Continue cuidando da sua saúde e volte sempre que precisar!'
     }
-    
+
     setCurrentDialog({
       npc: 'doctor',
       message: message,
@@ -127,13 +137,42 @@ const MedicalTriageGame = ({ onExit }) => {
     })
   }, [updateGameProgress])
 
-  if (gameState === 'loading') {
+  if (gameState === 'loading' || isLoading) {
     return (
       <div className="w-full h-screen bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
         <div className="text-center text-white">
           <div className="animate-bounce text-6xl mb-4">🏥</div>
           <h2 className="text-2xl font-bold mb-2">Carregando Hospital Virtual...</h2>
-          <div className="animate-pulse">Preparando a aventura médica!</div>
+          <div className="animate-pulse mb-4">
+            {isLoading ? 'Carregando assets do jogo...' : 'Preparando a aventura médica!'}
+          </div>
+
+          {/* Barra de progresso */}
+          {isLoading && (
+            <div className="w-64 mx-auto">
+              <div className="bg-white bg-opacity-20 rounded-full h-2 mb-2">
+                <div
+                  className="bg-white rounded-full h-2 transition-all duration-300"
+                  style={{ width: `${loadingProgress}%` }}
+                ></div>
+              </div>
+              <div className="text-sm opacity-80">
+                {Math.round(loadingProgress)}% carregado
+              </div>
+            </div>
+          )}
+
+          {/* Erro de carregamento */}
+          {error && (
+            <div className="mt-4 p-4 bg-red-500 bg-opacity-20 rounded-lg">
+              <div className="text-red-200 text-sm">
+                Erro ao carregar assets: {error}
+              </div>
+              <div className="text-xs mt-2 opacity-80">
+                O jogo continuará com gráficos básicos
+              </div>
+            </div>
+          )}
         </div>
       </div>
     )
@@ -142,10 +181,10 @@ const MedicalTriageGame = ({ onExit }) => {
   return (
     <div className="w-full h-screen bg-gradient-to-br from-green-100 to-blue-100 relative overflow-hidden">
       {/* Interface do jogo Pixi.js */}
-      <Stage 
-        width={GAME_WIDTH} 
+      <Stage
+        width={GAME_WIDTH}
         height={GAME_HEIGHT}
-        options={{ 
+        options={{
           backgroundColor: 0x87CEEB,
           antialias: true,
           resolution: window.devicePixelRatio || 1,
@@ -156,17 +195,17 @@ const MedicalTriageGame = ({ onExit }) => {
         <Container>
           {/* Cenário do Hospital */}
           <Hospital />
-          
+
           {/* NPC Doutor */}
-          <NPCDoctor 
-            x={600} 
-            y={400} 
+          <NPCDoctor
+            x={600}
+            y={400}
             isInteracting={currentDialog?.npc === 'doctor'}
           />
-          
+
           {/* Player */}
-          <Player 
-            x={playerPosition.x} 
+          <Player
+            x={playerPosition.x}
             y={playerPosition.y}
             onMove={handlePlayerMove}
           />
@@ -174,7 +213,7 @@ const MedicalTriageGame = ({ onExit }) => {
       </Stage>
 
       {/* UI Overlay */}
-      <GameUI 
+      <GameUI
         playerHealth={playerHealth}
         gameProgress={gameProgress}
         onExit={onExit}
@@ -182,7 +221,7 @@ const MedicalTriageGame = ({ onExit }) => {
 
       {/* Sistema de Diálogos */}
       {currentDialog && (
-        <DialogSystem 
+        <DialogSystem
           dialog={currentDialog}
           onChoice={handleDialogChoice}
           onClose={() => setCurrentDialog(null)}
@@ -191,7 +230,7 @@ const MedicalTriageGame = ({ onExit }) => {
 
       {/* Sistema de Triagem */}
       {showTriage && (
-        <TriageSystem 
+        <TriageSystem
           onComplete={handleTriageComplete}
           onClose={() => setShowTriage(false)}
         />

@@ -1,82 +1,147 @@
 import Link from 'next/link'
-import { useState } from 'react'
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Button,
+  Box,
+  IconButton,
+  Tooltip
+} from '@mui/material'
+import { Home, Info, Gamepad2 } from 'lucide-react'
+import ThemeSelector from './ui/ThemeSelector'
+import { HeartIcon, MedicalCrossIcon } from './ui/PixelIcons'
 
 export default function Navbar() {
-  const [isOpen, setIsOpen] = useState(false)
-
   return (
-    <nav className="bg-white shadow-lg">
-      <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center py-4">
-          <Link href="/" className="text-2xl font-bold text-primary-600">
-            CodeRace 2025
+    <AppBar
+      position="static"
+      sx={{
+        background: 'linear-gradient(135deg, #00BCD4 0%, #4DD0E1 100%)',
+        boxShadow: '0px 4px 0px rgba(0,0,0,0.2)'
+      }}
+    >
+      <Toolbar sx={{ justifyContent: 'space-between' }}>
+        {/* Logo e nome */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <MedicalCrossIcon size={32} color="#FFFFFF" />
+            <HeartIcon size={24} color="#FF6B6B" />
+          </Box>
+
+          <Link href="/" style={{ textDecoration: 'none', color: 'inherit' }}>
+            <Typography
+              variant="h4"
+              component="h1"
+              sx={{
+                fontFamily: '"Press Start 2P", monospace',
+                fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem' },
+                color: 'white',
+                textShadow: '2px 2px 0px rgba(0,0,0,0.3)',
+                '&:hover': {
+                  transform: 'translateY(-1px)',
+                  textShadow: '3px 3px 0px rgba(0,0,0,0.4)'
+                },
+                transition: 'all 0.2s ease'
+              }}
+            >
+              DoctorPixel
+            </Typography>
           </Link>
-          
-          {/* Desktop Menu */}
-          <div className="hidden md:flex space-x-8">
-            <Link href="/" className="text-gray-700 hover:text-primary-600 transition-colors">
-              Home
-            </Link>
-            <Link href="/problems" className="text-gray-700 hover:text-primary-600 transition-colors">
-              Problems
-            </Link>
-            <Link href="/leaderboard" className="text-gray-700 hover:text-primary-600 transition-colors">
-              Leaderboard
-            </Link>
-            <Link href="/about" className="text-gray-700 hover:text-primary-600 transition-colors">
-              About
-            </Link>
-          </div>
-          
-          {/* Desktop Auth Buttons */}
-          <div className="hidden md:flex space-x-4">
-            <button className="btn-secondary">
-              Sign In
-            </button>
-            <button className="btn-primary">
-              Sign Up
-            </button>
-          </div>
-          
-          {/* Mobile Menu Button */}
-          <button 
-            className="md:hidden"
-            onClick={() => setIsOpen(!isOpen)}
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
-        </div>
-        
-        {/* Mobile Menu */}
-        {isOpen && (
-          <div className="md:hidden py-4 border-t">
-            <div className="flex flex-col space-y-4">
-              <Link href="/" className="text-gray-700 hover:text-primary-600 transition-colors">
+        </Box>
+
+        {/* Menu de navegação */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          {/* Links de navegação */}
+          <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: 1 }}>
+            <Link href="/" passHref>
+              <Button
+                startIcon={<Home size={16} />}
+                sx={{
+                  color: 'white',
+                  fontFamily: '"Press Start 2P", monospace',
+                  fontSize: '0.75rem',
+                  textTransform: 'uppercase',
+                  '&:hover': {
+                    backgroundColor: 'rgba(255,255,255,0.1)',
+                    transform: 'translateY(-2px)'
+                  }
+                }}
+              >
                 Home
+              </Button>
+            </Link>
+
+            <Link href="/game" passHref>
+              <Button
+                startIcon={<Gamepad2 size={16} />}
+                sx={{
+                  color: 'white',
+                  fontFamily: '"Press Start 2P", monospace',
+                  fontSize: '0.75rem',
+                  textTransform: 'uppercase',
+                  '&:hover': {
+                    backgroundColor: 'rgba(255,255,255,0.1)',
+                    transform: 'translateY(-2px)'
+                  }
+                }}
+              >
+                Jogar
+              </Button>
+            </Link>
+
+            <Link href="/about" passHref>
+              <Button
+                startIcon={<Info size={16} />}
+                sx={{
+                  color: 'white',
+                  fontFamily: '"Press Start 2P", monospace',
+                  fontSize: '0.75rem',
+                  textTransform: 'uppercase',
+                  '&:hover': {
+                    backgroundColor: 'rgba(255,255,255,0.1)',
+                    transform: 'translateY(-2px)'
+                  }
+                }}
+              >
+                Sobre
+              </Button>
+            </Link>
+          </Box>
+
+          {/* Menu mobile */}
+          <Box sx={{ display: { xs: 'flex', sm: 'none' }, gap: 0.5 }}>
+            <Tooltip title="Home">
+              <Link href="/" passHref>
+                <IconButton sx={{ color: 'white' }}>
+                  <Home size={20} />
+                </IconButton>
               </Link>
-              <Link href="/problems" className="text-gray-700 hover:text-primary-600 transition-colors">
-                Problems
+            </Tooltip>
+
+            <Tooltip title="Jogar">
+              <Link href="/game" passHref>
+                <IconButton sx={{ color: 'white' }}>
+                  <Gamepad2 size={20} />
+                </IconButton>
               </Link>
-              <Link href="/leaderboard" className="text-gray-700 hover:text-primary-600 transition-colors">
-                Leaderboard
+            </Tooltip>
+
+            <Tooltip title="Sobre">
+              <Link href="/about" passHref>
+                <IconButton sx={{ color: 'white' }}>
+                  <Info size={20} />
+                </IconButton>
               </Link>
-              <Link href="/about" className="text-gray-700 hover:text-primary-600 transition-colors">
-                About
-              </Link>
-              <div className="flex flex-col space-y-2 pt-4">
-                <button className="btn-secondary">
-                  Sign In
-                </button>
-                <button className="btn-primary">
-                  Sign Up
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    </nav>
+            </Tooltip>
+          </Box>
+
+          {/* Seletor de tema */}
+          <Box sx={{ ml: 1 }}>
+            <ThemeSelector variant="button" />
+          </Box>
+        </Box>
+      </Toolbar>
+    </AppBar>
   )
 }

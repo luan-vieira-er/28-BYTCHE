@@ -2,17 +2,40 @@ import Head from 'next/head'
 import dynamic from 'next/dynamic'
 import { useState } from 'react'
 import Layout from '@/components/Layout'
+import { 
+  Container, 
+  Typography, 
+  Button, 
+  Box, 
+  Grid, 
+  Card, 
+  CardContent,
+  Chip,
+  Paper
+} from '@mui/material'
+import { Play, Heart, Users, Building2, Gamepad2, ArrowUp, ArrowDown, ArrowLeft, ArrowRight } from 'lucide-react'
+import { HeartIcon, MedicalCrossIcon, StethoscopeIcon, AmbulanceIcon } from '@/components/ui/PixelIcons'
 
 // Importação dinâmica do jogo para evitar problemas de SSR com Pixi.js
 const MedicalTriageGame = dynamic(() => import('@/components/game/MedicalTriageGame'), {
   ssr: false,
   loading: () => (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-green-500 mx-auto mb-4"></div>
-        <p className="text-xl text-gray-600">Carregando o Hospital Virtual...</p>
-      </div>
-    </div>
+    <Box sx={{ 
+      display: 'flex', 
+      alignItems: 'center', 
+      justifyContent: 'center', 
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #E3F2FD 0%, #F1F8E9 100%)'
+    }}>
+      <Box sx={{ textAlign: 'center' }}>
+        <Box className="animate-pixel-pulse" sx={{ mb: 4 }}>
+          <MedicalCrossIcon size={64} color="#00BCD4" />
+        </Box>
+        <Typography variant="h6" sx={{ fontFamily: '"Press Start 2P", monospace', fontSize: '1rem' }}>
+          Carregando DoctorPixel...
+        </Typography>
+      </Box>
+    </Box>
   )
 })
 
@@ -23,8 +46,8 @@ export default function Home() {
     return (
       <>
         <Head>
-          <title>Hospital Virtual - Triagem Médica Infantil</title>
-          <meta name="description" content="Plataforma gamificada de triagem médica para crianças" />
+          <title>DoctorPixel - Hospital Virtual Pixel Art</title>
+          <meta name="description" content="DoctorPixel - Um hospital virtual em pixel art para triagem médica interativa" />
           <meta name="viewport" content="width=device-width, initial-scale=1" />
           <link rel="icon" href="/favicon.ico" />
         </Head>
@@ -36,112 +59,239 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>Hospital Virtual - Triagem Médica Infantil</title>
-        <meta name="description" content="Plataforma gamificada de triagem médica para crianças" />
+        <title>DoctorPixel - Hospital Virtual Pixel Art</title>
+        <meta name="description" content="DoctorPixel - Um hospital virtual em pixel art para triagem médica interativa" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
       <Layout>
-        <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-purple-50">
-          <div className="container mx-auto px-4 py-16">
-            <div className="text-center">
-              <div className="mb-8">
-                <div className="w-24 h-24 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
-                  <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                  </svg>
-                </div>
-              </div>
+        <Box sx={{ minHeight: '100vh', background: 'linear-gradient(135deg, #E3F2FD 0%, #F1F8E9 100%)' }}>
+          {/* Hero Section */}
+          <Container maxWidth="lg" sx={{ pt: 8, pb: 6 }}>
+            <Box sx={{ textAlign: 'center', mb: 6 }}>
+              {/* Logo animado */}
+              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 2, mb: 4 }}>
+                <Box className="animate-pixel-bounce">
+                  <MedicalCrossIcon size={64} color="#FF6B6B" />
+                </Box>
+                <Box className="animate-pixel-pulse">
+                  <HeartIcon size={48} color="#FF6B6B" />
+                </Box>
+                <Box className="animate-pixel-bounce" sx={{ animationDelay: '0.5s' }}>
+                  <StethoscopeIcon size={56} color="#00BCD4" />
+                </Box>
+              </Box>
 
-              <h1 className="text-5xl font-bold text-gray-900 mb-6">
-                Bem-vindo ao <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-500 to-blue-600">Hospital Virtual</span>
-              </h1>
-              <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-                Uma aventura divertida onde você conhece o Dr. Pixel e seus amigos!
-                Explore o hospital, faça novos amigos e aprenda sobre saúde de forma super divertida! 🏥✨
-              </p>
-
-              <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-                <button
+              <Typography 
+                variant="h1" 
+                component="h1"
+                sx={{
+                  fontFamily: '"Press Start 2P", monospace',
+                  fontSize: { xs: '2rem', sm: '3rem', md: '4rem' },
+                  color: 'primary.main',
+                  textShadow: '4px 4px 0px rgba(0,0,0,0.2)',
+                  mb: 3,
+                  lineHeight: 1.2
+                }}
+              >
+                DoctorPixel
+              </Typography>
+              
+              <Typography 
+                variant="h5" 
+                component="h2"
+                sx={{
+                  fontFamily: '"Press Start 2P", monospace',
+                  fontSize: { xs: '0.75rem', sm: '1rem' },
+                  color: 'text.secondary',
+                  mb: 4,
+                  maxWidth: '600px',
+                  mx: 'auto',
+                  lineHeight: 1.8
+                }}
+              >
+                🏥 Hospital Virtual em Pixel Art 🎮
+                <br />
+                Aprenda sobre saúde de forma interativa e divertida!
+              </Typography>
+              
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
+                <Button
+                  variant="contained"
+                  size="large"
+                  startIcon={<Play size={24} />}
                   onClick={() => setGameStarted(true)}
-                  className="bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white font-bold text-lg px-8 py-4 rounded-full shadow-lg transform hover:scale-105 transition-all duration-200"
+                  sx={{
+                    fontSize: '1rem',
+                    py: 2,
+                    px: 4,
+                    background: 'linear-gradient(135deg, #4CAF50 0%, #81C784 100%)',
+                    '&:hover': {
+                      background: 'linear-gradient(135deg, #388E3C 0%, #66BB6A 100%)',
+                      transform: 'translateY(-4px)',
+                      boxShadow: '0 8px 16px rgba(76, 175, 80, 0.4)'
+                    }
+                  }}
                 >
-                  🎮 Começar Aventura
-                </button>
-                <button className="bg-white hover:bg-gray-50 text-gray-800 font-medium text-lg px-8 py-4 rounded-full shadow-lg border-2 border-gray-200 transition-all duration-200">
-                  📖 Como Jogar
-                </button>
-              </div>
-            </div>
+                  Começar Aventura
+                </Button>
+                
+                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'center' }}>
+                  <Chip 
+                    icon={<ArrowUp size={16} />} 
+                    label="↑" 
+                    size="small" 
+                    variant="outlined"
+                  />
+                  <Chip 
+                    icon={<ArrowDown size={16} />} 
+                    label="↓" 
+                    size="small" 
+                    variant="outlined"
+                  />
+                  <Chip 
+                    icon={<ArrowLeft size={16} />} 
+                    label="←" 
+                    size="small" 
+                    variant="outlined"
+                  />
+                  <Chip 
+                    icon={<ArrowRight size={16} />} 
+                    label="→" 
+                    size="small" 
+                    variant="outlined"
+                  />
+                  <Typography variant="caption" sx={{ alignSelf: 'center', ml: 1 }}>
+                    ou WASD para mover
+                  </Typography>
+                </Box>
+              </Box>
+            </Box>
+          </Container>
 
-            <div className="mt-16 grid md:grid-cols-3 gap-8">
-              <div className="bg-white rounded-2xl shadow-xl p-8 text-center transform hover:scale-105 transition-all duration-300">
-                <div className="w-16 h-16 bg-gradient-to-r from-pink-400 to-red-400 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <span className="text-2xl">🤖</span>
-                </div>
-                <h3 className="text-xl font-semibold mb-4 text-gray-800">Dr. Pixel - IA Amigável</h3>
-                <p className="text-gray-600">
-                  Conheça o Dr. Pixel! Ele é super inteligente e vai te ajudar em cada passo da sua visita ao hospital.
-                </p>
-              </div>
+          {/* Features Section */}
+          <Container maxWidth="lg" sx={{ py: 6 }}>
+            <Typography 
+              variant="h3" 
+              component="h2"
+              sx={{
+                fontFamily: '"Press Start 2P", monospace',
+                fontSize: { xs: '1.25rem', sm: '1.5rem' },
+                textAlign: 'center',
+                mb: 6,
+                color: 'primary.main'
+              }}
+            >
+              🌟 Características do Jogo
+            </Typography>
+            
+            <Grid container spacing={4}>
+              <Grid item xs={12} md={4}>
+                <Card className="pixel-card" sx={{ height: '100%', textAlign: 'center', p: 2 }}>
+                  <CardContent>
+                    <Box sx={{ mb: 2 }}>
+                      <Users size={48} color="#00BCD4" />
+                    </Box>
+                    <Typography variant="h6" component="h3" sx={{ mb: 2 }}>
+                      Interação com NPCs
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Converse com o Dr. Pixel e outros personagens do hospital virtual
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+              
+              <Grid item xs={12} md={4}>
+                <Card className="pixel-card" sx={{ height: '100%', textAlign: 'center', p: 2 }}>
+                  <CardContent>
+                    <Box sx={{ mb: 2 }}>
+                      <HeartIcon size={48} color="#4CAF50" />
+                    </Box>
+                    <Typography variant="h6" component="h3" sx={{ mb: 2 }}>
+                      Sistema de Triagem
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Aprenda sobre triagem médica através de jogos interativos e educativos
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+              
+              <Grid item xs={12} md={4}>
+                <Card className="pixel-card" sx={{ height: '100%', textAlign: 'center', p: 2 }}>
+                  <CardContent>
+                    <Box sx={{ mb: 2 }}>
+                      <Building2 size={48} color="#FF9800" />
+                    </Box>
+                    <Typography variant="h6" component="h3" sx={{ mb: 2 }}>
+                      Hospital Virtual
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Explore um hospital completo com diferentes áreas e equipamentos médicos
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            </Grid>
+          </Container>
 
-              <div className="bg-white rounded-2xl shadow-xl p-8 text-center transform hover:scale-105 transition-all duration-300">
-                <div className="w-16 h-16 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <span className="text-2xl">🎮</span>
-                </div>
-                <h3 className="text-xl font-semibold mb-4 text-gray-800">Jogos Divertidos</h3>
-                <p className="text-gray-600">
-                  Minijogos educativos, quebra-cabeças e atividades que tornam a triagem médica uma aventura!
-                </p>
-              </div>
-
-              <div className="bg-white rounded-2xl shadow-xl p-8 text-center transform hover:scale-105 transition-all duration-300">
-                <div className="w-16 h-16 bg-gradient-to-r from-purple-400 to-indigo-400 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <span className="text-2xl">🏆</span>
-                </div>
-                <h3 className="text-xl font-semibold mb-4 text-gray-800">Sistema de Recompensas</h3>
-                <p className="text-gray-600">
-                  Ganhe estrelas, desbloqueie conquistas e colecione itens especiais durante sua jornada!
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-16 bg-white rounded-2xl shadow-xl p-8">
-              <h2 className="text-3xl font-bold text-center mb-8 text-gray-800">Como Funciona? 🤔</h2>
-              <div className="grid md:grid-cols-4 gap-6">
-                <div className="text-center">
-                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <span className="text-xl font-bold text-blue-600">1</span>
-                  </div>
-                  <h4 className="font-semibold mb-2">Entre no Hospital</h4>
-                  <p className="text-sm text-gray-600">Crie seu avatar e explore o ambiente virtual</p>
-                </div>
-                <div className="text-center">
-                  <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <span className="text-xl font-bold text-green-600">2</span>
-                  </div>
-                  <h4 className="font-semibold mb-2">Conheça o Dr. Pixel</h4>
-                  <p className="text-sm text-gray-600">Nosso NPC com IA vai te receber e explicar tudo</p>
-                </div>
-                <div className="text-center">
-                  <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <span className="text-xl font-bold text-purple-600">3</span>
-                  </div>
-                  <h4 className="font-semibold mb-2">Faça a Triagem</h4>
-                  <p className="text-sm text-gray-600">Responda perguntas através de jogos divertidos</p>
-                </div>
-                <div className="text-center">
-                  <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <span className="text-xl font-bold text-yellow-600">4</span>
-                  </div>
-                  <h4 className="font-semibold mb-2">Receba Cuidados</h4>
-                  <p className="text-sm text-gray-600">Obtenha orientações personalizadas e recompensas</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+          {/* Instructions Section */}
+          <Container maxWidth="lg" sx={{ py: 6 }}>
+            <Typography 
+              variant="h3" 
+              component="h2"
+              sx={{
+                fontFamily: '"Press Start 2P", monospace',
+                fontSize: { xs: '1.25rem', sm: '1.5rem' },
+                textAlign: 'center',
+                mb: 6,
+                color: 'primary.main'
+              }}
+            >
+              📋 Como Jogar
+            </Typography>
+            
+            <Grid container spacing={4}>
+              <Grid item xs={12} md={6}>
+                <Paper className="pixel-card" sx={{ p: 4, height: '100%' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                    <Gamepad2 size={32} color="#2196F3" />
+                    <Typography variant="h6" component="h3" sx={{ ml: 2 }}>
+                      🎮 Controles
+                    </Typography>
+                  </Box>
+                  <Box component="ul" sx={{ pl: 2, '& li': { mb: 1 } }}>
+                    <li>• Use as setas ↑↓←→ para mover</li>
+                    <li>• Ou use as teclas WASD</li>
+                    <li>• Aproxime-se dos NPCs para interagir</li>
+                    <li>• Clique nas opções de diálogo</li>
+                    <li>• Explore todas as áreas do hospital</li>
+                  </Box>
+                </Paper>
+              </Grid>
+              
+              <Grid item xs={12} md={6}>
+                <Paper className="pixel-card" sx={{ p: 4, height: '100%' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                    <AmbulanceIcon size={32} color="#4CAF50" />
+                    <Typography variant="h6" component="h3" sx={{ ml: 2 }}>
+                      🎯 Objetivos
+                    </Typography>
+                  </Box>
+                  <Box component="ul" sx={{ pl: 2, '& li': { mb: 1 } }}>
+                    <li>• Converse com o Dr. Pixel</li>
+                    <li>• Complete a triagem médica</li>
+                    <li>• Explore o hospital virtual</li>
+                    <li>• Aprenda sobre saúde e medicina</li>
+                    <li>• Divirta-se aprendendo!</li>
+                  </Box>
+                </Paper>
+              </Grid>
+            </Grid>
+          </Container>
+        </Box>
       </Layout>
     </>
   )
