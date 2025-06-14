@@ -1,4 +1,4 @@
-# 🧠 Projeto [NOME DO PROJETO]
+# 🧠 Projeto [Doctor Pixel]
 
 ## 👥 Equipe: 28 - BYTCHÊ
 
@@ -14,7 +14,7 @@
 
 ---
 
-## 🧭 Tema / Área do Problema
+## 🧭 Tema / Área
 
 Avaliação pediátrica digital com foco em **avaliação psicológica e neurodesenvolvimental**, visando apoiar crianças (inclusive com TEA - Transtorno do Espectro Autista) em consultas iniciais através de tecnologia empática e acessível.
 
