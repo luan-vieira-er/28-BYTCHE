@@ -24,42 +24,59 @@ export default function CreateRoomPage() {
     };
 
     return (
-        <Box
-            sx={{
-                width: '100vw',
-                height: '100vh',
-                background: 'linear-gradient(135deg, #1a2332 0%, #131f24 100%)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontFamily: '"Press Start 2P", monospace',
-                padding: { xs: 1, sm: 2, md: 3 },
-                overflow: 'auto'
-            }}
-        >
+        <Box sx={{
+            minHeight: '100vh',
+            background: 'linear-gradient(135deg, #131F24 0%, #0A1015 100%)',
+            position: 'relative',
+            overflow: 'hidden',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            py: 4
+        }}>
+            {/* Background Effects */}
+            <Box sx={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: `
+                    radial-gradient(circle at 20% 80%, rgba(86, 255, 158, 0.1) 0%, transparent 50%),
+                    radial-gradient(circle at 80% 20%, rgba(86, 255, 158, 0.05) 0%, transparent 50%),
+                    radial-gradient(circle at 40% 40%, rgba(78, 205, 196, 0.05) 0%, transparent 50%)
+                `,
+                zIndex: 0
+            }} />
+
             <Box
                 sx={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: { xs: 2, sm: 2.5, md: 3 },
-                    alignItems: 'center',
-                    width: { xs: '95%', sm: '400px', md: '450px' },
+                    position: 'relative',
+                    zIndex: 1,
+                    width: { xs: '90%', sm: '500px', md: '600px' },
                     maxWidth: '95vw',
-                    margin: 'auto',
-                    py: { xs: 2, sm: 3 }
+                    p: { xs: 3, sm: 4, md: 5 },
+                    borderRadius: 4,
+                    background: 'rgba(26, 43, 51, 0.6)',
+                    backdropFilter: 'blur(20px)',
+                    border: '1px solid rgba(86, 255, 158, 0.2)',
+                    boxShadow: '0 8px 32px rgba(0,0,0,0.3)'
                 }}
             >
                 {/* Título */}
                 <Typography
-                    variant="h1"
+                    variant="h2"
+                    component="h1"
                     sx={{
-                        fontSize: { xs: '1rem', sm: '1.2rem', md: '1.4rem' },
-                        fontWeight: 'normal',
-                        color: 'white',
+                        fontSize: { xs: '1.5rem', sm: '1.8rem', md: '2rem' },
+                        fontWeight: 700,
                         textAlign: 'center',
-                        fontFamily: '"Press Start 2P", monospace',
-                        marginBottom: { xs: 1, sm: 2 },
-                        lineHeight: 1.3
+                        mb: 2.5,
+                        background: 'linear-gradient(135deg, #56FF9E 0%, #4ECDC4 100%)',
+                        backgroundClip: 'text',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                        textShadow: '0 0 40px rgba(86, 255, 158, 0.3)'
                     }}
                 >
                     Criar Nova Consulta
@@ -68,62 +85,54 @@ export default function CreateRoomPage() {
                 {/* Select Tipo de Consulta */}
                 <FormControl
                     fullWidth
-                    sx={{
-                        '& .MuiOutlinedInput-root': {
-                            backgroundColor: '#2a3940',
-                            borderRadius: '8px',
-                            fontSize: { xs: '7px', sm: '8px' },
-                            fontFamily: '"Press Start 2P", monospace',
-                            color: 'white',
-                            border: 'none',
-                            minHeight: '40px',
-                            '& fieldset': {
-                                border: 'none'
-                            },
-                            '&:hover fieldset': {
-                                border: 'none'
-                            },
-                            '&.Mui-focused fieldset': {
-                                border: 'none'
-                            },
-                            '&:hover': {
-                                backgroundColor: '#334149'
-                            },
-                            '&.Mui-focused': {
-                                backgroundColor: '#334149'
-                            }
-                        },
-                    }}
+                    sx={{ mb: 1.5 }}
                 >
-                    <InputLabel id="demo-simple-select-autowidth-label">Tipo de Consulta</InputLabel>
+                    <InputLabel
+                        sx={{
+                            color: '#B0BEC5',
+                            fontSize: '0.85rem',
+                            '&.Mui-focused': { color: '#56FF9E' }
+                        }}
+                    >
+                        Tipo de Consulta
+                    </InputLabel>
                     <Select
-                        labelId="demo-simple-select-autowidth-label"
                         value={formData.tipo_consulta}
                         onChange={handleInputChange('tipo_consulta')}
                         label="Tipo de Consulta"
-                        sx={
-                            {
-                                padding: { xs: '4px', sm: '4px' },
+                        sx={{
+                            '& .MuiOutlinedInput-notchedOutline': {
+                                borderColor: 'rgba(86, 255, 158, 0.3)',
+                                borderWidth: '1px'
+                            },
+                            '&:hover .MuiOutlinedInput-notchedOutline': {
+                                borderColor: 'rgba(86, 255, 158, 0.5)'
+                            },
+                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                borderColor: '#56FF9E'
+                            },
+                            '& .MuiSelect-select': {
+                                color: '#FFFFFF',
+                                backgroundColor: 'rgba(26, 43, 51, 0.8)',
+                                fontSize: '0.85rem'
                             }
-                        }
+                        }}
                         MenuProps={{
                             PaperProps: {
                                 sx: {
-                                    backgroundColor: '#2a3940',
-                                    border: '1px solid #3a4a57',
-                                    borderRadius: '8px',
+                                    backgroundColor: 'rgba(26, 43, 51, 0.95)',
+                                    backdropFilter: 'blur(10px)',
+                                    border: '1px solid rgba(86, 255, 158, 0.3)',
+                                    borderRadius: 2,
                                     '& .MuiMenuItem-root': {
-                                        fontFamily: '"Press Start 2P", monospace',
-                                        fontSize: { xs: '8px', sm: '9px' },
-                                        color: 'white',
+                                        color: '#FFFFFF',
                                         '&:hover': {
-                                            backgroundColor: '#334149'
+                                            backgroundColor: 'rgba(86, 255, 158, 0.1)'
                                         },
                                         '&.Mui-selected': {
-                                            backgroundColor: '#56FF9E',
-                                            color: '#1a2332',
+                                            backgroundColor: 'rgba(86, 255, 158, 0.2)',
                                             '&:hover': {
-                                                backgroundColor: '#4ade80'
+                                                backgroundColor: 'rgba(86, 255, 158, 0.3)'
                                             }
                                         }
                                     }
@@ -142,46 +151,40 @@ export default function CreateRoomPage() {
 
                 {/* Campo Perfil do Paciente */}
                 <TextField
-                    placeholder="Perfil do paciente"
+                    label="Perfil do Paciente"
+                    placeholder="Descreva o perfil do paciente..."
                     multiline
-                    rows={2}
+                    rows={1.5}
                     variant="outlined"
                     fullWidth
                     value={formData.perfil_paciente}
                     onChange={handleInputChange('perfil_paciente')}
                     sx={{
+                        mb: 1.5,
+                        '& .MuiInputLabel-root': {
+                            color: '#B0BEC5',
+                            fontSize: '0.85rem',
+                            '&.Mui-focused': { color: '#56FF9E' }
+                        },
                         '& .MuiOutlinedInput-root': {
-                            backgroundColor: '#2a3940',
-                            borderRadius: '8px',
-                            fontSize: { xs: '10px', sm: '11px' },
-                            fontFamily: '"Press Start 2P", monospace',
-                            color: 'white',
-                            border: 'none',
-                            '& fieldset': {
-                                border: 'none'
+                            backgroundColor: 'rgba(26, 43, 51, 0.8)',
+                            '& .MuiOutlinedInput-notchedOutline': {
+                                borderColor: 'rgba(86, 255, 158, 0.3)',
+                                borderWidth: '1px'
                             },
-                            '&:hover fieldset': {
-                                border: 'none'
+                            '&:hover .MuiOutlinedInput-notchedOutline': {
+                                borderColor: 'rgba(86, 255, 158, 0.5)'
                             },
-                            '&.Mui-focused fieldset': {
-                                border: 'none'
-                            },
-                            '&:hover': {
-                                backgroundColor: '#334149'
-                            },
-                            '&.Mui-focused': {
-                                backgroundColor: '#334149'
+                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                borderColor: '#56FF9E'
                             }
                         },
                         '& .MuiOutlinedInput-input': {
-                            padding: { xs: '8px 12px', sm: '10px 14px' },
-                            color: 'white',
-                            fontFamily: '"Press Start 2P", monospace',
-                            fontSize: { xs: '8px', sm: '9px' },
+                            color: '#FFFFFF',
+                            fontSize: '0.85rem',
                             '&::placeholder': {
-                                color: '#8fa3ad',
-                                opacity: 1,
-                                fontFamily: '"Press Start 2P", monospace'
+                                color: '#B0BEC5',
+                                opacity: 0.7
                             }
                         }
                     }}
@@ -189,46 +192,40 @@ export default function CreateRoomPage() {
 
                 {/* Campo Foco */}
                 <TextField
-                    placeholder="Foco da consulta"
+                    label="Foco da Consulta"
+                    placeholder="Qual o foco principal desta consulta..."
                     multiline
-                    rows={2}
+                    rows={1.5}
                     variant="outlined"
                     fullWidth
                     value={formData.foco}
                     onChange={handleInputChange('foco')}
                     sx={{
+                        mb: 1.5,
+                        '& .MuiInputLabel-root': {
+                            color: '#B0BEC5',
+                            fontSize: '0.85rem',
+                            '&.Mui-focused': { color: '#56FF9E' }
+                        },
                         '& .MuiOutlinedInput-root': {
-                            backgroundColor: '#2a3940',
-                            borderRadius: '8px',
-                            fontSize: { xs: '10px', sm: '11px' },
-                            fontFamily: '"Press Start 2P", monospace',
-                            color: 'white',
-                            border: 'none',
-                            '& fieldset': {
-                                border: 'none'
+                            backgroundColor: 'rgba(26, 43, 51, 0.8)',
+                            '& .MuiOutlinedInput-notchedOutline': {
+                                borderColor: 'rgba(86, 255, 158, 0.3)',
+                                borderWidth: '1px'
                             },
-                            '&:hover fieldset': {
-                                border: 'none'
+                            '&:hover .MuiOutlinedInput-notchedOutline': {
+                                borderColor: 'rgba(86, 255, 158, 0.5)'
                             },
-                            '&.Mui-focused fieldset': {
-                                border: 'none'
-                            },
-                            '&:hover': {
-                                backgroundColor: '#334149'
-                            },
-                            '&.Mui-focused': {
-                                backgroundColor: '#334149'
+                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                borderColor: '#56FF9E'
                             }
                         },
                         '& .MuiOutlinedInput-input': {
-                            padding: { xs: '8px 12px', sm: '10px 14px' },
-                            color: 'white',
-                            fontFamily: '"Press Start 2P", monospace',
-                            fontSize: { xs: '8px', sm: '9px' },
+                            color: '#FFFFFF',
+                            fontSize: '0.85rem',
                             '&::placeholder': {
-                                color: '#8fa3ad',
-                                opacity: 1,
-                                fontFamily: '"Press Start 2P", monospace'
+                                color: '#B0BEC5',
+                                opacity: 0.7
                             }
                         }
                     }}
@@ -236,58 +233,53 @@ export default function CreateRoomPage() {
 
                 {/* Campo Histórico Prévio */}
                 <TextField
-                    placeholder="Histórico prévio"
+                    label="Histórico Médico Prévio"
+                    placeholder="Descreva o histórico médico relevante..."
                     multiline
-                    rows={3}
+                    rows={2}
                     variant="outlined"
                     fullWidth
                     value={formData.historico_previo}
                     onChange={handleInputChange('historico_previo')}
                     sx={{
+                        mb: 2,
+                        '& .MuiInputLabel-root': {
+                            color: '#B0BEC5',
+                            fontSize: '0.85rem',
+                            '&.Mui-focused': { color: '#56FF9E' }
+                        },
                         '& .MuiOutlinedInput-root': {
-                            backgroundColor: '#2a3940',
-                            borderRadius: '8px',
-                            fontSize: { xs: '10px', sm: '11px' },
-                            fontFamily: '"Press Start 2P", monospace',
-                            color: 'white',
-                            border: 'none',
-                            '& fieldset': {
-                                border: 'none'
+                            backgroundColor: 'rgba(26, 43, 51, 0.8)',
+                            '& .MuiOutlinedInput-notchedOutline': {
+                                borderColor: 'rgba(86, 255, 158, 0.3)',
+                                borderWidth: '1px'
                             },
-                            '&:hover fieldset': {
-                                border: 'none'
+                            '&:hover .MuiOutlinedInput-notchedOutline': {
+                                borderColor: 'rgba(86, 255, 158, 0.5)'
                             },
-                            '&.Mui-focused fieldset': {
-                                border: 'none'
-                            },
-                            '&:hover': {
-                                backgroundColor: '#334149'
-                            },
-                            '&.Mui-focused': {
-                                backgroundColor: '#334149'
+                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                borderColor: '#56FF9E'
                             }
                         },
                         '& .MuiOutlinedInput-input': {
-                            padding: { xs: '8px 12px', sm: '10px 14px' },
-                            color: 'white',
-                            fontFamily: '"Press Start 2P", monospace',
-                            fontSize: { xs: '8px', sm: '9px' },
+                            color: '#FFFFFF',
+                            fontSize: '0.85rem',
                             '&::placeholder': {
-                                color: '#8fa3ad',
-                                opacity: 1,
-                                fontFamily: '"Press Start 2P", monospace'
+                                color: '#B0BEC5',
+                                opacity: 0.7
                             }
                         }
                     }}
                 />
 
-                {/* Botões em linha para desktop */}
+                {/* Botões */}
                 <Box
                     sx={{
                         display: 'flex',
-                        gap: { xs: 1.5, sm: 2 },
+                        gap: 2,
                         width: '100%',
-                        flexDirection: { xs: 'column', sm: 'row' }
+                        flexDirection: { xs: 'column', sm: 'row' },
+                        justifyContent: 'center'
                     }}
                 >
                     {/* Botão Criar Consulta */}
@@ -296,23 +288,24 @@ export default function CreateRoomPage() {
                         onClick={handleSubmit}
                         sx={{
                             flex: { xs: 'none', sm: 1 },
-                            backgroundColor: '#56FF9E',
-                            color: '#1a2332',
-                            borderRadius: '8px',
-                            padding: { xs: '8px 16px', sm: '10px 20px' },
-                            fontSize: { xs: '8px', sm: '9px' },
-                            fontWeight: 'normal',
-                            fontFamily: '"Press Start 2P", monospace',
-                            textTransform: 'uppercase',
-                            boxShadow: 'none',
-                            minHeight: { xs: '32px', sm: '36px' },
+                            maxWidth: { sm: '160px' },
+                            py: 0.8,
+                            px: 2.5,
+                            fontSize: '0.85rem',
+                            fontWeight: 600,
+                            borderRadius: 3,
+                            background: 'linear-gradient(135deg, #56FF9E 0%, #3EE67A 100%)',
+                            color: '#131F24',
+                            boxShadow: '0 4px 15px rgba(86, 255, 158, 0.4)',
+                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                             '&:hover': {
-                                backgroundColor: '#4ade80',
-                                boxShadow: 'none'
+                                background: 'linear-gradient(135deg, #3EE67A 0%, #2DD865 100%)',
+                                boxShadow: '0 8px 25px rgba(86, 255, 158, 0.5)',
+                                transform: 'translateY(-2px)'
                             }
                         }}
                     >
-                        CRIAR CONSULTA
+                        Criar Consulta
                     </Button>
 
                     {/* Botão Voltar */}
@@ -321,22 +314,23 @@ export default function CreateRoomPage() {
                         onClick={() => router.back()}
                         sx={{
                             flex: { xs: 'none', sm: 1 },
-                            backgroundColor: 'transparent',
-                            border: '1px solid #3a4a57',
-                            borderRadius: '8px',
-                            padding: { xs: '8px 16px', sm: '10px 20px' },
-                            color: '#8fa3ad',
-                            fontSize: { xs: '8px', sm: '9px' },
-                            fontFamily: '"Press Start 2P", monospace',
-                            textTransform: 'uppercase',
-                            minHeight: { xs: '32px', sm: '36px' },
+                            maxWidth: { sm: '160px' },
+                            py: 0.8,
+                            px: 2.5,
+                            fontSize: '0.85rem',
+                            fontWeight: 600,
+                            borderRadius: 3,
+                            border: '2px solid #56FF9E',
+                            color: '#56FF9E',
+                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                             '&:hover': {
-                                backgroundColor: 'rgba(143, 163, 173, 0.1)',
-                                border: '1px solid #8fa3ad'
+                                backgroundColor: 'rgba(86, 255, 158, 0.1)',
+                                border: '2px solid #3EE67A',
+                                transform: 'translateY(-2px)'
                             }
                         }}
                     >
-                        VOLTAR
+                        Voltar
                     </Button>
                 </Box>
             </Box>
