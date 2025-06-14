@@ -39,7 +39,7 @@ export function createRoom(req: Request, res: Response){
 
       let response = axios.post('http://localhost:3000', room)
 
-      return { success: true, message: 'Sala criada com sucesso'}
+      return { success: true, message: 'Sala criada com sucesso', id: room.id}
 
   }catch(error){
   console.log("🚀 ~ createRoom ~ error:", error)
