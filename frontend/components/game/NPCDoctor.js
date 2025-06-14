@@ -1,5 +1,5 @@
-import { Container, Graphics, Text } from '@pixi/react'
-import { useCallback, useEffect, useState } from 'react'
+import { Container, Text } from '@pixi/react'
+import { useEffect, useState } from 'react'
 import { TextStyle } from 'pixi.js'
 import CharacterSprite from './CharacterSprite'
 import { getDoctorConfig, getDoctorSpriteId } from '@/utils/characterMapping'
@@ -12,7 +12,6 @@ const NPCDoctor = ({ x, y, isInteracting, doctorConfig }) => {
   const mappedDoctor = getDoctorConfig({ doctor: doctorConfig })
   const doctorId = getDoctorSpriteId(doctorConfig)
   const doctorName = mappedDoctor.name
-  const doctorTitle = mappedDoctor.title
 
   // Animação idle (mantida para compatibilidade)
   useEffect(() => {
@@ -22,13 +21,6 @@ const NPCDoctor = ({ x, y, isInteracting, doctorConfig }) => {
 
     return () => clearInterval(interval)
   }, [])
-
-  const titleStyle = new TextStyle({
-    fontFamily: 'Arial',
-    fontSize: 12,
-    fill: 0x6B7280,
-    fontStyle: 'italic'
-  })
 
   return (
     <Container x={x} y={y}>
@@ -50,15 +42,6 @@ const NPCDoctor = ({ x, y, isInteracting, doctorConfig }) => {
           console.log(`✅ Sprite do médico carregado: ${doctorId}`, spriteData)
           console.log(`👨‍⚕️ Médico mapeado:`, mappedDoctor)
         }}
-      />
-
-      {/* Título profissional */}
-      <Text
-        text={doctorTitle}
-        style={titleStyle}
-        anchor={0.5}
-        x={0}
-        y={-60}
       />
 
       {/* Dica de interação */}

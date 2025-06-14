@@ -15,6 +15,16 @@ export async function verifyRoom(roomId: string): Promise<boolean> {
   }
 }
 
+export async function updateRoom(roomId: string, updates: Partial<any>): Promise<boolean> {
+  try {
+    const response = await axios.patch(`http://localhost:3000/room/${roomId}`, updates);
+    return response.status === 200;
+  } catch (error) {
+    console.error('Erro ao atualizar a sala:', error);
+    return false;
+  }
+}
+
 export async function getRoom(roomId: string): Promise<any> {
   try {
     const response = await axios.get(`http://localhost:3000/room/${roomId}`);
