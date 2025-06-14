@@ -228,7 +228,7 @@ Considere que os dados do paciente e do psicólogo estão parcialmente implícit
     const parsed = JSON.parse(content || '{}');
     return parsed;
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Erro ao gerar relatório com a IA:', error?.response?.data || error.message);
     return null;
   }

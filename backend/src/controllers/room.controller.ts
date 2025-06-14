@@ -33,7 +33,7 @@ export function createRoom(req: Request, res: Response){
       let room: Room = {} as Room;
       room.status = body.status
       room.dt_criacao = new Date()
-      room.status = 'AGUARDANDO'
+      room.status = 'SALA_CRIADA'
       room.id = uuidv4();
       room.medic_id = body.medic_id
 
@@ -91,7 +91,10 @@ export function loginMedic(req: Request, res: Response){
           let medicFromDB = response.data[0]
           bcrypt.compare(medic.password, medicFromDB.password, function(err, result) {
             if(err) return res.status(401).json({ success: false, message: 'Senha incorreta'})
-            let token = jwt.sign({ id: medic.id, nome: medic.nome }, process.env.HASH_TOKEN);
+            let token = jwt.sign({ 
+              exp: Math.floor(Date.now() / 1000) + (60 * 60),
+              id: medic.id,
+              nome: medic.nome }, process.env.HASH_TOKEN);
             if(result) return res.status(200).json({ success: true, message: 'Logado com sucesso', token: token})
             else return res.status(401).json({ success: false, message: 'Senha incorreta'})
           }); 
@@ -119,6 +122,24 @@ export const getRooms = async (req: Request, res: Response) => {
   }catch(error){
     console.log("🚀 ~ getRooms ~ error:", error)
     res.status(500).json({ success: false, message: 'Erro ao listar as salas'})
+    return;
+  }
+}
+
+export const getMedicRooms = async (req: Request, res: Response) => {
+  const medicId = req.query.medicId as string;
+  if(!medicId) {
+    res.status(400).json({ success: false, message: 'Parâmetro "medicId" é obrigatório'});
+    return;
+  }
+  try{
+    const rooms = await listRooms();
+    const medicRooms = rooms.filter(room => room.medic_id === medicId);
+    res.status(200).json({ success: true, message: 'Salas do médico listadas com sucesso', rooms: medicRooms})
+    return;
+  }catch(error){
+    console.log("🚀 ~ getMedicRooms ~ error:", error)
+    res.status(500).json({ success: false, message: 'Erro ao listar as salas do médico'})
     return;
   }
 }
