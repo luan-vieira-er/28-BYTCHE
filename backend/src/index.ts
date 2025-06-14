@@ -9,9 +9,6 @@ import { verifyRoom } from './services/room.service';
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-
-
-
 app.use(express.json());
 
 // Mount all routes
@@ -49,7 +46,7 @@ io.on('connection', (socket) => {
 
   // Recebe mensagens e repassa para os membros da sala
   socket.on('firstInteraction', async (roomId) => {
-    let existRoom = verifyRoom(roomId);
+    let existRoom = await verifyRoom(roomId);
     if(!existRoom) socket.emit('error', 'Sala não encontrada')
     // Consulta os usuários presentes na sala
     // const isSocketInRoom = await io.in(roomId).fetchSockets().then(sockets => sockets.some(sock => sock.id === socket.id));

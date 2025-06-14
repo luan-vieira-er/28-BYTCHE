@@ -111,12 +111,14 @@ export function loginMedic(req: Request, res: Response){
   }
 }
 
-export async function getRooms(req: Request, res: Response) {
+export const getRooms = async (req: Request, res: Response) => {
   try{
     const rooms = await listRooms();
-    return res.status(200).json({ success: true, message: 'Salas listadas com sucesso', rooms: rooms})
+    res.status(200).json({ success: true, message: 'Salas listadas com sucesso', rooms: rooms})
+    return;
   }catch(error){
     console.log("🚀 ~ getRooms ~ error:", error)
-    return res.status(500).json({ success: false, message: 'Erro ao listar as salas'})
+    res.status(500).json({ success: false, message: 'Erro ao listar as salas'})
+    return;
   }
 }
