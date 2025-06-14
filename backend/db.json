@@ -3,14 +3,14 @@
     {
       "id": "9fd458d0-61d7-4139-895e-d7fe1ca46517",
       "doctorId": "12155335-0b04-4606-ac73-774be0a770aa",
-      "finalidade": "",
-      "perfil_paciente": "",
-      "restricoes": "",
-      "foco": "",
-      "historico_previo": "",
-      "nome_paciente": "",
+      "finalidade": "primeira consulta",
+      "perfil_paciente": "Criança de 7 anos, tímida, dificuldade em socializar na escola.",
+      "restricoes": "Não falar sobre separação dos pais.",
+      "foco": "emocional e social",
+      "historico_previo": "Relato da escola indica episódios de choro frequente e isolamento durante o recreio.",
+      "nome_paciente": "juninho",
+      "idade": "7",
       "status": "AGUARDANDO",
-      "idade": "",
       "chat_history": [
         
       ]

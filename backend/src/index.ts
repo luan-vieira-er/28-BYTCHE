@@ -2,7 +2,7 @@ import express from 'express';
 import router from './routes';
 import { createServer } from 'http';
 import { Server } from 'socket.io'
-import { startChat, sendMessage } from './services/openai.service'
+import { startChat, sendMessage, finishRoom } from './services/openai.service'
 import axios from 'axios';
 import { verifyRoom } from './services/room.service';
 
@@ -88,6 +88,18 @@ io.on('connection', (socket) => {
     if(!existRoom) return socket.emit('error', 'Sala não encontrada')
     io.to(roomId).emit('newMessage', { sender: socket.id, message: message })
     const response = await sendMessage(roomId, message);
+    if (response){
+      const { reply, choices } = response
+      io.to(roomId).emit('newMessage', { sender: socket.id, message: {
+        reply, choices
+      } });
+    }
+  });
+
+  socket.on('doctorFinishRoom', async (roomId, message) => {
+    let existRoom = await verifyRoom(roomId);
+    if(!existRoom) return socket.emit('error', 'Sala não encontrada')
+    const response = await finishRoom(roomId, message);
     if (response){
       const { reply, choices } = response
       io.to(roomId).emit('newMessage', { sender: socket.id, message: {
