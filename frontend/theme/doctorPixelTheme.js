@@ -5,221 +5,214 @@ import { createTheme } from '@mui/material/styles'
  * Inspirado em design pixel art e jogos retrô
  */
 
-// Paleta de cores pixel art médica
-const pixelColors = {
+// Paleta de cores moderna e comercial
+const modernColors = {
   // Cores principais
   primary: {
-    main: '#00BCD4', // Cyan médico
-    light: '#4DD0E1',
-    dark: '#0097A7',
-    contrastText: '#FFFFFF'
+    main: '#56FF9E', // Verde neon vibrante
+    light: '#7DFFB3',
+    dark: '#3EE67A',
+    contrastText: '#131F24'
   },
-  
+
   // Cores secundárias
   secondary: {
-    main: '#FF6B6B', // Rosa médico
-    light: '#FF8A80',
-    dark: '#E53935',
+    main: '#1A2B33', // Azul escuro complementar
+    light: '#2A3B43',
+    dark: '#0F1A1F',
     contrastText: '#FFFFFF'
   },
-  
-  // Cores de sucesso (saúde)
+
+  // Cores de sucesso
   success: {
-    main: '#4CAF50', // Verde saúde
-    light: '#81C784',
-    dark: '#388E3C',
-    contrastText: '#FFFFFF'
+    main: '#56FF9E', // Mesmo verde primário
+    light: '#7DFFB3',
+    dark: '#3EE67A',
+    contrastText: '#131F24'
   },
-  
+
   // Cores de aviso
   warning: {
-    main: '#FF9800', // Laranja atenção
-    light: '#FFB74D',
-    dark: '#F57C00',
-    contrastText: '#000000'
+    main: '#FFD93D', // Amarelo vibrante
+    light: '#FFE066',
+    dark: '#E6C235',
+    contrastText: '#131F24'
   },
-  
+
   // Cores de erro
   error: {
-    main: '#F44336', // Vermelho emergência
-    light: '#EF5350',
-    dark: '#D32F2F',
+    main: '#FF6B6B', // Vermelho suave
+    light: '#FF8A8A',
+    dark: '#E55555',
     contrastText: '#FFFFFF'
   },
-  
+
   // Cores de informação
   info: {
-    main: '#2196F3', // Azul informativo
-    light: '#64B5F6',
-    dark: '#1976D2',
-    contrastText: '#FFFFFF'
+    main: '#4ECDC4', // Turquesa
+    light: '#6DD5CE',
+    dark: '#3BA99F',
+    contrastText: '#131F24'
   }
 }
 
-// Configuração da tipografia pixel art
-const pixelTypography = {
+// Configuração da tipografia moderna
+const modernTypography = {
   fontFamily: [
-    '"Press Start 2P"',
-    'monospace',
+    '"Poppins"',
+    '"Inter"',
+    '"Roboto"',
+    '"Helvetica"',
     'Arial',
     'sans-serif'
   ].join(','),
-  
-  // Tamanhos ajustados para fonte pixel
+
+  // Tamanhos modernos e legíveis
   h1: {
-    fontSize: '2rem',
-    fontWeight: 400,
+    fontSize: '2.5rem',
+    fontWeight: 700,
     lineHeight: 1.2,
-    letterSpacing: '0.1em'
+    letterSpacing: '-0.01em'
   },
   h2: {
-    fontSize: '1.5rem',
-    fontWeight: 400,
+    fontSize: '2rem',
+    fontWeight: 600,
     lineHeight: 1.3,
-    letterSpacing: '0.08em'
+    letterSpacing: '-0.01em'
   },
   h3: {
-    fontSize: '1.25rem',
-    fontWeight: 400,
+    fontSize: '1.5rem',
+    fontWeight: 600,
     lineHeight: 1.4,
-    letterSpacing: '0.06em'
+    letterSpacing: '-0.01em'
   },
   h4: {
-    fontSize: '1rem',
-    fontWeight: 400,
+    fontSize: '1.25rem',
+    fontWeight: 600,
     lineHeight: 1.4,
-    letterSpacing: '0.04em'
+    letterSpacing: '0em'
   },
   h5: {
-    fontSize: '0.875rem',
-    fontWeight: 400,
-    lineHeight: 1.5,
-    letterSpacing: '0.02em'
+    fontSize: '1.125rem',
+    fontWeight: 600,
+    lineHeight: 1.4,
+    letterSpacing: '0em'
   },
   h6: {
-    fontSize: '0.75rem',
-    fontWeight: 400,
-    lineHeight: 1.5,
-    letterSpacing: '0.02em'
+    fontSize: '1rem',
+    fontWeight: 600,
+    lineHeight: 1.4,
+    letterSpacing: '0em'
   },
   body1: {
-    fontSize: '0.75rem',
+    fontSize: '1rem',
     lineHeight: 1.6,
-    letterSpacing: '0.01em'
+    letterSpacing: '0em'
   },
   body2: {
-    fontSize: '0.625rem',
+    fontSize: '0.875rem',
     lineHeight: 1.6,
-    letterSpacing: '0.01em'
+    letterSpacing: '0em'
   },
   button: {
-    fontSize: '0.75rem',
-    fontWeight: 400,
-    textTransform: 'uppercase',
-    letterSpacing: '0.1em'
+    fontSize: '0.875rem',
+    fontWeight: 500,
+    textTransform: 'none',
+    letterSpacing: '0.01em'
   },
   caption: {
-    fontSize: '0.625rem',
+    fontSize: '0.75rem',
     lineHeight: 1.4,
-    letterSpacing: '0.02em'
+    letterSpacing: '0.01em'
   }
 }
 
-// Componentes customizados
-const pixelComponents = {
-  // Botões com estilo pixel art
+// Componentes customizados modernos
+const modernComponents = {
+  // Botões com estilo moderno e comercial
   MuiButton: {
     styleOverrides: {
       root: {
-        borderRadius: 0, // Bordas quadradas
-        textTransform: 'uppercase',
-        fontFamily: '"Press Start 2P", monospace',
-        fontSize: '0.75rem',
+        borderRadius: 12,
+        textTransform: 'none',
+        fontSize: '0.95rem',
+        fontWeight: 600,
         padding: '12px 24px',
-        border: '2px solid transparent',
-        transition: 'all 0.1s ease-in-out',
+        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        position: 'relative',
+        overflow: 'hidden',
         '&:hover': {
           transform: 'translateY(-2px)',
-          boxShadow: '4px 4px 0px rgba(0,0,0,0.3)'
-        },
-        '&:active': {
-          transform: 'translateY(0px)',
-          boxShadow: '2px 2px 0px rgba(0,0,0,0.3)'
+          boxShadow: '0 8px 25px rgba(86, 255, 158, 0.3)'
         }
       },
       contained: {
-        boxShadow: '4px 4px 0px rgba(0,0,0,0.2)',
+        background: 'linear-gradient(135deg, #56FF9E 0%, #3EE67A 100%)',
+        boxShadow: '0 4px 15px rgba(86, 255, 158, 0.4)',
+        color: '#131F24',
         '&:hover': {
-          boxShadow: '6px 6px 0px rgba(0,0,0,0.3)'
+          background: 'linear-gradient(135deg, #3EE67A 0%, #2DD865 100%)',
+          boxShadow: '0 8px 25px rgba(86, 255, 158, 0.5)'
         }
       },
       outlined: {
-        borderWidth: '2px',
+        border: '2px solid #56FF9E',
+        color: '#56FF9E',
         '&:hover': {
-          borderWidth: '2px'
+          backgroundColor: 'rgba(86, 255, 158, 0.1)',
+          border: '2px solid #3EE67A'
         }
       }
     }
   },
-  
-  // Cards com estilo pixel
+
+  // Cards com estilo moderno e comercial
   MuiCard: {
     styleOverrides: {
       root: {
-        borderRadius: 0,
-        border: '2px solid #E0E0E0',
-        boxShadow: '4px 4px 0px rgba(0,0,0,0.1)',
+        borderRadius: 20,
+        border: '1px solid rgba(86, 255, 158, 0.2)',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+        backgroundColor: 'rgba(26, 43, 51, 0.6)',
+        backdropFilter: 'blur(20px)',
+        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
         '&:hover': {
-          boxShadow: '6px 6px 0px rgba(0,0,0,0.15)'
+          transform: 'translateY(-4px)',
+          boxShadow: '0 16px 48px rgba(86, 255, 158, 0.2)',
+          border: '1px solid rgba(86, 255, 158, 0.4)'
         }
       }
     }
   },
-  
-  // Inputs com estilo pixel
+
+  // Inputs com estilo moderno
   MuiTextField: {
     styleOverrides: {
       root: {
         '& .MuiOutlinedInput-root': {
-          borderRadius: 0,
-          fontFamily: '"Press Start 2P", monospace',
-          fontSize: '0.75rem',
-          '& fieldset': {
-            borderWidth: '2px'
-          },
-          '&:hover fieldset': {
-            borderWidth: '2px'
-          },
-          '&.Mui-focused fieldset': {
-            borderWidth: '2px'
-          }
-        },
-        '& .MuiInputLabel-root': {
-          fontFamily: '"Press Start 2P", monospace',
-          fontSize: '0.75rem'
+          borderRadius: 8,
+          fontSize: '1rem'
         }
       }
     }
   },
-  
-  // AppBar com estilo pixel
+
+  // AppBar com estilo moderno
   MuiAppBar: {
     styleOverrides: {
       root: {
         borderRadius: 0,
-        boxShadow: '0px 4px 0px rgba(0,0,0,0.2)'
+        boxShadow: '0px 2px 8px rgba(0,0,0,0.1)'
       }
     }
   },
-  
-  // Chips com estilo pixel
+
+  // Chips com estilo moderno
   MuiChip: {
     styleOverrides: {
       root: {
-        borderRadius: 0,
-        fontFamily: '"Press Start 2P", monospace',
-        fontSize: '0.625rem',
-        border: '2px solid transparent'
+        borderRadius: 16,
+        fontSize: '0.875rem'
       }
     }
   }
@@ -229,57 +222,60 @@ const pixelComponents = {
 export const lightTheme = createTheme({
   palette: {
     mode: 'light',
-    ...pixelColors,
+    ...modernColors,
     background: {
-      default: '#F5F5F5',
-      paper: '#FFFFFF'
+      default: '#131F24',
+      paper: '#1A2B33'
     },
     text: {
-      primary: '#212121',
-      secondary: '#757575'
+      primary: '#FFFFFF',
+      secondary: '#B0BEC5'
     }
   },
-  typography: pixelTypography,
-  components: pixelComponents,
+  typography: modernTypography,
+  components: modernComponents,
   shape: {
-    borderRadius: 0 // Bordas quadradas em todos os componentes
+    borderRadius: 12
   },
-  spacing: 8 // Espaçamento base de 8px
+  spacing: 8
 })
 
 // Tema escuro
 export const darkTheme = createTheme({
   palette: {
     mode: 'dark',
-    ...pixelColors,
+    ...modernColors,
     background: {
-      default: '#121212',
-      paper: '#1E1E1E'
+      default: '#0A1015',
+      paper: '#131F24'
     },
     text: {
       primary: '#FFFFFF',
-      secondary: '#B0B0B0'
+      secondary: '#94A3B8'
     }
   },
-  typography: pixelTypography,
+  typography: modernTypography,
   components: {
-    ...pixelComponents,
+    ...modernComponents,
     // Ajustes específicos para tema escuro
     MuiCard: {
       styleOverrides: {
         root: {
-          borderRadius: 0,
-          border: '2px solid #333333',
-          boxShadow: '4px 4px 0px rgba(255,255,255,0.1)',
+          borderRadius: 16,
+          border: '1px solid rgba(86, 255, 158, 0.1)',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+          backgroundColor: 'rgba(26, 43, 51, 0.8)',
+          backdropFilter: 'blur(10px)',
           '&:hover': {
-            boxShadow: '6px 6px 0px rgba(255,255,255,0.15)'
+            boxShadow: '0 8px 32px rgba(86, 255, 158, 0.2)',
+            border: '1px solid rgba(86, 255, 158, 0.2)'
           }
         }
       }
     }
   },
   shape: {
-    borderRadius: 0
+    borderRadius: 12
   },
   spacing: 8
 })
@@ -306,7 +302,7 @@ export const highContrastTheme = createTheme({
     }
   },
   typography: {
-    ...pixelTypography,
+    ...modernTypography,
     // Aumenta tamanhos para melhor legibilidade
     body1: {
       fontSize: '0.875rem',
@@ -320,13 +316,13 @@ export const highContrastTheme = createTheme({
     }
   },
   components: {
-    ...pixelComponents,
+    ...modernComponents,
     // Bordas mais grossas para alto contraste
     MuiButton: {
       styleOverrides: {
         root: {
-          ...pixelComponents.MuiButton.styleOverrides.root,
-          border: '3px solid #000000',
+          ...modernComponents.MuiButton.styleOverrides.root,
+          border: '2px solid #000000',
           fontWeight: 600
         }
       }

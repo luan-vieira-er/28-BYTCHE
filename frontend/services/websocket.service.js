@@ -62,9 +62,9 @@ class WebSocketService {
     if (this.reconnectAttempts < this.maxReconnectAttempts) {
       this.reconnectAttempts++;
       const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts), 10000);
-      
+
       console.log(`Attempting to reconnect in ${delay}ms (attempt ${this.reconnectAttempts})`);
-      
+
       setTimeout(() => {
         if (!this.isConnected) {
           this.socket?.connect();
@@ -100,7 +100,7 @@ class WebSocketService {
     if (this.socket) {
       this.socket.on(event, callback);
     }
-    
+
     // Store listener for potential reconnection
     if (!this.eventListeners.has(event)) {
       this.eventListeners.set(event, []);
@@ -113,7 +113,7 @@ class WebSocketService {
     if (this.socket) {
       this.socket.off(event, callback);
     }
-    
+
     // Remove from stored listeners
     if (this.eventListeners.has(event)) {
       const listeners = this.eventListeners.get(event);
@@ -122,6 +122,15 @@ class WebSocketService {
         listeners.splice(index, 1);
       }
     }
+  }
+
+  // Game access methods
+  joinGameWithCode(accessCode, playerData = {}) {
+    this.emit('game:join', {
+      accessCode,
+      playerData,
+      timestamp: new Date().toISOString()
+    });
   }
 
   // Player-related methods
