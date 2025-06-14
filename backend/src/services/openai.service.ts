@@ -1,4 +1,5 @@
-import { verifyRoom } from "../repository/room.repository";
+import { getRoom, updateRoomHistory } from "./room.service";
+import { gerarRelatorioConsulta } from "./report.service";
 
 const axios = require('axios');
 require('dotenv').config();
@@ -36,17 +37,10 @@ const functions = [
 ];
 
 export const startChat = async (roomId) => {
-  //Busca essas variáveis pelo roomId
-  let existRoom = await verifyRoom(roomId);
-  if(!existRoom) return null
+  let room = await getRoom(roomId);
+  if(!room) return null
   
-  const finalidade = "primeira consulta";
-  const perfil_paciente = "Criança de 7 anos, tímida, dificuldade em socializar na escola.";
-  const restricoes = "Não falar sobre separação dos pais.";
-  const foco = "emocional e social";
-  const historico_previo = "Relato da escola indica episódios de choro frequente e isolamento durante o recreio.";
-  const nome_paciente = "juninho"
-  const idade = "10"
+  const { finalidade,  perfil_paciente,  restricoes,  foco,  historico_previo,  nome_paciente,  idade } = room;
 
   const systemPrompt = `
     Você é um psicólogo infantil virtual muito gentil, carinhoso e acolhedor. Vai conversar com uma criança usando linguagem simples, respeitosa e afetuosa. Seu objetivo é criar um espaço seguro para a criança se expressar sobre si mesma, seus sentimentos, seu corpo e sua rotina — sem julgamentos e sem pressão.
@@ -95,7 +89,8 @@ export const startChat = async (roomId) => {
     - Nunca diagnostique. Apenas ouça, acolha e registre.
     - Ao final, gere um resumo compreensível e estruturado para o profissional de saúde, com base no que a criança relatou.
     `;
-    console.log("🚀 ~ startChat ~ systemPrompt:", systemPrompt)
+
+    await updateRoomHistory(roomId, 'system', systemPrompt);
     
     try {
         const responseMessage = await axios.post(
@@ -118,7 +113,7 @@ export const startChat = async (roomId) => {
         const reply = responseMessage.data.choices[0].message.content;
         console.log("🚀 ~ startChat ~ reply:", reply)
 
-        // Gravar reply no history da consutla
+        await updateRoomHistory(roomId, 'assistant', reply);
         const responses = await generateOptions(reply);
         
 
@@ -130,10 +125,14 @@ export const startChat = async (roomId) => {
 
 export const sendMessage = async (roomId, message) => {
     try {
-        //buscar history pela roomId
-        const history = [];
+        let room = await getRoom(roomId);
+        if(!room) return null
+
+        await updateRoomHistory(roomId, 'user', message);
+
+        const { chat_history } = room;
         const messages = [
-            ...history,
+            ...chat_history,
             { role: 'user', content: message.toString() }
         ]
         console.log("🚀 ~ sendMessage ~ messages:", messages)
@@ -152,15 +151,89 @@ export const sendMessage = async (roomId, message) => {
       );
 
       const reply = response.data.choices[0].message.content;
-      // Gravar reply no history da consutla
-        const responses = await generateOptions(reply);
+      await updateRoomHistory(roomId, 'assistant', reply);
+    const responses = await generateOptions(reply);
     
 
         return { reply, choices: responses };
-    } catch (err) {
-      console.error('Erro ao chamar OpenAI', err);
+    } catch (err: any) {
+      console.error('Erro ao chamar OpenAI', err.response.data);
     }
 };
+
+export const finishRoom = async (roomId, message) => {
+    try {
+        let room = await getRoom(roomId);
+        if(!room) return null
+
+        await updateRoomHistory(roomId, 'system', 'A sessão foi finalizada pelo médico, agradeça ao paciente de forma educada na próxima interação.');
+
+        const Report = await generateReportFromHistory(room);
+        await gerarRelatorioConsulta(Report);
+        return;
+    } catch (err: any) {
+      console.error('Erro ao chamar OpenAI', err.response.data);
+    }
+};
+
+const generateReportFromHistory = async (roomData) => {
+  try {
+    const response = await axios.post(
+      'https://api.openai.com/v1/chat/completions',
+      {
+        model: 'gpt-4o',
+        messages: [
+          {
+            role: 'system',
+            content: `
+Você é um psicólogo experiente auxiliando na geração de relatórios clínicos para crianças.
+Com base na transcrição abaixo, gere um relatório estruturado em JSON, no seguinte formato TypeScript:
+
+type RelatorioConsulta = {
+  paciente: {
+    nome: string;
+    idade: number;
+  };
+  psicologo: {
+    nome: string;
+    crp: string;
+  };
+  data: string; // ISO string ou formato 'dd/mm/yyyy'
+  topicos: string[];
+  conversa: { autor: 'psicologo' | 'paciente'; mensagem: string }[];
+  avaliacao_ia?: string;
+};
+
+A chave "avaliacao_ia" deve conter uma síntese dos principais pontos observados na sessão, com linguagem técnica e objetiva.
+
+Considere que os dados do paciente e do psicólogo estão parcialmente implícitos e você pode preenchê-los com nomes fictícios coerentes.
+`
+          },
+          {
+            role: 'user',
+            content: `Segue a transcrição da conversa:\n\n${JSON.stringify(roomData, null, 2)}`
+          }
+        ],
+        temperature: 0.5
+      },
+      {
+        headers: {
+          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    const content = response.data.choices[0].message.content;
+    const parsed = JSON.parse(content || '{}');
+    return parsed;
+
+  } catch (error) {
+    console.error('Erro ao gerar relatório com a IA:', error?.response?.data || error.message);
+    return null;
+  }
+};
+
 
 const generateOptions = async (originalMessage) => {
     try {
