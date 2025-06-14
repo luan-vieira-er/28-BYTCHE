@@ -2,6 +2,10 @@ import express from 'express';
 import router from './routes';
 import { createServer } from 'http';
 import { Server } from 'socket.io'
+import { startChat } from './services/openai.service'
+
+startChat();
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 
