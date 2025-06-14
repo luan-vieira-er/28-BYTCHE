@@ -1,3 +1,5 @@
+import { verifyRoom } from "../repository/room.repository";
+
 const axios = require('axios');
 require('dotenv').config();
 
@@ -35,7 +37,9 @@ const functions = [
 
 export const startChat = async (roomId) => {
   //Busca essas variáveis pelo roomId
-
+  let existRoom = await verifyRoom(roomId);
+  if(!existRoom) return null
+  
   const finalidade = "primeira consulta";
   const perfil_paciente = "Criança de 7 anos, tímida, dificuldade em socializar na escola.";
   const restricoes = "Não falar sobre separação dos pais.";
