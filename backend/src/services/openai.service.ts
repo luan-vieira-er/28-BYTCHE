@@ -1,4 +1,4 @@
-import { getRoom, updateRoomHistory, verifyRoom } from "../repository/room.repository";
+import { getRoom, updateRoomHistory } from "./room.service";
 
 const axios = require('axios');
 require('dotenv').config();
@@ -155,7 +155,7 @@ export const sendMessage = async (roomId, message) => {
     
 
         return { reply, choices: responses };
-    } catch (err) {
+    } catch (err: any) {
       console.error('Erro ao chamar OpenAI', err.response.data);
     }
 };

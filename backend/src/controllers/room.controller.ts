@@ -2,6 +2,7 @@ import axios from "axios"
 import { Request, Response } from "express";
 import { v4 as uuidv4 } from 'uuid';
 import * as jwt from 'jsonwebtoken';
+import { listRooms } from "../services/room.service";
 const bcrypt = require('bcrypt');
 
 
@@ -63,7 +64,6 @@ export function createMedic(req: Request, res: Response){
       
       
       let response = axios.post('http://localhost:3000', medic)
-      console.log("🚀 ~ createRoom ~ response:", response)
 
 
       return { success: true, message: 'Sala criada com sucesso'}
@@ -108,5 +108,15 @@ export function loginMedic(req: Request, res: Response){
     console.log("🚀 ~ loginMedic ~ error:", error)
     return res.status(500).json({ success: false, message: 'Erro ao logar'})
 
+  }
+}
+
+export async function getRooms(req: Request, res: Response) {
+  try{
+    const rooms = await listRooms();
+    return res.status(200).json({ success: true, message: 'Salas listadas com sucesso', rooms: rooms})
+  }catch(error){
+    console.log("🚀 ~ getRooms ~ error:", error)
+    return res.status(500).json({ success: false, message: 'Erro ao listar as salas'})
   }
 }
