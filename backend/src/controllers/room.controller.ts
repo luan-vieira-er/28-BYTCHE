@@ -5,7 +5,7 @@ import * as jwt from 'jsonwebtoken';
 const bcrypt = require('bcrypt');
 
 
-type Sala = {
+type Room = {
   id: string;
   status: any;
   medic_id: String;
@@ -26,17 +26,17 @@ type Kid = {
 
 export function createRoom(req: Request, res: Response){
   try{  
-      const body = req.body as Sala | null;
+      const body = req.body as Room | null;
       if(!body) return
 
-      let sala: Sala = {} as Sala;
-      sala.status = body.status
-      sala.dt_criacao = new Date()
-      sala.status = 'AGUARDANDO'
-      sala.id = uuidv4();
-      sala.medic_id = body.medic_id
+      let room: Room = {} as Room;
+      room.status = body.status
+      room.dt_criacao = new Date()
+      room.status = 'AGUARDANDO'
+      room.id = uuidv4();
+      room.medic_id = body.medic_id
 
-      let response = axios.post('http://localhost:3001', sala)
+      let response = axios.post('http://localhost:3000', room)
 
       return { success: true, message: 'Sala criada com sucesso'}
 
@@ -62,7 +62,7 @@ export function createMedic(req: Request, res: Response){
       }); 
       
       
-      let response = axios.post('http://localhost:3001', medic)
+      let response = axios.post('http://localhost:3000', medic)
       console.log("🚀 ~ createRoom ~ response:", response)
 
 
@@ -85,7 +85,7 @@ export function loginMedic(req: Request, res: Response){
       medic.nome = body.nome
       medic.id = body.id
 
-      axios.get(`http://localhost:3001?nome=${medic.nome}`)
+      axios.get(`http://localhost:3000?nome=${medic.nome}`)
       .then((response) => {
         if(response.data.length > 0){
           let medicFromDB = response.data[0]

@@ -77,16 +77,6 @@ io.on('connection', (socket) => {
   });
 });
 
-const test = async () => {
-  const response = await startChat('');
-  console.log("🚀 ~ test ~ response:", response)
-}
-
-// test()
-
-// Mount all routes
-app.use('/api', router);
-
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
