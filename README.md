@@ -16,7 +16,7 @@
 
 ## 🧭 Tema / Área do Problema
 
-Triagem pediátrica digital com foco em **avaliação psicológica e neurodesenvolvimental**, visando apoiar crianças (inclusive com TEA - Transtorno do Espectro Autista) em consultas iniciais através de tecnologia empática e acessível.
+Avaliação pediátrica digital com foco em **avaliação psicológica e neurodesenvolvimental**, visando apoiar crianças (inclusive com TEA - Transtorno do Espectro Autista) em consultas iniciais através de tecnologia empática e acessível.
 
 ---
 
@@ -57,6 +57,7 @@ A solução se fundamenta em **teorias cognitivas e pedagógicas** que valorizam
 |------------------------|--------------------------------------|
 | Backend      | TypeScript / Node.js        |
 | API de IA              | OpenAI GPT-4o                        |
+| Comunicação           | REST e WebSockets                 |
 | Frontend          | React / NextJS                           |
 | Banco de Dados         | PostgreSQL |
 
@@ -79,12 +80,14 @@ git clone https://github.com/luan-vieira-er/28-BYTCHE
 cd 28-BYTCHE
 ```
 
-### 📥 2. Instale as dependências
+### 📥 2. Instale as dependências no frontend e backend
 
 ```bash
+#/backend
 npm install
-# ou
-yarn
+
+#/frontend
+npm install
 ```
 
 ### ⚙️ 3. Configure as variáveis de ambiente
@@ -94,19 +97,33 @@ Crie um arquivo .env na raiz do projeto com o seguinte conteúdo:
 OPENAI_API_KEY=sk-xxxxx...
 PORT=3000
 ```
-### ▶️ 4. Execute o projeto localmente
+### ▶️ 4. Execute o projeto localmente (json server, backend e frontend)
 
 ```bash
+#/backend -- banco de dados
+npx json-server ./db.json
+
+#/backend
 npm run dev
-# ou
-yarn dev
+
+#/frontend
+npm run dev
 ```
 
-A API estará disponível em:
+O banco de dados json estará disponível em:
 📍 http://localhost:3000
 
+O backend estará disponível em:
+📍 http://localhost:3001
+
+O frontend estará disponível em:
+📍 http://localhost:3002
+
 ### 📄 Licença
-Este projeto é livre para fins educacionais.
+**Este projeto foi feito durante o Code Race 2025.**
+
+Os autores agradecem enormemente a organização por esse evento incrível.
+
 Para uso comercial, entre em contato com os autores.
 
 ### 💬 Contato
