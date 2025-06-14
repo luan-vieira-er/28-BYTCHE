@@ -1,9 +1,10 @@
 import { Request, Response, Router } from 'express';
-import { createRoom, getMedicRooms, getRooms } from '../controllers/room.controller';
+import { createMedic, createRoom, getMedicRooms, getRooms } from '../controllers/room.controller';
 
 
 const router = Router();
 
+router.post('/medic', createMedic)
 router.get('/rooms', getRooms);
 router.get('/medic/:id/rooms', getMedicRooms);
 
