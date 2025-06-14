@@ -18,8 +18,6 @@ export const socketHandler = async (server: HttpServer) => {
     // Recebe o ID da sala e entra
     socket.on('doctorJoinRoom', async (roomId) => {
       // Buscar no Json Server se existe a Room Id
-      let existRoom = await verifyRoom(roomId);
-      if (!existRoom) return socket.emit('error', 'Sala não encontrada')
       
       await updateRoom(roomId, { status: 'DOUTOR_CONECTADO' })
       // Cria a sala
