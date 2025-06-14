@@ -1,14 +1,19 @@
-import { Button, TextField, Box, Typography, Select, MenuItem, FormControl, InputLabel } from "@mui/material";
+import { Button, TextField, Box, Typography, Select, MenuItem, FormControl, InputLabel, Grid } from "@mui/material";
 import { useRouter } from 'next/router';
 import { useState } from 'react';
+import apiService from '../../services/api.service';
 
 export default function CreateRoomPage() {
     const router = useRouter();
     const [formData, setFormData] = useState({
         tipo_consulta: '',
         perfil_paciente: '',
+        restricoes: '',
         foco: '',
-        historico_previo: ''
+        historico_previo: '',
+        nome_paciente: '',
+        idade: '',
+        status: '',
     });
 
     const handleInputChange = (field) => (event) => {
@@ -18,9 +23,51 @@ export default function CreateRoomPage() {
         });
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         console.log('Dados do formulário:', formData);
-        // Aqui você pode adicionar a lógica para enviar os dados
+
+        // Validação básica
+        if (!formData.tipo_consulta || !formData.perfil_paciente || !formData.foco || !formData.nome_paciente || !formData.idade) {
+            alert('Por favor, preencha todos os campos obrigatórios');
+            return;
+        }
+
+        try {
+            // Obter dados do usuário logado
+            const currentUser = apiService.getCurrentUser();
+            if (!currentUser) {
+                alert('Você precisa estar logado para criar uma consulta');
+                router.push('/LoginPage');
+                return;
+            }
+
+            // Preparar dados para envio
+            const roomData = {
+                doctorId: currentUser.id,
+                finalidade: formData.tipo_consulta,
+                restricoes: formData.restricoes,
+                perfil_paciente: formData.perfil_paciente,
+                foco: formData.foco,
+                historico_previo: formData.historico_previo || '',
+                nome_paciente: formData.nome_paciente,
+                idade: parseInt(formData.idade),
+                status: formData.status || 'AGUARDANDO'
+            };
+
+            // Chamada para a API de criação de sala
+            const response = await apiService.createRoom(roomData);
+
+            if (response.success) {
+                alert('Consulta criada com sucesso!');
+                // Redirecionar para a página principal ou lista de salas
+                router.push('/');
+            } else {
+                alert(response.message || 'Erro ao criar consulta');
+            }
+        } catch (error) {
+            console.error('Erro ao criar consulta:', error);
+            alert('Erro ao criar consulta. Tente novamente.');
+        }
     };
 
     return (
@@ -53,10 +100,11 @@ export default function CreateRoomPage() {
                 sx={{
                     position: 'relative',
                     zIndex: 1,
-                    width: { xs: '90%', sm: '500px', md: '600px' },
+                    width: { xs: '95%', sm: '420px', md: '480px' },
                     maxWidth: '95vw',
-                    p: { xs: 3, sm: 4, md: 5 },
-                    borderRadius: 4,
+                    maxHeight: '90vh',
+                    p: { xs: 2, sm: 2.5, md: 3 },
+                    borderRadius: 3,
                     background: 'rgba(26, 43, 51, 0.6)',
                     backdropFilter: 'blur(20px)',
                     border: '1px solid rgba(86, 255, 158, 0.2)',
@@ -68,10 +116,10 @@ export default function CreateRoomPage() {
                     variant="h2"
                     component="h1"
                     sx={{
-                        fontSize: { xs: '1.5rem', sm: '1.8rem', md: '2rem' },
+                        fontSize: { xs: '1.2rem', sm: '1.4rem', md: '1.6rem' },
                         fontWeight: 700,
                         textAlign: 'center',
-                        mb: 2.5,
+                        mb: 1.5,
                         background: 'linear-gradient(135deg, #56FF9E 0%, #4ECDC4 100%)',
                         backgroundClip: 'text',
                         WebkitBackgroundClip: 'text',
@@ -85,7 +133,7 @@ export default function CreateRoomPage() {
                 {/* Select Tipo de Consulta */}
                 <FormControl
                     fullWidth
-                    sx={{ mb: 1.5 }}
+                    sx={{ mb: 1 }}
                 >
                     <InputLabel
                         sx={{
@@ -154,13 +202,13 @@ export default function CreateRoomPage() {
                     label="Perfil do Paciente"
                     placeholder="Descreva o perfil do paciente..."
                     multiline
-                    rows={1.5}
+                    rows={1}
                     variant="outlined"
                     fullWidth
                     value={formData.perfil_paciente}
                     onChange={handleInputChange('perfil_paciente')}
                     sx={{
-                        mb: 1.5,
+                        mb: 1,
                         '& .MuiInputLabel-root': {
                             color: '#B0BEC5',
                             fontSize: '0.85rem',
@@ -190,25 +238,106 @@ export default function CreateRoomPage() {
                     }}
                 />
 
-                {/* Campo Foco */}
-                <TextField
-                    label="Foco da Consulta"
-                    placeholder="Qual o foco principal desta consulta..."
-                    multiline
-                    rows={1.5}
-                    variant="outlined"
+                {/* Grid com Nome do Paciente e Idade */}
+                <Grid container spacing={1.5} sx={{ mb: 1, width: '100%', flexWrap: 'nowrap' }}>
+                    <Grid item xs={12} sm={6} sx={{ width: '50%' }}>
+                        <TextField
+                            label="Nome do Paciente"
+                            placeholder="Digite o nome do paciente"
+                            variant="outlined"
+                            fullWidth
+                            value={formData.nome_paciente}
+                            onChange={handleInputChange('nome_paciente')}
+                            sx={{
+                                '& .MuiInputLabel-root': {
+                                    color: '#B0BEC5',
+                                    fontSize: '0.85rem',
+                                    '&.Mui-focused': { color: '#56FF9E' }
+                                },
+                                '& .MuiOutlinedInput-root': {
+                                    backgroundColor: 'rgba(26, 43, 51, 0.8)',
+                                    '& .MuiOutlinedInput-notchedOutline': {
+                                        borderColor: 'rgba(86, 255, 158, 0.3)',
+                                        borderWidth: '1px'
+                                    },
+                                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                                        borderColor: 'rgba(86, 255, 158, 0.5)'
+                                    },
+                                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                        borderColor: '#56FF9E'
+                                    }
+                                },
+                                '& .MuiOutlinedInput-input': {
+                                    color: '#FFFFFF',
+                                    fontSize: '0.85rem',
+                                    '&::placeholder': {
+                                        color: '#B0BEC5',
+                                        opacity: 0.7
+                                    }
+                                }
+                            }}
+                        />
+                    </Grid>
+                    <Grid item xs={12} sm={6} sx={{ width: '50%' }}>
+                        <TextField
+                            label="Idade"
+                            placeholder="Idade do paciente"
+                            variant="outlined"
+                            fullWidth
+                            type="number"
+                            value={formData.idade}
+                            onChange={handleInputChange('idade')}
+                            sx={{
+                                '& .MuiInputLabel-root': {
+                                    color: '#B0BEC5',
+                                    fontSize: '0.85rem',
+                                    '&.Mui-focused': { color: '#56FF9E' }
+                                },
+                                '& .MuiOutlinedInput-root': {
+                                    backgroundColor: 'rgba(26, 43, 51, 0.8)',
+                                    '& .MuiOutlinedInput-notchedOutline': {
+                                        borderColor: 'rgba(86, 255, 158, 0.3)',
+                                        borderWidth: '1px'
+                                    },
+                                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                                        borderColor: 'rgba(86, 255, 158, 0.5)'
+                                    },
+                                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                        borderColor: '#56FF9E'
+                                    }
+                                },
+                                '& .MuiOutlinedInput-input': {
+                                    color: '#FFFFFF',
+                                    fontSize: '0.85rem',
+                                    '&::placeholder': {
+                                        color: '#B0BEC5',
+                                        opacity: 0.7
+                                    }
+                                }
+                            }}
+                        />
+                    </Grid>
+                </Grid>
+
+                {/* Campo Status */}
+                <FormControl
                     fullWidth
-                    value={formData.foco}
-                    onChange={handleInputChange('foco')}
-                    sx={{
-                        mb: 1.5,
-                        '& .MuiInputLabel-root': {
+                    sx={{ mb: 1 }}
+                >
+                    <InputLabel
+                        sx={{
                             color: '#B0BEC5',
                             fontSize: '0.85rem',
                             '&.Mui-focused': { color: '#56FF9E' }
-                        },
-                        '& .MuiOutlinedInput-root': {
-                            backgroundColor: 'rgba(26, 43, 51, 0.8)',
+                        }}
+                    >
+                        Status do Paciente
+                    </InputLabel>
+                    <Select
+                        value={formData.status}
+                        onChange={handleInputChange('status')}
+                        label="Status do Paciente"
+                        sx={{
                             '& .MuiOutlinedInput-notchedOutline': {
                                 borderColor: 'rgba(86, 255, 158, 0.3)',
                                 borderWidth: '1px'
@@ -218,31 +347,140 @@ export default function CreateRoomPage() {
                             },
                             '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
                                 borderColor: '#56FF9E'
+                            },
+                            '& .MuiSelect-select': {
+                                color: '#FFFFFF',
+                                backgroundColor: 'rgba(26, 43, 51, 0.8)',
+                                fontSize: '0.85rem'
                             }
-                        },
-                        '& .MuiOutlinedInput-input': {
-                            color: '#FFFFFF',
-                            fontSize: '0.85rem',
-                            '&::placeholder': {
-                                color: '#B0BEC5',
-                                opacity: 0.7
+                        }}
+                        MenuProps={{
+                            PaperProps: {
+                                sx: {
+                                    backgroundColor: 'rgba(26, 43, 51, 0.95)',
+                                    backdropFilter: 'blur(10px)',
+                                    border: '1px solid rgba(86, 255, 158, 0.3)',
+                                    borderRadius: 2,
+                                    '& .MuiMenuItem-root': {
+                                        color: '#FFFFFF',
+                                        '&:hover': {
+                                            backgroundColor: 'rgba(86, 255, 158, 0.1)'
+                                        },
+                                        '&.Mui-selected': {
+                                            backgroundColor: 'rgba(86, 255, 158, 0.2)',
+                                            '&:hover': {
+                                                backgroundColor: 'rgba(86, 255, 158, 0.3)'
+                                            }
+                                        }
+                                    }
+                                }
                             }
-                        }
-                    }}
-                />
+                        }}
+                    >
+                        <MenuItem value="estavel">Estável</MenuItem>
+                        <MenuItem value="critico">Crítico</MenuItem>
+                        <MenuItem value="observacao">Em Observação</MenuItem>
+                        <MenuItem value="alta">Alta Médica</MenuItem>
+                        <MenuItem value="internado">Internado</MenuItem>
+                    </Select>
+                </FormControl>
+
+                {/* Grid com Foco e Restrições */}
+                <Grid container spacing={1.5} sx={{ mb: 1, width: '100%', flexWrap: 'nowrap'  }}>
+                    <Grid item xs={12} sm={6} sx={{ width: '50%' }}>
+                        <TextField
+                            label="Foco da Consulta"
+                
+                            multiline
+                            rows={1}
+                            variant="outlined"
+                            fullWidth
+                            value={formData.foco}
+                            onChange={handleInputChange('foco')}
+                            sx={{
+                                '& .MuiInputLabel-root': {
+                                    color: '#B0BEC5',
+                                    fontSize: '0.85rem',
+                                    '&.Mui-focused': { color: '#56FF9E' }
+                                },
+                                '& .MuiOutlinedInput-root': {
+                                    backgroundColor: 'rgba(26, 43, 51, 0.8)',
+                                    '& .MuiOutlinedInput-notchedOutline': {
+                                        borderColor: 'rgba(86, 255, 158, 0.3)',
+                                        borderWidth: '1px'
+                                    },
+                                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                                        borderColor: 'rgba(86, 255, 158, 0.5)'
+                                    },
+                                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                        borderColor: '#56FF9E'
+                                    }
+                                },
+                                '& .MuiOutlinedInput-input': {
+                                    color: '#FFFFFF',
+                                    fontSize: '0.85rem',
+                                    '&::placeholder': {
+                                        color: '#B0BEC5',
+                                        opacity: 0.7
+                                    }
+                                }
+                            }}
+                        />
+                    </Grid>
+                    <Grid item xs={12} sm={6} sx={{ width: '50%' }}>
+                        <TextField
+                            label="Restrições"
+             
+                            multiline
+                            rows={1}
+                            variant="outlined"
+                            fullWidth
+                            value={formData.restricoes}
+                            onChange={handleInputChange('restricoes')}
+                            sx={{
+                                '& .MuiInputLabel-root': {
+                                    color: '#B0BEC5',
+                                    fontSize: '0.85rem',
+                                    '&.Mui-focused': { color: '#56FF9E' }
+                                },
+                                '& .MuiOutlinedInput-root': {
+                                    backgroundColor: 'rgba(26, 43, 51, 0.8)',
+                                    '& .MuiOutlinedInput-notchedOutline': {
+                                        borderColor: 'rgba(86, 255, 158, 0.3)',
+                                        borderWidth: '1px'
+                                    },
+                                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                                        borderColor: 'rgba(86, 255, 158, 0.5)'
+                                    },
+                                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                        borderColor: '#56FF9E'
+                                    }
+                                },
+                                '& .MuiOutlinedInput-input': {
+                                    color: '#FFFFFF',
+                                    fontSize: '0.85rem',
+                                    '&::placeholder': {
+                                        color: '#B0BEC5',
+                                        opacity: 0.7
+                                    }
+                                }
+                            }}
+                        />
+                    </Grid>
+                </Grid>
 
                 {/* Campo Histórico Prévio */}
                 <TextField
                     label="Histórico Médico Prévio"
                     placeholder="Descreva o histórico médico relevante..."
                     multiline
-                    rows={2}
+                    rows={1.5}
                     variant="outlined"
                     fullWidth
                     value={formData.historico_previo}
                     onChange={handleInputChange('historico_previo')}
                     sx={{
-                        mb: 2,
+                        mb: 1.5,
                         '& .MuiInputLabel-root': {
                             color: '#B0BEC5',
                             fontSize: '0.85rem',
@@ -276,7 +514,7 @@ export default function CreateRoomPage() {
                 <Box
                     sx={{
                         display: 'flex',
-                        gap: 2,
+                        gap: 1.5,
                         width: '100%',
                         flexDirection: { xs: 'column', sm: 'row' },
                         justifyContent: 'center'
@@ -288,10 +526,10 @@ export default function CreateRoomPage() {
                         onClick={handleSubmit}
                         sx={{
                             flex: { xs: 'none', sm: 1 },
-                            maxWidth: { sm: '160px' },
-                            py: 0.8,
-                            px: 2.5,
-                            fontSize: '0.85rem',
+                            maxWidth: { sm: '140px' },
+                            py: 0.7,
+                            px: 2,
+                            fontSize: '0.8rem',
                             fontWeight: 600,
                             borderRadius: 3,
                             background: 'linear-gradient(135deg, #56FF9E 0%, #3EE67A 100%)',
