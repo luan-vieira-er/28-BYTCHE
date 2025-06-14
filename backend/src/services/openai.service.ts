@@ -1,4 +1,4 @@
-import { verifyRoom } from "../repository/room.repository";
+import { getRoom, updateRoomHistory, verifyRoom } from "../repository/room.repository";
 
 const axios = require('axios');
 require('dotenv').config();
@@ -36,17 +36,10 @@ const functions = [
 ];
 
 export const startChat = async (roomId) => {
-  //Busca essas variáveis pelo roomId
-  let existRoom = await verifyRoom(roomId);
-  if(!existRoom) return null
+  let room = await getRoom(roomId);
+  if(!room) return null
   
-  const finalidade = "primeira consulta";
-  const perfil_paciente = "Criança de 7 anos, tímida, dificuldade em socializar na escola.";
-  const restricoes = "Não falar sobre separação dos pais.";
-  const foco = "emocional e social";
-  const historico_previo = "Relato da escola indica episódios de choro frequente e isolamento durante o recreio.";
-  const nome_paciente = "juninho"
-  const idade = "10"
+  const { finalidade,  perfil_paciente,  restricoes,  foco,  historico_previo,  nome_paciente,  idade } = room;
 
   const systemPrompt = `
     Você é um psicólogo infantil virtual muito gentil, carinhoso e acolhedor. Vai conversar com uma criança usando linguagem simples, respeitosa e afetuosa. Seu objetivo é criar um espaço seguro para a criança se expressar sobre si mesma, seus sentimentos, seu corpo e sua rotina — sem julgamentos e sem pressão.
@@ -95,7 +88,8 @@ export const startChat = async (roomId) => {
     - Nunca diagnostique. Apenas ouça, acolha e registre.
     - Ao final, gere um resumo compreensível e estruturado para o profissional de saúde, com base no que a criança relatou.
     `;
-    console.log("🚀 ~ startChat ~ systemPrompt:", systemPrompt)
+
+    await updateRoomHistory(roomId, 'system', systemPrompt);
     
     try {
         const responseMessage = await axios.post(
@@ -118,7 +112,7 @@ export const startChat = async (roomId) => {
         const reply = responseMessage.data.choices[0].message.content;
         console.log("🚀 ~ startChat ~ reply:", reply)
 
-        // Gravar reply no history da consutla
+        await updateRoomHistory(roomId, 'assistant', reply);
         const responses = await generateOptions(reply);
         
 
@@ -130,10 +124,14 @@ export const startChat = async (roomId) => {
 
 export const sendMessage = async (roomId, message) => {
     try {
-        //buscar history pela roomId
-        const history = [];
+        let room = await getRoom(roomId);
+        if(!room) return null
+
+        await updateRoomHistory(roomId, 'user', message);
+
+        const { chat_history } = room;
         const messages = [
-            ...history,
+            ...chat_history,
             { role: 'user', content: message.toString() }
         ]
         console.log("🚀 ~ sendMessage ~ messages:", messages)
@@ -152,13 +150,13 @@ export const sendMessage = async (roomId, message) => {
       );
 
       const reply = response.data.choices[0].message.content;
-      // Gravar reply no history da consutla
-        const responses = await generateOptions(reply);
+      await updateRoomHistory(roomId, 'assistant', reply);
+    const responses = await generateOptions(reply);
     
 
         return { reply, choices: responses };
     } catch (err) {
-      console.error('Erro ao chamar OpenAI', err);
+      console.error('Erro ao chamar OpenAI', err.response.data);
     }
 };
 

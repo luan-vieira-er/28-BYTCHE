@@ -47,7 +47,7 @@ io.on('connection', (socket) => {
   });
 
   // Recebe mensagens e repassa para os membros da sala
-  socket.on('firstInteraction', async ({ roomId }) => {
+  socket.on('firstInteraction', async (roomId) => {
     let existRoom = verifyRoom(roomId);
     if(!existRoom) socket.emit('error', 'Sala não encontrada')
     const response = await startChat(roomId);
@@ -60,9 +60,10 @@ io.on('connection', (socket) => {
   });
 
   // Recebe mensagens e repassa para os membros da sala
-  socket.on('messageReceived', async ({ roomId, message }) => {
+  socket.on('patientSendMessage', async (roomId, message) => {
     let existRoom = await verifyRoom(roomId);
     if(!existRoom) return socket.emit('error', 'Sala não encontrada')
+      io.to(roomId).emit('newMessage', { sender: socket.id, message: message })
     const response = await sendMessage(roomId, message);
     if (response){
       const { reply, choices } = response
