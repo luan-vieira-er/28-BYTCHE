@@ -1,47 +1,110 @@
 import { Button, InputAdornment, TextField, Divider, Box, Typography } from "@mui/material";
 import { useRouter } from 'next/router';
+import { useState } from 'react';
 
 export default function LoginPage() {
     const router = useRouter();
 
-    const handleEndAdornmentClick = () => {
-        // Substitua '/sua-rota' pela rota que você deseja navegar
-        router.push('/sua-rota');
+    // Estado para armazenar os dados do formulário
+    const [formData, setFormData] = useState({
+        email: '',
+        password: ''
+    });
+
+    // Função para atualizar os campos do formulário
+    const handleInputChange = (field) => (event) => {
+        setFormData(prev => ({
+            ...prev,
+            [field]: event.target.value
+        }));
     };
 
+    // Função para lidar com o login
+    const handleLogin = () => {
+        console.log('Dados do login:', formData);
+
+        // Validação básica
+        if (!formData.email || !formData.password) {
+            alert('Por favor, preencha todos os campos');
+            return;
+        }
+
+        // Aqui você pode fazer a chamada para a API de login
+        // Exemplo:
+        // loginUser(formData.email, formData.password);
+
+        alert(`Login realizado com:\nEmail: ${formData.email}\nSenha: ${formData.password}`);
+    };
+
+    // Função para lidar com a criação de conta
+    const handleCreateAccount = () => {
+        console.log('Criar conta clicado');
+        // Aqui você pode redirecionar para a página de cadastro
+        // ou abrir um modal de cadastro
+        alert('Redirecionando para criação de conta...');
+    };
+
+    const handleEndAdornmentClick = () => {
+        console.log('Esqueceu a senha clicado');
+        // Aqui você pode redirecionar para recuperação de senha
+        alert('Redirecionando para recuperação de senha...');
+    };
+    
+
     return (
-        <Box
-            sx={{
-                width: '100vw',
-                height: '100vh',
-                background: 'linear-gradient(135deg, #1a2332 0%, #131f24 100%)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontFamily: '"Press Start 2P", monospace',
-                padding: { xs: 2, sm: 3, md: 4 }
-            }}
-        >
+        <Box sx={{
+            minHeight: '100vh',
+            background: 'linear-gradient(135deg, #131F24 0%, #0A1015 100%)',
+            position: 'relative',
+            overflow: 'hidden',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            py: 4
+        }}>
+            {/* Background Effects */}
+            <Box sx={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: `
+                    radial-gradient(circle at 20% 80%, rgba(86, 255, 158, 0.1) 0%, transparent 50%),
+                    radial-gradient(circle at 80% 20%, rgba(86, 255, 158, 0.05) 0%, transparent 50%),
+                    radial-gradient(circle at 40% 40%, rgba(78, 205, 196, 0.05) 0%, transparent 50%)
+                `,
+                zIndex: 0
+            }} />
+
             <Box
                 sx={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: { xs: 3, sm: 4 },
-                    alignItems: 'center',
-                    width: { xs: '100%', sm: '400px', md: '450px' },
-                    maxWidth: '95vw'
+                    position: 'relative',
+                    zIndex: 1,
+                    width: { xs: '90%', sm: '400px', md: '450px' },
+                    maxWidth: '95vw',
+                    p: { xs: 3, sm: 4, md: 5 },
+                    borderRadius: 4,
+                    background: 'rgba(26, 43, 51, 0.6)',
+                    backdropFilter: 'blur(20px)',
+                    border: '1px solid rgba(86, 255, 158, 0.2)',
+                    boxShadow: '0 8px 32px rgba(0,0,0,0.3)'
                 }}
             >
                 {/* Título */}
                 <Typography
-                    variant="h1"
+                    variant="h2"
+                    component="h1"
                     sx={{
-                        fontSize: { xs: '1.8rem', sm: '2.2rem', md: '2.5rem' },
-                        fontWeight: 'normal',
-                        color: 'white',
+                        fontSize: { xs: '1.5rem', sm: '1.8rem', md: '2rem' },
+                        fontWeight: 700,
                         textAlign: 'center',
-                        fontFamily: '"Press Start 2P", monospace',
-                        marginBottom: { xs: 2, sm: 3 }
+                        mb: 2.5,
+                        background: 'linear-gradient(135deg, #56FF9E 0%, #4ECDC4 100%)',
+                        backgroundClip: 'text',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                        textShadow: '0 0 40px rgba(86, 255, 158, 0.3)'
                     }}
                 >
                     Entrar
@@ -49,42 +112,38 @@ export default function LoginPage() {
 
                 {/* Campo Email */}
                 <TextField
-                    placeholder="E-mail ou nome de usuário"
+                    label="E-mail ou usuário"
+                    placeholder="Digite seu e-mail ou nome de usuário"
                     variant="outlined"
                     fullWidth
+                    value={formData.email}
+                    onChange={handleInputChange('email')}
                     sx={{
+                        mb: 1.5,
+                        '& .MuiInputLabel-root': {
+                            color: '#B0BEC5',
+                            fontSize: '0.85rem',
+                            '&.Mui-focused': { color: '#56FF9E' }
+                        },
                         '& .MuiOutlinedInput-root': {
-                            backgroundColor: '#2a3940',
-                            borderRadius: '12px',
-                            fontSize: { xs: '12px', sm: '14px' },
-                            fontFamily: '"Press Start 2P", monospace',
-                            color: '#8fa3ad',
-                            border: 'none',
-                            '& fieldset': {
-                                border: 'none'
+                            backgroundColor: 'rgba(26, 43, 51, 0.8)',
+                            '& .MuiOutlinedInput-notchedOutline': {
+                                borderColor: 'rgba(86, 255, 158, 0.3)',
+                                borderWidth: '1px'
                             },
-                            '&:hover fieldset': {
-                                border: 'none'
+                            '&:hover .MuiOutlinedInput-notchedOutline': {
+                                borderColor: 'rgba(86, 255, 158, 0.5)'
                             },
-                            '&.Mui-focused fieldset': {
-                                border: 'none'
-                            },
-                            '&:hover': {
-                                backgroundColor: '#334149'
-                            },
-                            '&.Mui-focused': {
-                                backgroundColor: '#334149'
+                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                borderColor: '#56FF9E'
                             }
                         },
                         '& .MuiOutlinedInput-input': {
-                            padding: { xs: '14px 16px', sm: '16px 18px' },
-                            color: '#8fa3ad',
-                            fontFamily: '"Press Start 2P", monospace',
-                            fontSize: { xs: '10px', sm: '12px' },
+                            color: '#FFFFFF',
+                            fontSize: '0.85rem',
                             '&::placeholder': {
-                                color: '#8fa3ad',
-                                opacity: 1,
-                                fontFamily: '"Press Start 2P", monospace'
+                                color: '#B0BEC5',
+                                opacity: 0.7
                             }
                         }
                     }}
@@ -92,43 +151,39 @@ export default function LoginPage() {
 
                 {/* Campo Senha */}
                 <TextField
-                    placeholder="Senha"
+                    label="Senha"
+                    placeholder="Digite sua senha"
                     type="password"
                     variant="outlined"
                     fullWidth
+                    value={formData.password}
+                    onChange={handleInputChange('password')}
                     sx={{
+                        mb: 2,
+                        '& .MuiInputLabel-root': {
+                            color: '#B0BEC5',
+                            fontSize: '0.85rem',
+                            '&.Mui-focused': { color: '#56FF9E' }
+                        },
                         '& .MuiOutlinedInput-root': {
-                            backgroundColor: '#2a3940',
-                            borderRadius: '12px',
-                            fontSize: { xs: '12px', sm: '14px' },
-                            fontFamily: '"Press Start 2P", monospace',
-                            color: '#8fa3ad',
-                            border: 'none',
-                            '& fieldset': {
-                                border: 'none'
+                            backgroundColor: 'rgba(26, 43, 51, 0.8)',
+                            '& .MuiOutlinedInput-notchedOutline': {
+                                borderColor: 'rgba(86, 255, 158, 0.3)',
+                                borderWidth: '1px'
                             },
-                            '&:hover fieldset': {
-                                border: 'none'
+                            '&:hover .MuiOutlinedInput-notchedOutline': {
+                                borderColor: 'rgba(86, 255, 158, 0.5)'
                             },
-                            '&.Mui-focused fieldset': {
-                                border: 'none'
-                            },
-                            '&:hover': {
-                                backgroundColor: '#334149'
-                            },
-                            '&.Mui-focused': {
-                                backgroundColor: '#334149'
+                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                borderColor: '#56FF9E'
                             }
                         },
                         '& .MuiOutlinedInput-input': {
-                            padding: { xs: '14px 16px', sm: '16px 18px' },
-                            color: '#8fa3ad',
-                            fontFamily: '"Press Start 2P", monospace',
-                            fontSize: { xs: '10px', sm: '12px' },
+                            color: '#FFFFFF',
+                            fontSize: '0.85rem',
                             '&::placeholder': {
-                                color: '#8fa3ad',
-                                opacity: 1,
-                                fontFamily: '"Press Start 2P", monospace'
+                                color: '#B0BEC5',
+                                opacity: 0.7
                             }
                         }
                     }}
@@ -140,14 +195,12 @@ export default function LoginPage() {
                                         onClick={handleEndAdornmentClick}
                                         style={{
                                             cursor: 'pointer',
-                                            color: '#6b7c87',
-                                            fontFamily: '"Press Start 2P", monospace',
-                                            fontSize: { xs: '8px', sm: '10px' },
-                                            transition: 'color 0.3s ease',
-                                            textTransform: 'uppercase'
+                                            color: '#B0BEC5',
+                                            fontSize: '0.75rem',
+                                            transition: 'color 0.3s ease'
                                         }}
-                                        onMouseEnter={(e) => e.target.style.color = '#8fa3ad'}
-                                        onMouseLeave={(e) => e.target.style.color = '#6b7c87'}
+                                        onMouseEnter={(e) => e.target.style.color = '#56FF9E'}
+                                        onMouseLeave={(e) => e.target.style.color = '#B0BEC5'}
                                     >
                                         Esqueceu?
                                     </span>
@@ -161,23 +214,26 @@ export default function LoginPage() {
                 <Button
                     variant="contained"
                     fullWidth
+                    onClick={handleLogin}
                     sx={{
-                        backgroundColor: '#56FF9E',
-                        color: '#1a2332',
-                        borderRadius: '12px',
-                        padding: { xs: '12px 0', sm: '14px 0', md: '16px 0' },
-                        fontSize: { xs: '12px', sm: '14px', md: '16px' },
-                        fontWeight: 'normal',
-                        fontFamily: '"Press Start 2P", monospace',
-                        textTransform: 'uppercase',
-                        boxShadow: 'none',
+                        py: 1.2,
+                        px: 4,
+                        fontSize: '1rem',
+                        fontWeight: 600,
+                        borderRadius: 3,
+                        background: 'linear-gradient(135deg, #56FF9E 0%, #3EE67A 100%)',
+                        color: '#131F24',
+                        boxShadow: '0 4px 15px rgba(86, 255, 158, 0.4)',
+                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                        mb: 2,
                         '&:hover': {
-                            backgroundColor: '#4ade80',
-                            boxShadow: 'none'
+                            background: 'linear-gradient(135deg, #3EE67A 0%, #2DD865 100%)',
+                            boxShadow: '0 8px 25px rgba(86, 255, 158, 0.5)',
+                            transform: 'translateY(-2px)'
                         }
                     }}
                 >
-                    ENTRAR
+                    Entrar
                 </Button>
 
                 {/* Separador OU */}
@@ -186,23 +242,22 @@ export default function LoginPage() {
                         display: 'flex',
                         alignItems: 'center',
                         width: '100%',
-                        my: { xs: 2, sm: 3 }
+                        my: 2
                     }}
                 >
                     <Divider
                         sx={{
                             flex: 1,
-                            borderColor: '#3a4a57',
+                            borderColor: 'rgba(86, 255, 158, 0.3)',
                             borderWidth: '1px'
                         }}
                     />
                     <Typography
                         sx={{
                             mx: 3,
-                            color: '#6b7c87',
-                            fontSize: { xs: '10px', sm: '12px' },
-                            fontFamily: '"Press Start 2P", monospace',
-                            textTransform: 'uppercase'
+                            color: '#B0BEC5',
+                            fontSize: '0.85rem',
+                            fontWeight: 500
                         }}
                     >
                         OU
@@ -210,22 +265,39 @@ export default function LoginPage() {
                     <Divider
                         sx={{
                             flex: 1,
-                            borderColor: '#3a4a57',
+                            borderColor: 'rgba(86, 255, 158, 0.3)',
                             borderWidth: '1px'
                         }}
                     />
                 </Box>
 
-                {/* Botões de redes sociais */}
+                {/* Botão Criar Conta */}
                 <Box
                     sx={{
                         display: 'flex',
-                        gap: { xs: 2, sm: 3 },
-                        width: '100%',
-                        flexDirection: { xs: 'column', sm: 'row' }
+                        justifyContent: 'center',
+                        width: '100%'
                     }}
                 >
-                    <Button variant="text" className="flex w-full">
+                    <Button
+                        variant="outlined"
+                        onClick={handleCreateAccount}
+                        sx={{
+                            py: 1,
+                            px: 3,
+                            fontSize: '0.9rem',
+                            fontWeight: 600,
+                            borderRadius: 3,
+                            border: '2px solid #56FF9E',
+                            color: '#56FF9E',
+                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                            '&:hover': {
+                                backgroundColor: 'rgba(86, 255, 158, 0.1)',
+                                border: '2px solid #3EE67A',
+                                transform: 'translateY(-2px)'
+                            }
+                        }}
+                    >
                         Criar uma conta
                     </Button>
                 </Box>
