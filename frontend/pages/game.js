@@ -42,11 +42,27 @@ export default function Game() {
   const [showGame, setShowGame] = useState(false)
   const [playerConfig, setPlayerConfig] = useState(null)
 
+  // Verificar se há configuração salva para este código
+  const getStorageKey = (code) => `doctorPixel-playerConfig-${code}`
+
   useEffect(() => {
     if (!code) {
       setError('Código de acesso não fornecido')
       setConnectionStatus('error')
       return
+    }
+
+    // Verificar se há configuração salva para este código
+    const savedConfig = localStorage.getItem(getStorageKey(code))
+    if (savedConfig) {
+      try {
+        const parsedConfig = JSON.parse(savedConfig)
+        console.log('🔄 Configuração encontrada para reload:', parsedConfig)
+        setPlayerConfig(parsedConfig)
+      } catch (err) {
+        console.warn('⚠️ Erro ao carregar configuração salva:', err)
+        localStorage.removeItem(getStorageKey(code))
+      }
     }
 
     // Conectar ao WebSocket com o código de acesso
@@ -74,7 +90,24 @@ export default function Game() {
         websocketService.on('patientJoined', (message) => {
           console.log('✅ Paciente entrou na sala:', message)
           setConnectionStatus('ready')
-          setShowConfigStepper(true)
+
+          // Verificar se já há configuração salva
+          const savedConfig = localStorage.getItem(getStorageKey(code))
+          if (savedConfig) {
+            try {
+              const parsedConfig = JSON.parse(savedConfig)
+              console.log('🎮 Configuração encontrada, indo direto para o jogo:', parsedConfig)
+              setPlayerConfig(parsedConfig)
+              setShowGame(true)
+            } catch (err) {
+              console.warn('⚠️ Erro ao carregar configuração salva:', err)
+              localStorage.removeItem(getStorageKey(code))
+              setShowConfigStepper(true)
+            }
+          } else {
+            console.log('⚙️ Nenhuma configuração encontrada, mostrando ConfigStepper')
+            setShowConfigStepper(true)
+          }
         })
 
         // Fallback - se não receber resposta em 5 segundos, assumir sucesso para desenvolvimento
@@ -82,7 +115,24 @@ export default function Game() {
           if (connectionStatus === 'connecting') {
             console.log('⚠️ Timeout - assumindo sucesso para desenvolvimento')
             setConnectionStatus('ready')
-            setShowConfigStepper(true)
+
+            // Verificar se já há configuração salva
+            const savedConfig = localStorage.getItem(getStorageKey(code))
+            if (savedConfig) {
+              try {
+                const parsedConfig = JSON.parse(savedConfig)
+                console.log('🎮 Configuração encontrada no timeout, indo direto para o jogo:', parsedConfig)
+                setPlayerConfig(parsedConfig)
+                setShowGame(true)
+              } catch (err) {
+                console.warn('⚠️ Erro ao carregar configuração salva no timeout:', err)
+                localStorage.removeItem(getStorageKey(code))
+                setShowConfigStepper(true)
+              }
+            } else {
+              console.log('⚙️ Nenhuma configuração encontrada no timeout, mostrando ConfigStepper')
+              setShowConfigStepper(true)
+            }
           }
         }, 5000)
 
@@ -104,10 +154,20 @@ export default function Game() {
   }, [code])
 
   const handleGoBack = () => {
+    // Limpar configuração salva ao sair do jogo
+    if (code) {
+      localStorage.removeItem(getStorageKey(code))
+      console.log('🗑️ Configuração removida ao sair do jogo')
+    }
     router.push('/')
   }
 
   const handleConfigStepperComplete = (config) => {
+    console.log('💾 Salvando configuração do jogador:', config)
+
+    // Salvar configuração no localStorage para este código específico
+    localStorage.setItem(getStorageKey(code), JSON.stringify(config))
+
     setPlayerConfig(config)
     setShowConfigStepper(false)
     setShowGame(true)
@@ -116,6 +176,18 @@ export default function Game() {
   const handleConfigStepperClose = () => {
     // Se o usuário fechar o stepper sem completar, volta para a landing page
     router.push('/')
+  }
+
+  const handleReconfigure = () => {
+    console.log('🔄 Reconfigurando personagem...')
+    // Limpar configuração salva
+    if (code) {
+      localStorage.removeItem(getStorageKey(code))
+    }
+    // Voltar para o ConfigStepper
+    setPlayerConfig(null)
+    setShowGame(false)
+    setShowConfigStepper(true)
   }
 
   if (connectionStatus === 'error') {
@@ -211,6 +283,7 @@ export default function Game() {
           accessCode={code}
           playerConfig={playerConfig}
           onExit={handleGoBack}
+          onReconfigure={handleReconfigure}
         />
       </>
     )

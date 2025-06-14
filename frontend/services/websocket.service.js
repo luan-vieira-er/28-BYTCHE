@@ -101,17 +101,18 @@ class WebSocketService {
   }
 
   // Send event to server
-  emit(event, data) {
+  emit(event, data, message) {
     console.log('🔌 Tentando emitir evento:', event, {
       hasSocket: !!this.socket,
       isConnected: this.isConnected,
       socketConnected: this.socket?.connected,
-      data
+      data,
+      message
     });
 
     if (this.socket && this.isConnected) {
       console.log('✅ Emitindo evento:', event, data);
-      this.socket.emit(event, data);
+      this.socket.emit(event, data, message);
     } else {
       console.warn('❌ Cannot emit event: WebSocket not connected', {
         hasSocket: !!this.socket,

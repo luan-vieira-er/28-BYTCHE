@@ -146,7 +146,9 @@ const DialogSystem = ({ dialog, onChoice, onClose }) => {
                           {index + 1}
                         </div>
                         <span className="text-gray-800 font-medium group-hover:text-gray-900">
-                          {option.text}
+                          {typeof option.text === 'string' ? option.text :
+                           typeof option.text === 'object' ? JSON.stringify(option.text) :
+                           String(option.text || 'Opção')}
                         </span>
                       </div>
                     </motion.button>

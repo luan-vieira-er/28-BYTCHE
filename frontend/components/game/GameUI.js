@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useGameStore } from '@/store/gameStore'
 
-const GameUI = ({ playerHealth, gameProgress, onExit, environmentName, showInstructions = true }) => {
+const GameUI = ({ playerHealth, gameProgress, onExit, onReconfigure, environmentName, showInstructions = true }) => {
   const [showMenu, setShowMenu] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
 
@@ -264,9 +264,9 @@ const GameUI = ({ playerHealth, gameProgress, onExit, environmentName, showInstr
               <div className="flex items-center space-x-2">
                 <span className="text-[#56FF9E] font-medium text-xs">🎮</span>
                 <div className="flex space-x-1">
-                  <kbd className="px-1.5 py-1 bg-gray-700/80 rounded text-xs font-mono text-white">↑↓←→</kbd>
+                  <kbd className="px-1.5 py-1 bg-gray-700/80 rounded text-xs font-mono text-white">↑ ↓ ← →</kbd>
                   <span className="text-gray-400 text-xs">ou</span>
-                  <kbd className="px-1.5 py-1 bg-gray-700/80 rounded text-xs font-mono text-white">WASD</kbd>
+                  <kbd className="px-1.5 py-1 bg-gray-700/80 rounded text-xs font-mono text-white">W A S D</kbd>
                 </div>
               </div>
 
@@ -353,6 +353,15 @@ const GameUI = ({ playerHealth, gameProgress, onExit, environmentName, showInstr
                 >
                   📖 Como Jogar
                 </button>
+
+                {onReconfigure && (
+                  <button
+                    onClick={onReconfigure}
+                    className="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white py-3 rounded-xl font-medium hover:from-blue-600 hover:to-purple-600 transition-all"
+                  >
+                    ⚙️ Reconfigurar Personagem
+                  </button>
+                )}
 
                 <button
                   onClick={onExit}
