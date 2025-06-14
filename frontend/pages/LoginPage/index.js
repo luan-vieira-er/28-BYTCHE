@@ -1,6 +1,7 @@
 import { Button, InputAdornment, TextField, Divider, Box, Typography } from "@mui/material";
 import { useRouter } from 'next/router';
 import { useState } from 'react';
+import apiService from '../../services/api.service';
 
 export default function LoginPage() {
     const router = useRouter();
@@ -20,7 +21,7 @@ export default function LoginPage() {
     };
 
     // Função para lidar com o login
-    const handleLogin = () => {
+    const handleLogin = async () => {
         console.log('Dados do login:', formData);
 
         // Validação básica
@@ -29,19 +30,54 @@ export default function LoginPage() {
             return;
         }
 
-        // Aqui você pode fazer a chamada para a API de login
-        // Exemplo:
-        // loginUser(formData.email, formData.password);
+        try {
+            // Chamada para a API de login
+            const response = await apiService.loginMedic({
+                name: formData.email, // O backend espera 'nome'
+                password: formData.password
+            });
 
-        alert(`Login realizado com:\nEmail: ${formData.email}\nSenha: ${formData.password}`);
+            if (response.success) {
+                alert('Login realizado com sucesso!');
+                // Redirecionar para a página principal
+                router.push('/');
+            } else {
+                alert(response.message || 'Erro no login');
+            }
+        } catch (error) {
+            console.error('Erro no login:', error);
+            alert('Erro ao fazer login. Verifique suas credenciais.');
+        }
     };
 
     // Função para lidar com a criação de conta
-    const handleCreateAccount = () => {
+    const handleCreateAccount = async () => {
         console.log('Criar conta clicado');
-        // Aqui você pode redirecionar para a página de cadastro
-        // ou abrir um modal de cadastro
-        alert('Redirecionando para criação de conta...');
+
+        // Validação básica
+        if (!formData.email || !formData.password) {
+            alert('Por favor, preencha todos os campos para criar uma conta');
+            return;
+        }
+
+        try {
+            // Chamada para a API de criação de médico
+            const response = await apiService.createMedic({
+                name: formData.email,
+                password: formData.password
+            });
+
+            if (response.success) {
+                alert('Conta criada com sucesso! Agora você pode fazer login.');
+                // Limpar o formulário
+                setFormData({ email: '', password: '' });
+            } else {
+                alert(response.message || 'Erro ao criar conta');
+            }
+        } catch (error) {
+            console.error('Erro ao criar conta:', error);
+            alert('Erro ao criar conta. Tente novamente.');
+        }
     };
 
     const handleEndAdornmentClick = () => {

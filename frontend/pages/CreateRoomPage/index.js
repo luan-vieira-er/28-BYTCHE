@@ -1,14 +1,19 @@
 import { Button, TextField, Box, Typography, Select, MenuItem, FormControl, InputLabel } from "@mui/material";
 import { useRouter } from 'next/router';
 import { useState } from 'react';
+import apiService from '../../services/api.service';
 
 export default function CreateRoomPage() {
     const router = useRouter();
     const [formData, setFormData] = useState({
         tipo_consulta: '',
         perfil_paciente: '',
+        restricoes: '',
         foco: '',
-        historico_previo: ''
+        historico_previo: '',
+        nome_paciente: '',
+        idade: '',
+        status: '',
     });
 
     const handleInputChange = (field) => (event) => {
@@ -18,9 +23,49 @@ export default function CreateRoomPage() {
         });
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         console.log('Dados do formulário:', formData);
-        // Aqui você pode adicionar a lógica para enviar os dados
+
+        // Validação básica
+        if (!formData.tipo_consulta || !formData.perfil_paciente || !formData.foco) {
+            alert('Por favor, preencha todos os campos obrigatórios');
+            return;
+        }
+
+        try {
+            // Obter dados do usuário logado
+            const currentUser = apiService.getCurrentUser();
+            if (!currentUser) {
+                alert('Você precisa estar logado para criar uma consulta');
+                router.push('/LoginPage');
+                return;
+            }
+
+            // Preparar dados para envio
+            const roomData = {
+                doctorId: currentUser.id,
+                finalidade: formData.tipo_consulta,
+                restricoes: formData.restricoes,
+                perfil_paciente: formData.perfil_paciente,
+                foco: formData.foco,
+                historico_previo: formData.historico_previo || '',
+                status: 'AGUARDANDO'
+            };
+
+            // Chamada para a API de criação de sala
+            const response = await apiService.createRoom(roomData);
+
+            if (response.success) {
+                alert('Consulta criada com sucesso!');
+                // Redirecionar para a página principal ou lista de salas
+                router.push('/');
+            } else {
+                alert(response.message || 'Erro ao criar consulta');
+            }
+        } catch (error) {
+            console.error('Erro ao criar consulta:', error);
+            alert('Erro ao criar consulta. Tente novamente.');
+        }
     };
 
     return (
@@ -192,6 +237,46 @@ export default function CreateRoomPage() {
 
                 {/* Campo Foco */}
                 <TextField
+                    label="Restrições"
+                    placeholder="Existem restrições ao falar com o paciente?"
+                    multiline
+                    rows={1.5}
+                    variant="outlined"
+                    fullWidth
+                    value={formData.foco}
+                    onChange={handleInputChange('foco')}
+                    sx={{
+                        mb: 1.5,
+                        '& .MuiInputLabel-root': {
+                            color: '#B0BEC5',
+                            fontSize: '0.85rem',
+                            '&.Mui-focused': { color: '#56FF9E' }
+                        },
+                        '& .MuiOutlinedInput-root': {
+                            backgroundColor: 'rgba(26, 43, 51, 0.8)',
+                            '& .MuiOutlinedInput-notchedOutline': {
+                                borderColor: 'rgba(86, 255, 158, 0.3)',
+                                borderWidth: '1px'
+                            },
+                            '&:hover .MuiOutlinedInput-notchedOutline': {
+                                borderColor: 'rgba(86, 255, 158, 0.5)'
+                            },
+                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                borderColor: '#56FF9E'
+                            }
+                        },
+                        '& .MuiOutlinedInput-input': {
+                            color: '#FFFFFF',
+                            fontSize: '0.85rem',
+                            '&::placeholder': {
+                                color: '#B0BEC5',
+                                opacity: 0.7
+                            }
+                        }
+                    }}
+                />
+
+                                <TextField
                     label="Foco da Consulta"
                     placeholder="Qual o foco principal desta consulta..."
                     multiline
@@ -199,7 +284,7 @@ export default function CreateRoomPage() {
                     variant="outlined"
                     fullWidth
                     value={formData.foco}
-                    onChange={handleInputChange('foco')}
+                    onChange={handleInputChange('restricoes')}
                     sx={{
                         mb: 1.5,
                         '& .MuiInputLabel-root': {
