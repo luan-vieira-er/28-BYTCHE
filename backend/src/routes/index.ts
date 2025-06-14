@@ -7,6 +7,5 @@ const router = Router();
 
 router.get('/', getHome);
 
-router.post('/create-rooom', createRoom);
 
 export default router;

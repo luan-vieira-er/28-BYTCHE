@@ -1,16 +1,45 @@
+import { getRoom, updateRoomHistory, verifyRoom } from "../repository/room.repository";
+
 const axios = require('axios');
 require('dotenv').config();
 
-export const startChat = async (roomId) => {
-  //Busca essas variáveis pelo roomId
+const functions = [
+  {
+    name: "suggest_patient_responses",
+    description: "Gera opções de resposta para uma criança responder ao psicólogo virtual",
+    parameters: {
+      type: "object",
+      properties: {
+        responses: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              option: {
+                type: "string",
+                description: "Letra identificadora da opção (A, B, C, D)"
+              },
+              text: {
+                type: "string",
+                description: "Texto da resposta da criança, em linguagem simples"
+              }
+            },
+            required: ["option", "text"]
+          },
+          minItems: 4,
+          maxItems: 4
+        }
+      },
+      required: ["responses"]
+    }
+  }
+];
 
-  const finalidade = "primeira consulta";
-  const perfil_paciente = "Criança de 7 anos, tímida, dificuldade em socializar na escola.";
-  const restricoes = "Não falar sobre separação dos pais.";
-  const foco = "emocional e social";
-  const historico_previo = "Relato da escola indica episódios de choro frequente e isolamento durante o recreio.";
-  const nome_paciente = "juninho"
-  const idade = "10"
+export const startChat = async (roomId) => {
+  let room = await getRoom(roomId);
+  if(!room) return null
+  
+  const { finalidade,  perfil_paciente,  restricoes,  foco,  historico_previo,  nome_paciente,  idade } = room;
 
   const systemPrompt = `
     Você é um psicólogo infantil virtual muito gentil, carinhoso e acolhedor. Vai conversar com uma criança usando linguagem simples, respeitosa e afetuosa. Seu objetivo é criar um espaço seguro para a criança se expressar sobre si mesma, seus sentimentos, seu corpo e sua rotina — sem julgamentos e sem pressão.
@@ -59,36 +88,50 @@ export const startChat = async (roomId) => {
     - Nunca diagnostique. Apenas ouça, acolha e registre.
     - Ao final, gere um resumo compreensível e estruturado para o profissional de saúde, com base no que a criança relatou.
     `;
+
+    await updateRoomHistory(roomId, 'system', systemPrompt);
     
     try {
-        const response = await axios.post(
-        'https://api.openai.com/v1/chat/completions',
-        {
-          model: 'gpt-4o',
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: 'Envie a primeira mensagem, o paciente acabou de chegar, cumprimente-o e de as boas vindas' },
-          ]
-        },
-        {
-          headers: {
-            'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+        const responseMessage = await axios.post(
+            'https://api.openai.com/v1/chat/completions',
+            {
+            model: 'gpt-4o',
+            messages: [
+                { role: 'system', content: systemPrompt },
+                { role: 'user', content: 'Envie a primeira mensagem, o paciente acabou de chegar, cumprimente-o e de as boas vindas e pergunte como ele está.' },
+            ]
+            },
+            {
+            headers: {
+                'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+                'Content-Type': 'application/json',
+            },
+            }
+        );
 
-      const reply = response.data.choices[0].message.content;
-      return reply
+        const reply = responseMessage.data.choices[0].message.content;
+        console.log("🚀 ~ startChat ~ reply:", reply)
+
+        await updateRoomHistory(roomId, 'assistant', reply);
+        const responses = await generateOptions(reply);
+        
+
+            return { reply, choices: responses };
     } catch (error) {
         console.log("🚀 ~ startChat ~ error:", error)
     }
 };
 
-export const sendMessage = async (history, message) => {
+export const sendMessage = async (roomId, message) => {
     try {
+        let room = await getRoom(roomId);
+        if(!room) return null
+
+        await updateRoomHistory(roomId, 'user', message);
+
+        const { chat_history } = room;
         const messages = [
-            ...history,
+            ...chat_history,
             { role: 'user', content: message.toString() }
         ]
         console.log("🚀 ~ sendMessage ~ messages:", messages)
@@ -107,8 +150,46 @@ export const sendMessage = async (history, message) => {
       );
 
       const reply = response.data.choices[0].message.content;
-      console.log("🚀 ~ sendMessage ~ reply:", reply)
+      await updateRoomHistory(roomId, 'assistant', reply);
+    const responses = await generateOptions(reply);
+    
+
+        return { reply, choices: responses };
     } catch (err) {
-      console.error('Erro ao chamar OpenAI', err);
+      console.error('Erro ao chamar OpenAI', err.response.data);
     }
 };
+
+const generateOptions = async (originalMessage) => {
+    try {
+    const responseChoices = await axios.post(
+        'https://api.openai.com/v1/chat/completions',
+        {
+            model: 'gpt-4o',
+            messages: [
+            {
+                role: 'user',
+                content: `Considere a seguinte resposta do psicólogo: "${originalMessage}".
+                    Gere 4 opções de resposta possíveis para a criança, em linguagem simples e amigável.
+                    Elas podem ser positivas ou negativas, dependendo do contexto.
+                    Adicione emoji em todas elas
+                `
+            }
+            ],
+            functions: functions,
+            function_call: { name: "suggest_patient_responses" }
+        },
+        {
+            headers: {
+            'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+            'Content-Type': 'application/json',
+            },
+        }
+        );
+
+        const parsedFunctionCall = JSON.parse(responseChoices.data.choices[0].message.function_call.arguments);
+        return parsedFunctionCall.responses
+    } catch (error) {
+        console.log("🚀 ~ generateOptions ~ error:", error)
+    }
+}

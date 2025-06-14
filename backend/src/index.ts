@@ -2,12 +2,20 @@ import express from 'express';
 import router from './routes';
 import { createServer } from 'http';
 import { Server } from 'socket.io'
-import { startChat } from './services/openai.service'
+import { startChat, sendMessage } from './services/openai.service'
+import axios from 'axios';
+import { verifyRoom } from './repository/room.repository';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+
+
+
 app.use(express.json());
+
+// Mount all routes
+app.use('/api', router);
 
 const server = createServer(app);
 
@@ -17,15 +25,20 @@ io.on('connection', (socket) => {
   console.log('🟢 Novo cliente conectado:', socket.id);
 
   // Recebe o ID da sala e entra
-  socket.on('doctorJoinRoom', (roomId) => {
+  socket.on('doctorJoinRoom', async (roomId) => {
     // Buscar no Json Server se existe a Room Id
+    let existRoom = await verifyRoom(roomId);
+    if(!existRoom) return socket.emit('error', 'Sala não encontrada')
+    // Cria a sala
     socket.join(roomId);
     console.log(`Socket ${socket.id} entrou na sala ${roomId}`);
   });
 
   // Recebe o ID da sala e entra
-  socket.on('patientJoinRoom', (roomId) => {
+  socket.on('patientJoinRoom', async (roomId) => {
     // Buscar no Json Server se existe a Room Id
+     let existRoom = await verifyRoom(roomId);
+    if(!existRoom) return socket.emit('error', 'Sala não encontrada')
     socket.join(roomId);
     console.log(`Socket ${socket.id} entrou na sala ${roomId}`);
 
@@ -34,9 +47,30 @@ io.on('connection', (socket) => {
   });
 
   // Recebe mensagens e repassa para os membros da sala
-  socket.on('firstInteraction', ({ roomId }) => {
-    const firstMessage = startChat(roomId);
-    io.to(roomId).emit('newMessage', { sender: socket.id, firstMessage });
+  socket.on('firstInteraction', async (roomId) => {
+    let existRoom = verifyRoom(roomId);
+    if(!existRoom) socket.emit('error', 'Sala não encontrada')
+    const response = await startChat(roomId);
+    if (response){
+      const { reply, choices } = response
+      io.to(roomId).emit('newMessage', { sender: socket.id, message: {
+        reply, choices
+      } });
+    }
+  });
+
+  // Recebe mensagens e repassa para os membros da sala
+  socket.on('patientSendMessage', async (roomId, message) => {
+    let existRoom = await verifyRoom(roomId);
+    if(!existRoom) return socket.emit('error', 'Sala não encontrada')
+      io.to(roomId).emit('newMessage', { sender: socket.id, message: message })
+    const response = await sendMessage(roomId, message);
+    if (response){
+      const { reply, choices } = response
+      io.to(roomId).emit('newMessage', { sender: socket.id, message: {
+        reply, choices
+      } });
+    }
   });
 
   socket.on('disconnect', () => {
@@ -44,11 +78,6 @@ io.on('connection', (socket) => {
   });
 });
 
-
-
-// Mount all routes
-app.use('/api', router);
-
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

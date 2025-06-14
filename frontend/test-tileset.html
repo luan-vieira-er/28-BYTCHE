@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste do Tileset</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f0f0f0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .tileset-preview {
+            border: 2px solid #333;
+            margin: 20px 0;
+            display: inline-block;
+            background: #fff;
+        }
+        .tile-info {
+            margin: 10px 0;
+            padding: 10px;
+            background: #f9f9f9;
+            border-left: 4px solid #007acc;
+        }
+        .grid-overlay {
+            position: relative;
+            display: inline-block;
+        }
+        .grid-lines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            opacity: 0.3;
+        }
+        .tile-grid {
+            display: grid;
+            grid-template-columns: repeat(16, 20px);
+            gap: 1px;
+            margin: 20px 0;
+        }
+        .tile-cell {
+            width: 20px;
+            height: 20px;
+            border: 1px solid #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8px;
+            background: #f9f9f9;
+        }
+        .tile-cell:hover {
+            background: #007acc;
+            color: white;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Teste do Tileset Tiny Town</h1>
+        
+        <div class="tile-info">
+            <h3>Informações do Tileset:</h3>
+            <p><strong>Arquivo:</strong> /assets/tilesets/tiny-town-tileset.png</p>
+            <p><strong>Tamanho do Tile:</strong> 16x16 pixels</p>
+            <p><strong>Grid:</strong> 16 colunas x 8 linhas = 128 tiles</p>
+            <p><strong>Espaçamento:</strong> 0px</p>
+            <p><strong>Margem:</strong> 0px</p>
+        </div>
+
+        <h3>Preview do Tileset:</h3>
+        <div class="grid-overlay">
+            <img src="/assets/tilesets/tiny-town-tileset.png" 
+                 alt="Tiny Town Tileset" 
+                 class="tileset-preview"
+                 style="image-rendering: pixelated; transform: scale(3);">
+        </div>
+
+        <h3>Grid de IDs dos Tiles:</h3>
+        <p>Clique em um tile para ver seu ID:</p>
+        <div class="tile-grid" id="tileGrid">
+            <!-- Grid será gerado via JavaScript -->
+        </div>
+
+        <div id="selectedTile" class="tile-info" style="display: none;">
+            <h4>Tile Selecionado:</h4>
+            <p><strong>ID:</strong> <span id="tileId"></span></p>
+            <p><strong>Posição:</strong> Linha <span id="tileRow"></span>, Coluna <span id="tileCol"></span></p>
+            <p><strong>Nome:</strong> <span id="tileName"></span></p>
+        </div>
+    </div>
+
+    <script>
+        // Mapeamento dos nomes dos tiles baseado no TINY_TOWN_CONFIG
+        const tileNames = {
+            0: "GRASS_1", 1: "GRASS_2", 2: "GRASS_3", 3: "GRASS_4",
+            4: "DIRT_1", 5: "DIRT_2", 6: "STONE_1", 7: "STONE_2",
+            8: "WATER_1", 9: "WATER_2", 10: "SAND_1", 11: "SAND_2",
+            12: "FLOWER_1", 13: "FLOWER_2", 14: "TREE_SMALL", 15: "BUSH",
+            
+            16: "FLOOR_WOOD_1", 17: "FLOOR_WOOD_2", 18: "FLOOR_STONE_1", 19: "FLOOR_STONE_2",
+            20: "FLOOR_TILE_WHITE", 21: "FLOOR_TILE_BLUE", 22: "FLOOR_CARPET_RED", 23: "FLOOR_CARPET_BLUE",
+            24: "ROAD_HORIZONTAL", 25: "ROAD_VERTICAL", 26: "ROAD_CORNER_TL", 27: "ROAD_CORNER_TR",
+            28: "ROAD_CORNER_BL", 29: "ROAD_CORNER_BR", 30: "SIDEWALK_1", 31: "SIDEWALK_2",
+            
+            32: "WALL_BRICK_1", 33: "WALL_BRICK_2", 34: "WALL_WOOD_1", 35: "WALL_WOOD_2",
+            36: "WALL_STONE_1", 37: "WALL_STONE_2", 38: "WALL_HOSPITAL", 39: "WALL_WINDOW",
+            40: "DOOR_CLOSED", 41: "DOOR_OPEN", 42: "FENCE_1", 43: "FENCE_2",
+            44: "PILLAR_1", 45: "PILLAR_2", 46: "ROOF_1", 47: "ROOF_2",
+            
+            48: "TABLE_SMALL", 49: "TABLE_LARGE", 50: "CHAIR_1", 51: "CHAIR_2",
+            52: "BED_1", 53: "BED_2", 54: "DESK_1", 55: "DESK_2",
+            56: "BOOKSHELF", 57: "CABINET", 58: "CHEST_1", 59: "CHEST_2",
+            60: "BARREL", 61: "CRATE", 62: "LAMP_1", 63: "LAMP_2",
+            
+            64: "MEDICAL_BED", 65: "MEDICAL_EQUIPMENT_1", 66: "MEDICAL_EQUIPMENT_2", 67: "COMPUTER",
+            68: "MONITOR", 69: "PHONE", 70: "CLOCK", 71: "SIGN_1",
+            72: "SIGN_2", 73: "PLANT_SMALL", 74: "PLANT_LARGE", 75: "VASE",
+            76: "PAINTING_1", 77: "PAINTING_2", 78: "MIRROR", 79: "WINDOW_SMALL",
+            
+            80: "CAR_1", 81: "CAR_2", 82: "TRUCK", 83: "AMBULANCE",
+            84: "BIKE", 85: "MOTORCYCLE", 86: "BUS", 87: "TAXI",
+            88: "BOAT_1", 89: "BOAT_2", 90: "PLANE_SMALL", 91: "HELICOPTER",
+            92: "TRAIN_1", 93: "TRAIN_2", 94: "CART", 95: "WHEELCHAIR",
+            
+            96: "PERSON_1", 97: "PERSON_2", 98: "DOCTOR", 99: "NURSE",
+            100: "PATIENT_1", 101: "PATIENT_2", 102: "CHILD_1", 103: "CHILD_2",
+            104: "ELDERLY_1", 105: "ELDERLY_2", 106: "WORKER_1", 107: "WORKER_2",
+            108: "POLICE", 109: "FIREFIGHTER", 110: "TEACHER", 111: "STUDENT",
+            
+            112: "FOOD_1", 113: "FOOD_2", 114: "DRINK_1", 115: "DRINK_2",
+            116: "MEDICINE_1", 117: "MEDICINE_2", 118: "TOOL_1", 119: "TOOL_2",
+            120: "BOOK_1", 121: "BOOK_2", 122: "PAPER", 123: "PEN",
+            124: "KEY", 125: "COIN", 126: "HEART", 127: "STAR"
+        };
+
+        // Gera o grid de tiles
+        const tileGrid = document.getElementById('tileGrid');
+        const selectedTileDiv = document.getElementById('selectedTile');
+        const tileIdSpan = document.getElementById('tileId');
+        const tileRowSpan = document.getElementById('tileRow');
+        const tileColSpan = document.getElementById('tileCol');
+        const tileNameSpan = document.getElementById('tileName');
+
+        for (let i = 0; i < 128; i++) {
+            const tileCell = document.createElement('div');
+            tileCell.className = 'tile-cell';
+            tileCell.textContent = i;
+            tileCell.title = `Tile ${i}: ${tileNames[i] || 'Unknown'}`;
+            
+            tileCell.addEventListener('click', () => {
+                const row = Math.floor(i / 16);
+                const col = i % 16;
+                
+                tileIdSpan.textContent = i;
+                tileRowSpan.textContent = row;
+                tileColSpan.textContent = col;
+                tileNameSpan.textContent = tileNames[i] || 'Unknown';
+                
+                selectedTileDiv.style.display = 'block';
+                
+                // Destaca o tile selecionado
+                document.querySelectorAll('.tile-cell').forEach(cell => {
+                    cell.style.background = '#f9f9f9';
+                    cell.style.color = 'black';
+                });
+                tileCell.style.background = '#007acc';
+                tileCell.style.color = 'white';
+            });
+            
+            tileGrid.appendChild(tileCell);
+        }
+    </script>
+</body>
+</html>
