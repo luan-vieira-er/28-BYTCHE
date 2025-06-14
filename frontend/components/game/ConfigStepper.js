@@ -21,7 +21,6 @@ export default function ConfigStepper({ open, onComplete, onClose }) {
   const [selectedLocation, setSelectedLocation] = useState(null)
   const [currentCharacterIndex, setCurrentCharacterIndex] = useState(0)
 
-  // Definição dos personagens com características
   const characters = [
     {
       id: 'Jorge',
@@ -81,7 +80,6 @@ export default function ConfigStepper({ open, onComplete, onClose }) {
     }
   ]
 
-  // Locais com imagens
   const locations = [
     { id: 'fazendinha', name: 'Hospital da Fazendinha', image: '/assets/fazendinha.png' },
     { id: 'cidade', name: 'Hospital Urbano', image: '/assets/cidade.png' },
@@ -95,7 +93,6 @@ export default function ConfigStepper({ open, onComplete, onClose }) {
     if (activeStep < steps.length - 1) {
       setActiveStep(prev => prev + 1)
     } else {
-      // Finalizar configuração
       const config = {
         doctor: selectedDoctor,
         character: characters[currentCharacterIndex],
@@ -155,7 +152,6 @@ export default function ConfigStepper({ open, onComplete, onClose }) {
 
     return (
       <Box sx={{ mb: 6 }}>
-        {/* Progress Bar */}
         <Box sx={{
           position: 'relative',
           height: 6,
@@ -177,7 +173,6 @@ export default function ConfigStepper({ open, onComplete, onClose }) {
           }} />
         </Box>
 
-        {/* Steps */}
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           {steps.map((step, index) => (
             <Box key={step} sx={{
@@ -186,7 +181,6 @@ export default function ConfigStepper({ open, onComplete, onClose }) {
               alignItems: 'center',
               flex: 1
             }}>
-              {/* Step Circle */}
               <Box sx={{
                 width: 40,
                 height: 40,
@@ -212,7 +206,6 @@ export default function ConfigStepper({ open, onComplete, onClose }) {
                 {index < activeStep ? '✓' : index + 1}
               </Box>
 
-              {/* Step Label */}
               <Typography
                 variant="body2"
                 sx={{
@@ -561,7 +554,7 @@ export default function ConfigStepper({ open, onComplete, onClose }) {
         {renderStepContent()}
 
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
-          { activeStep !== 0 ? (
+          {activeStep !== 0 ? (
             <Button
               onClick={handleBack}
               disabled={activeStep === 0}
