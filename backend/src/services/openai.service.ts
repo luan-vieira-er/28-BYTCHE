@@ -124,8 +124,10 @@ export const startChat = async (roomId) => {
     }
 };
 
-export const sendMessage = async (history, message) => {
+export const sendMessage = async (roomId, message) => {
     try {
+        //buscar history pela roomId
+        const history = [];
         const messages = [
             ...history,
             { role: 'user', content: message.toString() }
@@ -146,7 +148,11 @@ export const sendMessage = async (history, message) => {
       );
 
       const reply = response.data.choices[0].message.content;
-      console.log("🚀 ~ sendMessage ~ reply:", reply)
+      // Gravar reply no history da consutla
+        const responses = await generateOptions(reply);
+    
+
+        return { reply, choices: responses };
     } catch (err) {
       console.error('Erro ao chamar OpenAI', err);
     }

@@ -2,12 +2,15 @@ import express from 'express';
 import router from './routes';
 import { createServer } from 'http';
 import { Server } from 'socket.io'
-import { startChat } from './services/openai.service'
+import { startChat, sendMessage } from './services/openai.service'
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
 app.use(express.json());
+
+// Mount all routes
+app.use('/api', router);
 
 const server = createServer(app);
 
@@ -44,6 +47,17 @@ io.on('connection', (socket) => {
     }
   });
 
+  // Recebe mensagens e repassa para os membros da sala
+  socket.on('messageReceived', async ({ roomId, message }) => {
+    const response = await sendMessage(roomId, message);
+    if (response){
+      const { reply, choices } = response
+      io.to(roomId).emit('newMessage', { sender: socket.id, message: {
+        reply, choices
+      } });
+    }
+  });
+
   socket.on('disconnect', () => {
     console.log('🔴 Cliente desconectado:', socket.id);
   });
@@ -54,11 +68,8 @@ const test = async () => {
   console.log("🚀 ~ test ~ response:", response)
 }
 
-test()
+// test()
 
-// Mount all routes
-app.use('/api', router);
-
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
