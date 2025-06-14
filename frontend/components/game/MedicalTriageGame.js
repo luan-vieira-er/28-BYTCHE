@@ -32,8 +32,10 @@ const MedicalTriageGame = ({ onExit, onReconfigure, playerConfig, isDoctor = fal
     playerPosition,
     playerHealth,
     gameProgress,
+    selectedLocation,
     updatePlayerPosition,
-    updateGameProgress
+    updateGameProgress,
+    setSelectedLocation
   } = useGameStore()
 
   // Hook para acessar finishRoom
@@ -66,21 +68,49 @@ const MedicalTriageGame = ({ onExit, onReconfigure, playerConfig, isDoctor = fal
       }
     }
 
-    // Para médicos, tentar usar configuração da sala ou padrão
+    // Para médicos, usar configuração da sala (localização do paciente)
     // Para pacientes, usar configuração do player
-    let selectedLocation = 'fazendinha' // padrão
+    let gameSelectedLocation = 'fazendinha' // padrão
 
     if (isDoctor && roomData) {
-      // Médico: usar configuração da sala se disponível
-      // Por enquanto usar padrão, mas pode ser expandido para ler da sala
-      selectedLocation = 'fazendinha'
+      // Médico: usar a localização configurada pelo paciente
+      try {
+        if (roomData.configuracao_paciente) {
+          const patientConfig = JSON.parse(roomData.configuracao_paciente)
+          gameSelectedLocation = patientConfig.location || 'fazendinha'
+          console.log('👨‍⚕️ Médico usando localização do paciente:', gameSelectedLocation)
+
+          // Atualizar store com a localização do paciente para sincronização
+          setSelectedLocation(gameSelectedLocation)
+        } else if (playerConfig?.location) {
+          // Fallback: usar configuração do playerConfig se disponível
+          gameSelectedLocation = playerConfig.location
+          console.log('👨‍⚕️ Médico usando localização do playerConfig:', gameSelectedLocation)
+        } else if (selectedLocation && selectedLocation !== 'fazendinha') {
+          // Fallback final: usar localização do store se disponível
+          gameSelectedLocation = selectedLocation
+          console.log('👨‍⚕️ Médico usando localização do store:', gameSelectedLocation)
+        }
+      } catch (error) {
+        console.error('❌ Erro ao parsear configuração do paciente para localização:', error)
+        gameSelectedLocation = selectedLocation || 'fazendinha' // usar store ou padrão em caso de erro
+      }
     } else if (playerConfig?.location) {
       // Paciente: usar configuração do player
-      selectedLocation = playerConfig.location
+      gameSelectedLocation = playerConfig.location
+      console.log('🎮 Paciente usando localização configurada:', gameSelectedLocation)
+
+      // Atualizar store com a localização selecionada
+      setSelectedLocation(gameSelectedLocation)
+    } else if (selectedLocation && selectedLocation !== 'fazendinha') {
+      // Fallback: usar localização do store se disponível
+      gameSelectedLocation = selectedLocation
+      console.log('🎮 Usando localização do store:', gameSelectedLocation)
     }
 
-    return locationMapping[selectedLocation] || locationMapping['fazendinha']
-  }, [playerConfig, isDoctor, roomData])
+    console.log('🗺️ Localização selecionada:', gameSelectedLocation, 'Ambiente:', locationMapping[gameSelectedLocation]?.name)
+    return locationMapping[gameSelectedLocation] || locationMapping['fazendinha']
+  }, [playerConfig, isDoctor, roomData, selectedLocation, setSelectedLocation])
 
   // Configurações do jogo
   const GAME_WIDTH = 1200

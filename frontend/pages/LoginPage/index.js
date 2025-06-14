@@ -1,10 +1,15 @@
+import Head from 'next/head';
 import { Button, InputAdornment, TextField, Divider, Box, Typography } from "@mui/material";
+import { ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
-import apiService from '../../services/api.service';
+import { useAuthStore } from '../../store/authStore';
 
 export default function LoginPage() {
     const router = useRouter();
+
+    // Auth store
+    const { login, register } = useAuthStore();
 
     // Estado para armazenar os dados do formulário
     const [formData, setFormData] = useState({
@@ -31,18 +36,18 @@ export default function LoginPage() {
         }
 
         try {
-            // Chamada para a API de login
-            const response = await apiService.loginMedic({
-                name: formData.email, // O backend espera 'nome'
+            // Usar o store de autenticação
+            const result = await login({
+                name: formData.email, // O backend espera 'name'
                 password: formData.password
             });
 
-            if (response.success) {
+            if (result.success) {
                 alert('Login realizado com sucesso!');
                 // Redirecionar para a página principal
                 router.push('/');
             } else {
-                alert(response.message || 'Erro no login');
+                alert(result.message || 'Erro no login');
             }
         } catch (error) {
             console.error('Erro no login:', error);
@@ -61,18 +66,18 @@ export default function LoginPage() {
         }
 
         try {
-            // Chamada para a API de criação de médico
-            const response = await apiService.createMedic({
+            // Usar o store de autenticação
+            const result = await register({
                 name: formData.email,
                 password: formData.password
             });
 
-            if (response.success) {
+            if (result.success) {
                 alert('Conta criada com sucesso! Agora você pode fazer login.');
                 // Limpar o formulário
                 setFormData({ email: '', password: '' });
             } else {
-                alert(response.message || 'Erro ao criar conta');
+                alert(result.message || 'Erro ao criar conta');
             }
         } catch (error) {
             console.error('Erro ao criar conta:', error);
@@ -85,10 +90,22 @@ export default function LoginPage() {
         // Aqui você pode redirecionar para recuperação de senha
         alert('Redirecionando para recuperação de senha...');
     };
-    
+
+    const handleGoBack = () => {
+        router.push('/');
+    };
+
 
     return (
-        <Box sx={{
+        <>
+            <Head>
+                <title>Login - DoctorPixel</title>
+                <meta name="description" content="Faça login na plataforma DoctorPixel" />
+                <meta name="viewport" content="width=device-width, initial-scale=1" />
+                <link rel="icon" href="/favicon.ico" />
+            </Head>
+
+            <Box sx={{
             minHeight: '100vh',
             background: 'linear-gradient(135deg, #131F24 0%, #0A1015 100%)',
             position: 'relative',
@@ -127,6 +144,25 @@ export default function LoginPage() {
                     boxShadow: '0 8px 32px rgba(0,0,0,0.3)'
                 }}
             >
+                {/* Botão Voltar */}
+                <Box sx={{ mb: 2, textAlign: 'left' }}>
+                    <Button
+                        variant="text"
+                        startIcon={<ArrowLeft size={16} />}
+                        onClick={handleGoBack}
+                        sx={{
+                            fontSize: '0.8rem',
+                            color: 'text.secondary',
+                            '&:hover': {
+                                color: 'primary.main',
+                                backgroundColor: 'rgba(86, 255, 158, 0.1)'
+                            }
+                        }}
+                    >
+                        Voltar
+                    </Button>
+                </Box>
+
                 {/* Título */}
                 <Typography
                     variant="h2"
@@ -339,5 +375,6 @@ export default function LoginPage() {
                 </Box>
             </Box>
         </Box>
+        </>
     );
 }

@@ -1,7 +1,8 @@
 import Head from 'next/head'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import AccessCodeDialog from '@/components/ui/AccessCodeDialog'
+import { useAuthStore } from '@/store/authStore'
 import {
   Container,
   Typography,
@@ -20,12 +21,22 @@ import {
   Shield,
   Award,
   BookOpen,
-  Stethoscope
+  Stethoscope,
+  LogIn,
+  Plus
 } from 'lucide-react'
 
 export default function Home() {
   const router = useRouter()
   const [dialogOpen, setDialogOpen] = useState(false)
+
+  // Auth store
+  const { isAuthenticated, initAuth, getCurrentUser, logout } = useAuthStore()
+
+  // Inicializar autenticação ao carregar a página
+  useEffect(() => {
+    initAuth()
+  }, [initAuth])
 
   const handleStartGame = () => {
     setDialogOpen(true)
@@ -33,6 +44,19 @@ export default function Home() {
 
   const handleDoctorAccess = () => {
     router.push('/doctor-access')
+  }
+
+  const handleLogin = () => {
+    router.push('/LoginPage')
+  }
+
+  const handleCreateRoom = () => {
+    router.push('/CreateRoomPage')
+  }
+
+  const handleLogout = () => {
+    logout()
+    alert('Logout realizado com sucesso!')
   }
 
   return (
@@ -64,6 +88,50 @@ export default function Home() {
           `,
           zIndex: 0
         }} />
+
+        {/* Top Navigation - User Info */}
+        {isAuthenticated && (
+          <Box sx={{
+            position: 'relative',
+            zIndex: 2,
+            py: 2,
+            borderBottom: '1px solid rgba(86, 255, 158, 0.1)'
+          }}>
+            <Container maxWidth="xl">
+              <Box sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}>
+                <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                  👨‍⚕️ Bem-vindo, <Box component="span" sx={{ color: 'primary.main', fontWeight: 600 }}>
+                    {getCurrentUser()?.name}
+                  </Box>
+                </Typography>
+
+                <Button
+                  variant="outlined"
+                  size="small"
+                  onClick={handleLogout}
+                  sx={{
+                    fontSize: '0.8rem',
+                    py: 0.5,
+                    px: 2,
+                    borderColor: 'rgba(86, 255, 158, 0.3)',
+                    color: 'text.secondary',
+                    '&:hover': {
+                      borderColor: '#56FF9E',
+                      backgroundColor: 'rgba(86, 255, 158, 0.1)',
+                      color: '#56FF9E'
+                    }
+                  }}
+                >
+                  Sair
+                </Button>
+              </Box>
+            </Container>
+          </Box>
+        )}
 
         {/* Hero Section */}
         <Container maxWidth="xl" sx={{ position: 'relative', zIndex: 1 }}>
@@ -193,6 +261,62 @@ export default function Home() {
                     </Button>
                   </Stack>
 
+                  {/* Auth Buttons */}
+                  <Stack
+                    direction={{ xs: 'column', sm: 'row' }}
+                    spacing={2}
+                    alignItems="center"
+                    justifyContent={{ xs: 'center', lg: 'flex-start' }}
+                    sx={{ mb: 4 }}
+                  >
+                    {!isAuthenticated ? (
+                      <Button
+                        variant="outlined"
+                        size="medium"
+                        startIcon={<LogIn size={20} />}
+                        onClick={handleLogin}
+                        sx={{
+                          fontSize: '0.95rem',
+                          py: 1.5,
+                          px: 4,
+                          minWidth: 140,
+                          borderColor: '#4ECDC4',
+                          color: '#4ECDC4',
+                          '&:hover': {
+                            borderColor: '#56FF9E',
+                            backgroundColor: 'rgba(78, 205, 196, 0.1)',
+                            color: '#56FF9E'
+                          }
+                        }}
+                      >
+                        Login Médico
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="contained"
+                        size="medium"
+                        startIcon={<Plus size={20} />}
+                        onClick={handleCreateRoom}
+                        sx={{
+                          fontSize: '0.95rem',
+                          py: 1.5,
+                          px: 4,
+                          minWidth: 160,
+                          background: 'linear-gradient(135deg, #4ECDC4 0%, #3BA99F 100%)',
+                          color: '#131F24',
+                          boxShadow: '0 4px 15px rgba(78, 205, 196, 0.4)',
+                          '&:hover': {
+                            background: 'linear-gradient(135deg, #3BA99F 0%, #2E8B7A 100%)',
+                            boxShadow: '0 8px 25px rgba(78, 205, 196, 0.5)',
+                            transform: 'translateY(-2px)'
+                          }
+                        }}
+                      >
+                        Criar Sala
+                      </Button>
+                    )}
+                  </Stack>
+
                   {/* Stats */}
                   <Stack direction="row" spacing={4} justifyContent={{ xs: 'center', lg: 'flex-start' }}>
                     <Box sx={{ textAlign: 'center' }}>
@@ -227,6 +351,7 @@ export default function Home() {
                   <Box sx={{
                     mt: 4,
                     p: 3,
+                    height: '100%',
                     borderRadius: 2,
                     backgroundColor: 'rgba(78, 205, 196, 0.1)',
                     border: '1px solid rgba(78, 205, 196, 0.2)',

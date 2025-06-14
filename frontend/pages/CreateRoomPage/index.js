@@ -1,10 +1,16 @@
+import Head from 'next/head';
 import { Button, TextField, Box, Typography, Select, MenuItem, FormControl, InputLabel, Grid } from "@mui/material";
 import { useRouter } from 'next/router';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useAuthStore } from '../../store/authStore';
 import apiService from '../../services/api.service';
 
 export default function CreateRoomPage() {
     const router = useRouter();
+
+    // Auth store
+    const { isAuthenticated, getCurrentUser, initAuth } = useAuthStore();
+
     const [formData, setFormData] = useState({
         tipo_consulta: '',
         perfil_paciente: '',
@@ -15,6 +21,16 @@ export default function CreateRoomPage() {
         idade: '',
         status: '',
     });
+
+    // Verificar autenticação ao carregar a página
+    useEffect(() => {
+        initAuth();
+
+        if (!isAuthenticated) {
+            alert('Você precisa estar logado para criar uma consulta');
+            router.push('/LoginPage');
+        }
+    }, [isAuthenticated, initAuth, router]);
 
     const handleInputChange = (field) => (event) => {
         setFormData({
@@ -33,8 +49,8 @@ export default function CreateRoomPage() {
         }
 
         try {
-            // Obter dados do usuário logado
-            const currentUser = apiService.getCurrentUser();
+            // Obter dados do usuário logado do store
+            const currentUser = getCurrentUser();
             if (!currentUser) {
                 alert('Você precisa estar logado para criar uma consulta');
                 router.push('/LoginPage');
@@ -71,7 +87,15 @@ export default function CreateRoomPage() {
     };
 
     return (
-        <Box sx={{
+        <>
+            <Head>
+                <title>Criar Sala - DoctorPixel</title>
+                <meta name="description" content="Crie uma nova sala de consulta na plataforma DoctorPixel" />
+                <meta name="viewport" content="width=device-width, initial-scale=1" />
+                <link rel="icon" href="/favicon.ico" />
+            </Head>
+
+            <Box sx={{
             minHeight: '100vh',
             background: 'linear-gradient(135deg, #131F24 0%, #0A1015 100%)',
             position: 'relative',
@@ -390,7 +414,7 @@ export default function CreateRoomPage() {
                     <Grid item xs={12} sm={6} sx={{ width: '50%' }}>
                         <TextField
                             label="Foco da Consulta"
-                
+
                             multiline
                             rows={1}
                             variant="outlined"
@@ -430,7 +454,7 @@ export default function CreateRoomPage() {
                     <Grid item xs={12} sm={6} sx={{ width: '50%' }}>
                         <TextField
                             label="Restrições"
-             
+
                             multiline
                             rows={1}
                             variant="outlined"
@@ -573,5 +597,6 @@ export default function CreateRoomPage() {
                 </Box>
             </Box>
         </Box>
+        </>
     );
 }

@@ -10,13 +10,14 @@ export const useGameStore = create(
       playerName: '',
       playerAge: 0,
       playerAvatar: 'child1',
-      
+      selectedLocation: 'fazendinha', // Localização selecionada pelo paciente
+
       // Progresso do jogo
       gameProgress: 'intro',
       completedActivities: [],
       currentScore: 0,
       achievements: [],
-      
+
       // Estado da triagem médica
       triageData: {
         symptoms: [],
@@ -24,44 +25,46 @@ export const useGameStore = create(
         recommendations: [],
         completed: false
       },
-      
+
       // Configurações
       soundEnabled: true,
       musicEnabled: true,
       difficulty: 'easy',
-      
+
       // Actions
       updatePlayerPosition: (position) => set({ playerPosition: position }),
-      
+
       updatePlayerHealth: (health) => set({ playerHealth: health }),
-      
-      setPlayerInfo: (name, age, avatar) => set({ 
-        playerName: name, 
-        playerAge: age, 
-        playerAvatar: avatar 
+
+      setPlayerInfo: (name, age, avatar) => set({
+        playerName: name,
+        playerAge: age,
+        playerAvatar: avatar
       }),
-      
+
+      setSelectedLocation: (location) => set({ selectedLocation: location }),
+
       updateGameProgress: (progress) => set({ gameProgress: progress }),
-      
+
       addCompletedActivity: (activity) => set((state) => ({
         completedActivities: [...state.completedActivities, activity]
       })),
-      
+
       updateScore: (points) => set((state) => ({
         currentScore: state.currentScore + points
       })),
-      
+
       addAchievement: (achievement) => set((state) => ({
         achievements: [...state.achievements, achievement]
       })),
-      
+
       updateTriageData: (data) => set((state) => ({
         triageData: { ...state.triageData, ...data }
       })),
-      
+
       completeTriageStep: (step, data) => set((state) => {
         const newTriageData = { ...state.triageData }
-        
+
         switch (step) {
           case 'symptoms':
             newTriageData.symptoms = data
@@ -74,10 +77,10 @@ export const useGameStore = create(
             newTriageData.completed = true
             break
         }
-        
+
         return { triageData: newTriageData }
       }),
-      
+
       resetTriageData: () => set({
         triageData: {
           symptoms: [],
@@ -86,13 +89,13 @@ export const useGameStore = create(
           completed: false
         }
       }),
-      
+
       toggleSound: () => set((state) => ({ soundEnabled: !state.soundEnabled })),
-      
+
       toggleMusic: () => set((state) => ({ musicEnabled: !state.musicEnabled })),
-      
+
       setDifficulty: (difficulty) => set({ difficulty }),
-      
+
       resetGame: () => set({
         playerPosition: { x: 300, y: 500 },
         playerHealth: 100,
@@ -106,7 +109,7 @@ export const useGameStore = create(
           completed: false
         }
       }),
-      
+
       // Funções utilitárias
       getPlayerLevel: () => {
         const score = get().currentScore
@@ -116,21 +119,21 @@ export const useGameStore = create(
         if (score < 1000) return 4
         return 5
       },
-      
+
       getNextLevelScore: () => {
         const level = get().getPlayerLevel()
         const thresholds = [100, 300, 600, 1000, 2000]
         return thresholds[level - 1] || 2000
       },
-      
+
       hasAchievement: (achievementId) => {
         return get().achievements.some(a => a.id === achievementId)
       },
-      
+
       canAccessArea: (area) => {
         const progress = get().gameProgress
         const completedActivities = get().completedActivities
-        
+
         switch (area) {
           case 'triage':
             return progress !== 'intro'
@@ -149,6 +152,7 @@ export const useGameStore = create(
         playerName: state.playerName,
         playerAge: state.playerAge,
         playerAvatar: state.playerAvatar,
+        selectedLocation: state.selectedLocation,
         gameProgress: state.gameProgress,
         completedActivities: state.completedActivities,
         currentScore: state.currentScore,
