@@ -1,5 +1,12 @@
 import { useState, useEffect } from 'react'
-import { tilesetLoader, TINY_TOWN_CONFIG } from '@/utils/tilesetLoader'
+import {
+  tilesetLoader,
+  TINY_TOWN_CONFIG,
+  CIDADE_CONFIG,
+  POLO_NORTE_CONFIG,
+  PLANETA_CONFIG,
+  TILESET_CONFIGS
+} from '@/utils/tilesetLoader'
 import { setupDemoTileset } from '@/utils/createDemoTileset'
 
 /**
@@ -29,8 +36,31 @@ export const useAssets = () => {
           tileHeight: TINY_TOWN_CONFIG.TILESET.tileHeight,
           spacing: TINY_TOWN_CONFIG.TILESET.spacing,
           margin: TINY_TOWN_CONFIG.TILESET.margin
+        },
+        {
+          name: 'cidade',
+          path: CIDADE_CONFIG.TILESET.path,
+          tileWidth: CIDADE_CONFIG.TILESET.tileWidth,
+          tileHeight: CIDADE_CONFIG.TILESET.tileHeight,
+          spacing: CIDADE_CONFIG.TILESET.spacing,
+          margin: CIDADE_CONFIG.TILESET.margin
+        },
+        {
+          name: 'polo-norte',
+          path: POLO_NORTE_CONFIG.TILESET.path,
+          tileWidth: POLO_NORTE_CONFIG.TILESET.tileWidth,
+          tileHeight: POLO_NORTE_CONFIG.TILESET.tileHeight,
+          spacing: POLO_NORTE_CONFIG.TILESET.spacing,
+          margin: POLO_NORTE_CONFIG.TILESET.margin
+        },
+        {
+          name: 'planeta',
+          path: PLANETA_CONFIG.TILESET.path,
+          tileWidth: PLANETA_CONFIG.TILESET.tileWidth,
+          tileHeight: PLANETA_CONFIG.TILESET.tileHeight,
+          spacing: PLANETA_CONFIG.TILESET.spacing,
+          margin: PLANETA_CONFIG.TILESET.margin
         }
-        // Adicione mais assets aqui conforme necessário
       ]
 
       const totalAssets = assetsToLoad.length
