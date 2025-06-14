@@ -99,6 +99,34 @@
       "nome_paciente": "Maria Oliveira",
       "idade": "8",
       "chat_history": []
+    },
+    {
+      "id": "013bb953-c5f2-4dfc-8f13-af0a2c5d3b50",
+      "status": "SALA_CRIADA",
+      "dt_criacao": "2025-06-14T08:32:00.932Z"
+    },
+    {
+      "id": "076d9c96-c973-432c-83d0-1f3d7a28163d",
+      "status": "SALA_CRIADA",
+      "dt_criacao": "2025-06-14T08:35:32.763Z"
+    },
+    {
+      "id": "57acdf4b-a481-4c56-8f26-c031cd7b13c3",
+      "status": "SALA_CRIADA",
+      "dt_criacao": "2025-06-14T08:36:11.087Z"
+    },
+    {
+      "id": "4c705096-d7f7-41e0-bfc8-44b699183c92",
+      "status": "SALA_CRIADA",
+      "dt_criacao": "2025-06-14T08:38:22.312Z",
+      "doctorId": "eeb21f98-45a4-4f9c-a58f-7b5445f21497",
+      "restricoes": "123123",
+      "foco": "89789",
+      "historico_previo": "6546456",
+      "nome_paciente": "7567567",
+      "idade": 234234,
+      "finalidade": "acompanhamento_terapeutico",
+      "perfil_paciente": "756756"
     }
   ],
   "doctor": [

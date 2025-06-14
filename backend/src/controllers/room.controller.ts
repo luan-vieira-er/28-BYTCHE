@@ -9,7 +9,14 @@ const bcrypt = require('bcrypt');
 type Room = {
   id: string;
   status: any;
-  medic_id: String;
+  doctorId: String;
+  finalidade: String;
+  perfil_paciente: String;
+  restricoes: String;
+  foco: String;
+  historico_previo: String;
+  nome_paciente: String;
+  idade: Number;
   dt_criacao?: Date;
   dt_finalizacao?: Date;
 }
@@ -37,7 +44,14 @@ export async function createRoom(req: Request, res: Response){
       room.status = 'SALA_CRIADA'
       room.dt_criacao = new Date()
       room.id = uuidv4();
-      room.medic_id = body.medic_id
+      room.doctorId = body.doctorId
+      room.restricoes = body.restricoes
+      room.foco = body.foco
+      room.historico_previo = body.historico_previo
+      room.nome_paciente = body.nome_paciente
+      room.idade = body.idade
+      room.finalidade = body.finalidade
+      room.perfil_paciente = body.perfil_paciente
 
       // Salvar no JSON Server
       await axios.post('http://localhost:3000/room', room);
