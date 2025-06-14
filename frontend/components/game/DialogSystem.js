@@ -13,7 +13,7 @@ const DialogSystem = ({ dialog, onChoice, onClose }) => {
     setCurrentText('')
     setIsTyping(true)
     setShowOptions(false)
-    
+
     let index = 0
     const typingInterval = setInterval(() => {
       if (index < dialog.message.length) {
@@ -106,6 +106,18 @@ const DialogSystem = ({ dialog, onChoice, onClose }) => {
                   <span className="inline-block w-1 h-6 bg-blue-500 ml-1 animate-pulse"></span>
                 )}
               </p>
+
+              {/* Indicador de IA ativa */}
+              {dialog.message && dialog.message.includes('pensar') && (
+                <div className="flex items-center justify-center mt-4">
+                  <div className="flex space-x-1">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
+                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                  </div>
+                  <span className="ml-2 text-sm text-gray-600">IA processando...</span>
+                </div>
+              )}
             </div>
 
             {/* Opções de resposta */}

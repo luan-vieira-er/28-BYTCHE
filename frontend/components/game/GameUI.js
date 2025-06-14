@@ -322,7 +322,7 @@ const GameUI = ({ playerHealth, gameProgress, onExit, environmentName, showInstr
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white rounded-3xl p-8 max-w-md w-full mx-4"
+              className="rounded-3xl p-8 max-w-md w-full mx-4 bg-inherit"
               onClick={(e) => e.stopPropagation()}
             >
               <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">

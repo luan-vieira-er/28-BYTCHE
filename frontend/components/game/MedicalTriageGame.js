@@ -14,11 +14,15 @@ import { CIDADE_MAP } from '@/data/cidadeMap'
 import { POLO_NORTE_MAP } from '@/data/poloNorteMap'
 import { PLANETA_MAP } from '@/data/planetaMap'
 import { initializeCollisionSystem } from '@/utils/collisionSystem'
+import websocketService from '@/services/websocket.service'
 
 const MedicalTriageGame = ({ onExit, playerConfig }) => {
   const [gameState, setGameState] = useState('loading')
   const [currentDialog, setCurrentDialog] = useState(null)
   const [showTriage, setShowTriage] = useState(false)
+  const [roomId, setRoomId] = useState(null)
+  const [aiMessages, setAiMessages] = useState([])
+  const [isWaitingForAI, setIsWaitingForAI] = useState(false)
 
   const {
     playerPosition,
@@ -64,6 +68,50 @@ const MedicalTriageGame = ({ onExit, playerConfig }) => {
   const GAME_WIDTH = 1200
   const GAME_HEIGHT = 800
 
+  // Configurar listeners do WebSocket para integração com backend
+  useEffect(() => {
+    // Obter roomId da URL ou playerConfig
+    const currentRoomId = new URLSearchParams(window.location.search).get('code') || playerConfig?.roomId
+    if (currentRoomId) {
+      setRoomId(currentRoomId)
+    }
+
+    // Configurar listeners para mensagens da IA
+    const handleNewMessage = (data) => {
+      console.log('📨 Nova mensagem recebida:', data)
+      if (data.message && typeof data.message === 'object') {
+        const { reply, choices } = data.message
+        setAiMessages(prev => [...prev, { type: 'ai', content: reply, choices }])
+
+        // Mostrar diálogo com resposta da IA
+        setCurrentDialog({
+          npc: 'doctor',
+          message: reply,
+          options: choices ? choices.map((choice, index) => ({
+            text: choice,
+            action: `ai_choice_${index}`,
+            originalChoice: choice
+          })) : [{ text: 'Continuar', action: 'continue' }]
+        })
+        setIsWaitingForAI(false)
+      }
+    }
+
+    const handleError = (error) => {
+      console.error('❌ Erro do WebSocket:', error)
+      setIsWaitingForAI(false)
+    }
+
+    // Registrar listeners
+    websocketService.on('newMessage', handleNewMessage)
+    websocketService.on('error', handleError)
+
+    return () => {
+      websocketService.off('newMessage', handleNewMessage)
+      websocketService.off('error', handleError)
+    }
+  }, [playerConfig])
+
   useEffect(() => {
     // Aguarda carregamento dos assets
     if (!isLoading && !error) {
@@ -80,6 +128,11 @@ const MedicalTriageGame = ({ onExit, playerConfig }) => {
   const handlePlayerMove = useCallback((newPosition) => {
     updatePlayerPosition(newPosition)
 
+    // Sincronizar posição via WebSocket se roomId estiver disponível
+    if (roomId) {
+      websocketService.movePlayer(newPosition, roomId)
+    }
+
     // Verificar interações com NPCs usando spawn points do mapa
     const doctorSpawn = gameEnvironment.mapData.spawnPoints.doctor
     const doctorPosition = {
@@ -92,20 +145,57 @@ const MedicalTriageGame = ({ onExit, playerConfig }) => {
       Math.pow(newPosition.y - doctorPosition.y, 2)
     )
 
-    if (distance < 80 && !currentDialog) {
-      setCurrentDialog({
-        npc: 'doctor',
-        message: 'Olá! Eu sou o Dr. Pixel! 👨‍⚕️ Bem-vindo ao nosso hospital virtual! Como você está se sentindo hoje?',
-        options: [
-          { text: 'Estou bem! 😊', action: 'feeling_good' },
-          { text: 'Não estou me sentindo muito bem... 😔', action: 'feeling_bad' },
-          { text: 'Quero fazer um check-up! 🔍', action: 'checkup' }
-        ]
-      })
+    if (distance < 80 && !currentDialog && !isWaitingForAI) {
+      if (roomId && aiMessages.length === 0) {
+        // Primeira interação - usar IA do backend
+        console.log('🤖 Iniciando primeira interação com IA')
+        setIsWaitingForAI(true)
+        websocketService.startFirstInteraction(roomId)
+
+        // Mostrar diálogo de carregamento
+        setCurrentDialog({
+          npc: 'doctor',
+          message: 'Olá! Eu sou o Dr. Pixel! 👨‍⚕️ Deixe-me pensar na melhor forma de te ajudar...',
+          options: []
+        })
+      } else {
+        // Fallback para sistema local
+        setCurrentDialog({
+          npc: 'doctor',
+          message: 'Olá! Eu sou o Dr. Pixel! 👨‍⚕️ Bem-vindo ao nosso hospital virtual! Como você está se sentindo hoje?',
+          options: [
+            { text: 'Estou bem! 😊', action: 'feeling_good' },
+            { text: 'Não estou me sentindo muito bem... 😔', action: 'feeling_bad' },
+            { text: 'Quero fazer um check-up! 🔍', action: 'checkup' }
+          ]
+        })
+      }
     }
-  }, [currentDialog, updatePlayerPosition, gameEnvironment])
+  }, [currentDialog, updatePlayerPosition, gameEnvironment, roomId, aiMessages, isWaitingForAI])
 
   const handleDialogChoice = useCallback((choice) => {
+    // Verificar se é uma escolha da IA
+    if (choice.action.startsWith('ai_choice_') && roomId) {
+      const choiceText = choice.originalChoice || choice.text
+      console.log('🤖 Enviando resposta para IA:', choiceText)
+
+      // Adicionar mensagem do usuário ao histórico
+      setAiMessages(prev => [...prev, { type: 'user', content: choiceText }])
+
+      // Enviar resposta para IA
+      setIsWaitingForAI(true)
+      websocketService.sendMessageToAI(roomId, choiceText)
+
+      // Mostrar diálogo de carregamento
+      setCurrentDialog({
+        npc: 'doctor',
+        message: 'Deixe-me pensar na melhor resposta para você... 🤔',
+        options: []
+      })
+      return
+    }
+
+    // Lógica original para sistema local
     switch (choice.action) {
       case 'feeling_good':
         setCurrentDialog({
@@ -140,11 +230,12 @@ const MedicalTriageGame = ({ onExit, playerConfig }) => {
         setShowTriage(true)
         updateGameProgress('triage_started')
         break
+      case 'continue':
       case 'close':
         setCurrentDialog(null)
         break
     }
-  }, [updateGameProgress])
+  }, [updateGameProgress, roomId])
 
   const handleTriageComplete = useCallback((results) => {
     setShowTriage(false)
@@ -369,6 +460,7 @@ const MedicalTriageGame = ({ onExit, playerConfig }) => {
                 y={playerPosition.y}
                 onMove={handlePlayerMove}
                 characterConfig={playerConfig}
+                roomId={roomId}
               />
             </Container>
           </Stage>

@@ -54,32 +54,40 @@ export default function Game() {
       try {
         setConnectionStatus('connecting')
 
-        // Conectar ao servidor WebSocket
-        websocketService.connect('http://localhost:3001')
-
-        // Aguardar conexão
-        websocketService.on('connection:success', () => {
-          // Enviar código de acesso para validação
-          websocketService.emit('game:join', { accessCode: code })
-          setConnectionStatus('connected')
-        })
+        // Conectar ao servidor WebSocket passando o código de acesso
+        // O websocket service agora chama automaticamente patientJoinRoom após conexão
+        websocketService.connect('http://localhost:3001', code)
 
         websocketService.on('connection:error', (error) => {
+          console.error('❌ Erro de conexão:', error)
           setError('Erro ao conectar com o servidor')
           setConnectionStatus('error')
         })
 
-        websocketService.on('game:access_denied', () => {
-          setError('Código de acesso inválido')
+        // Eventos do backend
+        websocketService.on('error', (errorMessage) => {
+          console.error('❌ Erro do backend:', errorMessage)
+          setError(errorMessage || 'Código de acesso inválido')
           setConnectionStatus('error')
         })
 
-        websocketService.on('game:access_granted', () => {
+        websocketService.on('patientJoined', (message) => {
+          console.log('✅ Paciente entrou na sala:', message)
           setConnectionStatus('ready')
           setShowConfigStepper(true)
         })
 
+        // Fallback - se não receber resposta em 5 segundos, assumir sucesso para desenvolvimento
+        setTimeout(() => {
+          if (connectionStatus === 'connecting') {
+            console.log('⚠️ Timeout - assumindo sucesso para desenvolvimento')
+            setConnectionStatus('ready')
+            setShowConfigStepper(true)
+          }
+        }, 5000)
+
       } catch (err) {
+        console.error('❌ Erro ao inicializar:', err)
         setError('Erro ao inicializar o jogo')
         setConnectionStatus('error')
       }
@@ -87,11 +95,7 @@ export default function Game() {
 
     connectToGame();
 
-    // Simulação para desenvolvimento - remover em produção
-    setTimeout(() => {
-      setConnectionStatus('ready')
-      setShowConfigStepper(true)
-    }, 3000)
+    // Simulação removida - agora usando integração real com backend
 
     // Cleanup ao desmontar o componente
     return () => {

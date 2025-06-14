@@ -6,7 +6,7 @@ import { getCollisionSystem } from '@/utils/collisionSystem'
 import CharacterSprite from './CharacterSprite'
 import { getCharacterConfig, getCharacterSpriteId } from '@/utils/characterMapping'
 
-const Player = ({ x, y, onMove, characterConfig }) => {
+const Player = ({ x, y, onMove, characterConfig, roomId }) => {
   const [isMoving, setIsMoving] = useState(false)
   const [direction, setDirection] = useState('down')
   const [animationFrame, setAnimationFrame] = useState(0)

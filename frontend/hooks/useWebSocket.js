@@ -29,14 +29,29 @@ export const useWebSocket = () => {
       setConnectionError('Failed to connect after multiple attempts');
     };
 
+    // Novo handler para quando o socket conecta (independente de código de acesso)
+    const handleSocketConnected = () => {
+      setIsConnected(true);
+      setConnectionError(null);
+    };
+
     // Setup connection event listeners
     websocketService.on('connection:success', handleConnectionSuccess);
     websocketService.on('connection:lost', handleConnectionLost);
     websocketService.on('connection:error', handleConnectionError);
     websocketService.on('connection:failed', handleConnectionFailed);
 
-    // Connect to server
-    websocketService.connect();
+    // Escutar evento direto do socket para conexões automáticas
+    if (websocketService.socket) {
+      websocketService.socket.on('connect', handleSocketConnected);
+    }
+
+    // Connect to server (apenas se não estiver conectado)
+    if (!websocketService.isConnected) {
+      websocketService.connect();
+    } else {
+      setIsConnected(true);
+    }
 
     // Cleanup on unmount
     return () => {
@@ -44,6 +59,10 @@ export const useWebSocket = () => {
       websocketService.off('connection:lost', handleConnectionLost);
       websocketService.off('connection:error', handleConnectionError);
       websocketService.off('connection:failed', handleConnectionFailed);
+
+      if (websocketService.socket) {
+        websocketService.socket.off('connect', handleSocketConnected);
+      }
     };
   }, []);
 
@@ -64,16 +83,16 @@ export const useWebSocket = () => {
     };
 
     const handlePlayerMove = (movement) => {
-      setPlayers(prev => prev.map(player => 
-        player.id === movement.playerId 
+      setPlayers(prev => prev.map(player =>
+        player.id === movement.playerId
           ? { ...player, position: movement.position }
           : player
       ));
     };
 
     const handlePlayerUpdate = (update) => {
-      setPlayers(prev => prev.map(player => 
-        player.id === update.playerId 
+      setPlayers(prev => prev.map(player =>
+        player.id === update.playerId
           ? { ...player, ...update.updates }
           : player
       ));
@@ -87,7 +106,39 @@ export const useWebSocket = () => {
       setChatMessages(messages);
     };
 
-    // Register event listeners
+    // Novos handlers para eventos do backend
+    const handleBackendPosition = (data) => {
+      console.log('📍 Posição recebida do backend:', data);
+      // Atualizar posição de outros jogadores
+      if (data.sender && data.position) {
+        setPlayers(prev => prev.map(player =>
+          player.id === data.sender
+            ? { ...player, position: data.position }
+            : player
+        ));
+      }
+    };
+
+    const handleNewMessage = (data) => {
+      console.log('💬 Nova mensagem do backend:', data);
+      setChatMessages(prev => [...prev, {
+        id: Date.now(),
+        sender: data.sender,
+        message: data.message,
+        timestamp: new Date().toISOString()
+      }].slice(-100));
+    };
+
+    const handlePatientJoined = (message) => {
+      console.log('👤 Paciente entrou:', message);
+    };
+
+    const handleError = (error) => {
+      console.error('❌ Erro do backend:', error);
+      setConnectionError(error);
+    };
+
+    // Register event listeners (sistema antigo)
     websocketService.on('player:list', handlePlayerList);
     websocketService.on('player:join', handlePlayerJoin);
     websocketService.on('player:disconnected', handlePlayerDisconnected);
@@ -96,11 +147,18 @@ export const useWebSocket = () => {
     websocketService.on('chat:broadcast', handleChatBroadcast);
     websocketService.on('chat:history', handleChatHistory);
 
+    // Register event listeners (backend)
+    websocketService.on('position', handleBackendPosition);
+    websocketService.on('newMessage', handleNewMessage);
+    websocketService.on('patientJoined', handlePatientJoined);
+    websocketService.on('error', handleError);
+
     // Get initial chat history
     websocketService.getChatHistory();
 
     // Cleanup
     return () => {
+      // Sistema antigo
       websocketService.off('player:list', handlePlayerList);
       websocketService.off('player:join', handlePlayerJoin);
       websocketService.off('player:disconnected', handlePlayerDisconnected);
@@ -108,6 +166,12 @@ export const useWebSocket = () => {
       websocketService.off('player:update', handlePlayerUpdate);
       websocketService.off('chat:broadcast', handleChatBroadcast);
       websocketService.off('chat:history', handleChatHistory);
+
+      // Backend
+      websocketService.off('position', handleBackendPosition);
+      websocketService.off('newMessage', handleNewMessage);
+      websocketService.off('patientJoined', handlePatientJoined);
+      websocketService.off('error', handleError);
     };
   }, [isConnected]);
 
@@ -116,8 +180,8 @@ export const useWebSocket = () => {
     websocketService.joinGame(playerData);
   }, []);
 
-  const movePlayer = useCallback((position) => {
-    websocketService.movePlayer(position);
+  const movePlayer = useCallback((position, roomId) => {
+    websocketService.movePlayer(position, roomId);
   }, []);
 
   const updatePlayer = useCallback((updates) => {
@@ -125,8 +189,8 @@ export const useWebSocket = () => {
   }, []);
 
   // Chat actions
-  const sendMessage = useCallback((message) => {
-    websocketService.sendChatMessage(message);
+  const sendMessage = useCallback((message, roomId) => {
+    websocketService.sendChatMessage(message, roomId);
   }, []);
 
   // NPC actions
@@ -143,16 +207,34 @@ export const useWebSocket = () => {
     websocketService.submitTriagemAnswer(sessionId, step, answer);
   }, []);
 
+  // Backend-specific actions
+  const joinRoom = useCallback((roomId) => {
+    console.log("🚀 ~ joinRoom ~ roomId:", roomId)
+    websocketService.joinGameWithCode(roomId);
+  }, []);
+
+  const startFirstInteraction = useCallback((roomId) => {
+    websocketService.startFirstInteraction(roomId);
+  }, []);
+
+  const sendMessageToAI = useCallback((roomId, message) => {
+    websocketService.sendMessageToAI(roomId, message);
+  }, []);
+
+  const finishRoom = useCallback((roomId, message) => {
+    websocketService.finishRoom(roomId, message);
+  }, []);
+
   return {
     // Connection state
     isConnected,
     connectionError,
-    
+
     // Game state
     players,
     chatMessages,
-    
-    // Actions
+
+    // Actions (sistema antigo)
     joinGame,
     movePlayer,
     updatePlayer,
@@ -160,7 +242,13 @@ export const useWebSocket = () => {
     interactWithNPC,
     startTriagem,
     submitTriagemAnswer,
-    
+
+    // Backend actions
+    joinRoom,
+    startFirstInteraction,
+    sendMessageToAI,
+    finishRoom,
+
     // WebSocket service instance
     websocketService
   };
